@@ -1,6 +1,6 @@
-# Dhikr & Duas App
+# Sakan App
 
-A comprehensive app for daily dhikr (remembrance), duas (supplications), prayer times, tasbeeh, and general/combined duas, designed to help users maintain their daily worship in an easy and elegant way.  
+A comprehensive app for daily zikr (remembrance), duas (supplications), prayer times, tasbeeh, and general/combined duas, designed to help users maintain their daily worship in an easy and elegant way.  
 
 ## Key Features
 
