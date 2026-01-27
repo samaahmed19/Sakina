@@ -3,7 +3,9 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     kotlin("kapt")
+
 }
+
 
 android {
     namespace = "com.example.sakina"
@@ -44,7 +46,7 @@ android {
 
 dependencies {
 
-
+    implementation("com.google.dagger:hilt-android:2.59")
     implementation("androidx.room:room-runtime:2.6.0")
     kapt("androidx.room:room-compiler:2.6.0")
     implementation("androidx.room:room-ktx:2.6.0")
