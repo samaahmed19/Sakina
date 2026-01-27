@@ -1,4 +1,21 @@
 package com.example.sakina.data.local.database
 
-class AppDatabase {
+
+import androidx.room.Database
+import androidx.room.RoomDatabase
+import com.example.sakina.data.local.database.dao.AzkarDao
+import com.example.sakina.data.local.database.entity.CategoryEntity
+import com.example.sakina.data.local.database.entity.ZikrEntity
+
+@Database(
+    entities = [
+        CategoryEntity::class,
+        ZikrEntity::class
+    ],
+    version = 1,
+    exportSchema = false
+)
+abstract class AppDatabase : RoomDatabase() {
+
+    abstract fun azkarDao(): AzkarDao
 }
