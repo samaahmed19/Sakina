@@ -45,7 +45,7 @@ android {
 }
 
 dependencies {
-
+    implementation("androidx.datastore:datastore-preferences:1.1.1")
     implementation("com.google.dagger:hilt-android:2.59")
     implementation("androidx.room:room-runtime:2.6.0")
     kapt("androidx.room:room-compiler:2.6.0")

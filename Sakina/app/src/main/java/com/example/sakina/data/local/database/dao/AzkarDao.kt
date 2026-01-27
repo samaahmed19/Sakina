@@ -1,15 +1,12 @@
 package com.example.sakina.data.local.database.dao
-
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.example.sakina.data.local.database.entity.ZikrEntity
 import com.example.sakina.data.local.database.entity.CategoryEntity
-
-@Dao
+ @Dao
 interface AzkarDao {
-
     @Query("SELECT * FROM categories")
     suspend fun getAllCategories(): List<CategoryEntity>
 
