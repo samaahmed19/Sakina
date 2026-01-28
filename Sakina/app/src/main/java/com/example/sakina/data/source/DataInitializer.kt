@@ -2,14 +2,19 @@ package com.example.sakina.data.source
 
 import android.content.Context
 import com.example.sakina.data.local.database.dao.AzkarDao
+import com.example.sakina.data.local.database.dao.QuranDao
+import com.example.sakina.data.local.database.entity.AyahEntity
+import com.example.sakina.data.local.database.entity.SurahEntity
 import com.example.sakina.data.source.mapper.JsonMapper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.json.JSONArray
 import javax.inject.Inject
 
 class DataInitializer @Inject constructor(
     private val context: Context,
-    private val azkarDao: AzkarDao
+    private val azkarDao: AzkarDao,
+    private val quranDao: QuranDao
 ) {
 
     suspend fun initAzkarIfNeeded() = withContext(Dispatchers.IO) {
@@ -24,5 +29,47 @@ class DataInitializer @Inject constructor(
 
         azkarDao.insertCategories(categories)
         azkarDao.insertAzkar(azkar)
+    }
+
+    suspend fun initQuranIfNeeded() = withContext(Dispatchers.IO) {
+        if (quranDao.getAllSurahs().isNotEmpty()) return@withContext
+
+        val jsonString = context.assets
+            .open("quran.json")
+            .bufferedReader()
+            .use { it.readText() }
+
+        val jsonArray = JSONArray(jsonString)
+        val surahs = mutableListOf<SurahEntity>()
+        val ayahs = mutableListOf<AyahEntity>()
+
+        for (i in 0 until jsonArray.length()) {
+            val surahObject = jsonArray.getJSONObject(i)
+            val surahId = surahObject.getInt("id")
+
+            surahs.add(
+                SurahEntity(
+                    id = surahId,
+                    nameAr = surahObject.getString("name"),
+                    nameEn = surahObject.getString("englishName"),
+                    ayahCount = surahObject.getJSONArray("verses").length()
+                )
+            )
+
+            val versesArray = surahObject.getJSONArray("verses")
+            for (j in 0 until versesArray.length()) {
+                val verseObject = versesArray.getJSONObject(j)
+                ayahs.add(
+                    AyahEntity(
+                        surahId = surahId,
+                        text = verseObject.getString("text"),
+                        number = verseObject.getInt("numberInSurah")
+                    )
+                )
+            }
+        }
+
+        quranDao.insertSurahs(surahs)
+        quranDao.insertAyahs(ayahs)
     }
 }

@@ -32,4 +32,8 @@ object DatabaseModule {
     fun provideAzkarDao(
         database: AppDatabase
     ): AzkarDao = database.azkarDao()
+    fun provideQuranDao(
+        database: AppDatabase
+    ): QuranDao = database.quranDao()
+
 }
