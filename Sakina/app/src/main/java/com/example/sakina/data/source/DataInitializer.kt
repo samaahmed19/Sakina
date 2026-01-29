@@ -2,14 +2,17 @@ package com.example.sakina.data.source
 
 import android.content.Context
 import com.example.sakina.data.local.database.dao.AzkarDao
+import com.example.sakina.data.local.repository.DuaRepository
 import com.example.sakina.data.source.mapper.JsonMapper
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class DataInitializer @Inject constructor(
-    private val context: Context,
-    private val azkarDao: AzkarDao
+    @ApplicationContext private val context: Context,
+    private val azkarDao: AzkarDao ,
+    private val duaRepository: DuaRepository
 ) {
 
     suspend fun initAzkarIfNeeded() = withContext(Dispatchers.IO) {
