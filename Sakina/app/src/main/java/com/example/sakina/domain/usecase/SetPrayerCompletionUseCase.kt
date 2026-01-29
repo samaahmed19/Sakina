@@ -5,7 +5,7 @@ import com.example.sakina.domain.model.PrayerDaySummary
 import com.example.sakina.domain.model.PrayerKey
 import javax.inject.Inject
 
-class CompletePrayerUseCase @Inject constructor(
+class SetPrayerCompletionUseCase @Inject constructor(
     private val repository: PrayerRepository
 ) {
     suspend operator fun invoke(
