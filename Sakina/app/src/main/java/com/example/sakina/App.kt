@@ -18,8 +18,6 @@ class App : Application() {
 
         CoroutineScope(Dispatchers.IO).launch {
             dataInitializer.initAzkarIfNeeded()
-
-            dataInitializer.initDuasIfNeeded()
         }
     }
 }

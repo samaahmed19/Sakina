@@ -1,0 +1,9 @@
+package com.example.sakina.domain.repository
+
+import com.example.sakina.data.local.database.entity.AyahEntity
+import com.example.sakina.data.local.database.entity.SurahEntity
+
+interface QuranRepository {
+    suspend fun getSurahs(): List<SurahEntity>
+    suspend fun getAyahsBySurah(surahId: Int): List<AyahEntity>
+}
