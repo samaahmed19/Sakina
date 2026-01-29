@@ -6,6 +6,7 @@ import androidx.room.Room
 import com.example.sakina.data.local.database.AppDatabase
 import com.example.sakina.data.local.database.dao.AzkarDao
 import com.example.sakina.data.local.database.dao.DuaDao
+import com.example.sakina.data.local.database.dao.PrayerDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -26,16 +27,22 @@ object DatabaseModule {
             context,
             AppDatabase::class.java,
             "sakina_db"
-        ).build()
+        )
+            // Dev-stage safety: avoids crash when version changes and you don't have migrations yet
+            .fallbackToDestructiveMigration()
+            .build()
     }
 
     @Provides
     fun provideAzkarDao(
         database: AppDatabase
     ): AzkarDao = database.azkarDao()
-
+    @Provides
+    fun providePrayerDao(database: AppDatabase): PrayerDao = database.prayerDao()
     @Provides
     fun provideDuaDao(
         database: AppDatabase
     ): DuaDao = database.duaDao()
 }
+
+
