@@ -5,6 +5,7 @@ import android.content.Context
 import androidx.room.Room
 import com.example.sakina.data.local.database.AppDatabase
 import com.example.sakina.data.local.database.dao.AzkarDao
+import com.example.sakina.data.local.database.dao.DuaDao
 import com.example.sakina.data.local.database.dao.PrayerDao
 import dagger.Module
 import dagger.Provides
@@ -38,4 +39,10 @@ object DatabaseModule {
     ): AzkarDao = database.azkarDao()
     @Provides
     fun providePrayerDao(database: AppDatabase): PrayerDao = database.prayerDao()
+    @Provides
+    fun provideDuaDao(
+        database: AppDatabase
+    ): DuaDao = database.duaDao()
 }
+
+
