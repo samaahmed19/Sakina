@@ -1,3 +1,10 @@
+package com.example.sakina.data.local.database.dao
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import com.example.sakina.data.local.database.entity.AyahEntity
+import com.example.sakina.data.local.database.entity.SurahEntity
 @Dao
 interface QuranDao {
 
