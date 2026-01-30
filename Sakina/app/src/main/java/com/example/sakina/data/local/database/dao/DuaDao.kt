@@ -1,4 +1,33 @@
 package com.example.sakina.data.local.database.dao
 
-class DuaDao {
+
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import com.example.sakina.data.local.database.entity.DuaEntity
+import kotlinx.coroutines.flow.Flow
+
+@Dao
+interface DuaDao {
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertAll(duas: List<DuaEntity>)
+
+    @Query("SELECT * FROM dua_table")
+    fun getAllDuas(): Flow<List<DuaEntity>>
+
+    @Query("SELECT * FROM dua_table WHERE categoryId = :catId")
+    fun getDuasByCategory(catId: Int): Flow<List<DuaEntity>>
+
+    @Query("SELECT * FROM dua_table WHERE text LIKE '%' || :query || '%'")
+    fun searchDuas(query: String): Flow<List<DuaEntity>>
+
+    @Query("UPDATE dua_table SET isFavorite = :isFav WHERE id = :id")
+    suspend fun updateFavorite(id: Int, isFav: Boolean)
+
+    @Query("SELECT * FROM dua_table WHERE isFavorite = 1")
+    fun getFavoriteDuas(): Flow<List<DuaEntity>>
+
+    @Query("SELECT COUNT(*) FROM dua_table")
+    suspend fun getCount(): Int
 }
