@@ -1,14 +1,1 @@
 /build
-# IDE
-.idea/
-*.iml
-
-# macOS
-.DS_Store
-
-# random folders accidentally created
-Configure/
-Get/
-Run/
-Task/
-There/

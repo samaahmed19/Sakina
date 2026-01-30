@@ -1,5 +1,6 @@
 package com.example.sakina.data.local.database.entity
 
+
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
