@@ -83,6 +83,19 @@ class DataInitializer @Inject constructor(
         quranDao.insertSurahs(surahs)
         quranDao.insertAyahs(ayahs)
     }
+
+    suspend fun initDuasIfNeeded() = withContext(Dispatchers.IO) {
+        if (duaDao.getCount() > 0) return@withContext
+
+        val json = context.assets
+            .open("dua.json")
+            .bufferedReader()
+            .use { it.readText() }
+
+        val duasList = JsonMapper.mapDuas(json)
+
+        duaDao.insertAll(duasList)
+    }
 }
 
 
