@@ -1,13 +1,14 @@
 package com.example.sakina.data.source.mapper
 
-
 import com.example.sakina.data.local.database.entity.CategoryEntity
 import com.example.sakina.data.local.database.entity.DuaEntity
 import com.example.sakina.data.local.database.entity.ZikrEntity
+import com.example.sakina.data.local.database.entity.TasbeehEntity
 import org.json.JSONObject
 
 object JsonMapper {
-   //Azkar
+
+    // ===== Azkar =====
     fun mapCategories(json: String): Pair<List<CategoryEntity>, List<ZikrEntity>> {
         val categories = mutableListOf<CategoryEntity>()
         val azkar = mutableListOf<ZikrEntity>()
@@ -17,9 +18,7 @@ object JsonMapper {
 
         for (i in 0 until categoriesArray.length()) {
             val categoryObj = categoriesArray.getJSONObject(i)
-
             val categoryId = categoryObj.getString("id")
-
 
             categories.add(
                 CategoryEntity(
@@ -28,7 +27,6 @@ object JsonMapper {
                     icon = categoryObj.getString("icon")
                 )
             )
-
 
             val azkarArray = categoryObj.getJSONArray("azkar")
             for (j in 0 until azkarArray.length()) {
@@ -44,22 +42,22 @@ object JsonMapper {
                 )
             }
         }
-
         return Pair(categories, azkar)
     }
 
-    fun mapDuas (json: String) :List<DuaEntity>{
+    // ===== Duas =====
+    fun mapDuas(json: String): List<DuaEntity> {
         val duas = mutableListOf<DuaEntity>()
         val root = JSONObject(json)
         val categoryArray = root.getJSONArray("categories")
 
-        for (i in 0 until categoryArray.length()){
+        for (i in 0 until categoryArray.length()) {
             val categoryObj = categoryArray.getJSONObject(i)
             val categoryId = categoryObj.getInt("id")
             val categoryName = categoryObj.getString("name")
 
             val duasArray = categoryObj.getJSONArray("duas")
-            for (j in 0 until duasArray.length()){
+            for (j in 0 until duasArray.length()) {
                 val duaObj = duasArray.getJSONObject(j)
                 duas.add(
                     DuaEntity(
@@ -72,5 +70,33 @@ object JsonMapper {
             }
         }
         return duas
+    }
+
+    // ===== Tasbeeh  =====
+    fun mapTasbeeh(json: String): List<TasbeehEntity> {
+        val result = mutableListOf<TasbeehEntity>()
+        val root = JSONObject(json)
+        val tasbeehArray = root.getJSONArray("tasbeeh")
+
+        for (i in 0 until tasbeehArray.length()) {
+            val obj = tasbeehArray.getJSONObject(i)
+            val targetsJson = obj.getJSONArray("targets").toString()
+
+            result.add(
+                TasbeehEntity(
+                    id = obj.getInt("id"),
+                    slug = obj.getString("slug"),
+                    text = obj.getString("text"),
+                    targets = targetsJson,
+                    category = obj.getString("category"),
+                    virtue = obj.getString("virtue"),
+                    source = obj.getString("source"),
+                    priority = obj.getInt("priority"),
+                    isDefault = obj.getBoolean("isDefault"),
+                    currentCount = 0
+                )
+            )
+        }
+        return result
     }
 }

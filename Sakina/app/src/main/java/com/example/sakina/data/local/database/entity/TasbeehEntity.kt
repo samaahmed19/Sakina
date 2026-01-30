@@ -2,7 +2,7 @@ package com.example.sakina.data.local.database.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-
+import com.example.sakina.data.local.database.entity.TasbeehEntity
 @Entity(tableName = "tasbeeh")
 data class TasbeehEntity(
     @PrimaryKey

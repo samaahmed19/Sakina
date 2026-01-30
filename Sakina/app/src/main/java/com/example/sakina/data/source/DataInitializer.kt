@@ -12,21 +12,18 @@ import com.example.sakina.data.local.database.entity.SurahEntity
 import com.example.sakina.data.source.mapper.JsonMapper
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
-import org.json.JSONArray
 import kotlinx.coroutines.withContext
+import org.json.JSONArray
 import javax.inject.Inject
 
 class DataInitializer @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val azkarDao: AzkarDao ,
+    private val azkarDao: AzkarDao,
     private val duaDao: DuaDao,
     private val quranDao: QuranDao,
     private val tasbeehDao: TasbeehDao,
     private val checklistDao: ChecklistDao,
     private val prayerDao: PrayerDao
-
-
-
 ) {
 
     suspend fun initAzkarIfNeeded() = withContext(Dispatchers.IO) {
@@ -42,6 +39,7 @@ class DataInitializer @Inject constructor(
         azkarDao.insertCategories(categories)
         azkarDao.insertAzkar(azkar)
     }
+
     suspend fun initQuranIfNeeded() = withContext(Dispatchers.IO) {
         if (quranDao.getAllSurahs().isNotEmpty()) return@withContext
 
@@ -96,7 +94,17 @@ class DataInitializer @Inject constructor(
 
         duaDao.insertAll(duasList)
     }
+
+    suspend fun initTasbeehIfNeeded() = withContext(Dispatchers.IO) {
+        if (tasbeehDao.getAll().isNotEmpty()) return@withContext
+
+        val json = context.assets
+            .open("tasbeeh.json")
+            .bufferedReader()
+            .use { it.readText() }
+
+        val tasbeehList = JsonMapper.mapTasbeeh(json)
+
+        tasbeehDao.insertAll(tasbeehList)
+    }
 }
-
-
-
