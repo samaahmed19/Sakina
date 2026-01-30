@@ -6,8 +6,10 @@ import androidx.room.Room
 import com.example.sakina.data.local.database.AppDatabase
 import com.example.sakina.data.local.database.dao.AzkarDao
 import com.example.sakina.data.local.database.dao.DuaDao
+import com.example.sakina.data.local.database.dao.ChecklistDao
 import com.example.sakina.data.local.database.dao.PrayerDao
 import com.example.sakina.data.local.database.dao.QuranDao
+import com.example.sakina.data.local.database.dao.TasbeehDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -48,6 +50,14 @@ object DatabaseModule {
     fun provideQuranDao(
         database: AppDatabase
     ): QuranDao = database.quranDao()
+    @Provides
+    fun provideChecklistDao(
+        database: AppDatabase
+    ): ChecklistDao = database.checklistDao()
+    @Provides
+    fun provideTasbeehDao(
+        database: AppDatabase
+    ): TasbeehDao = database.tasbeehDao()
 
 }
 

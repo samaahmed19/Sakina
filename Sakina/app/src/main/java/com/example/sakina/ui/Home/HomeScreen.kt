@@ -1,4 +1,8 @@
 package com.example.sakina.ui.Home
 
-class HomeScreen {
+import androidx.compose.runtime.Composable
+
+@Composable
+fun HomeScreen() {
+
 }

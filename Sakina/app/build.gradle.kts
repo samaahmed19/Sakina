@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.hilt)
     kotlin("kapt")
 
+
 }
 
 
@@ -53,7 +54,8 @@ dependencies {
     testImplementation("androidx.room:room-testing:2.6.1")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1")
     testImplementation("androidx.test:core-ktx:1.6.1")
-
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.compiler)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
