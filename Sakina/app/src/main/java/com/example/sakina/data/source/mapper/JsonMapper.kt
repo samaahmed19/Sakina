@@ -3,7 +3,6 @@ package com.example.sakina.data.source.mapper
 
 import com.example.sakina.data.local.database.entity.CategoryEntity
 import com.example.sakina.data.local.database.entity.ZikrEntity
-import com.example.sakina.data.local.database.entity.DuaEntity
 import org.json.JSONObject
 
 object JsonMapper {
@@ -46,36 +45,5 @@ object JsonMapper {
         }
 
         return Pair(categories, azkar)
-    }
-
-    fun mapDuas(json: String): List<DuaEntity> {
-        val duasList = mutableListOf<DuaEntity>()
-
-        val root = JSONObject(json)
-        val categoriesArray = root.getJSONArray("categories")
-
-        for (i in 0 until categoriesArray.length()) {
-            val categoryObj = categoriesArray.getJSONObject(i)
-
-            val categoryId = categoryObj.getInt("id")
-            val categoryName = categoryObj.getString("name")
-
-            val duasArray = categoryObj.getJSONArray("duas")
-
-            for (j in 0 until duasArray.length()) {
-                val duaObj = duasArray.getJSONObject(j)
-
-                duasList.add(
-                    DuaEntity(
-                        id = duaObj.getInt("id"),
-                        text = duaObj.getString("text"),
-                        categoryId = categoryId,
-                        categoryName = categoryName,
-                        isFavorite = false
-                    )
-                )
-            }
-        }
-        return duasList
     }
 }

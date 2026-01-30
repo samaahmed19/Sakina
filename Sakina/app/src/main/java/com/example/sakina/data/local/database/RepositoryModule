@@ -1,0 +1,20 @@
+package com.example.sakina.data.local.database
+
+import com.example.sakina.data.repository.QuranRepositoryImpl
+import com.example.sakina.domain.repository.QuranRepository
+import dagger.Binds
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
+import javax.inject.Singleton
+
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class RepositoryModule {
+
+    @Binds
+    @Singleton
+    abstract fun bindQuranRepository(
+        quranRepositoryImpl: QuranRepositoryImpl
+    ): QuranRepository
+}
