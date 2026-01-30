@@ -2,7 +2,10 @@ package com.example.sakina.data.source
 
 import android.content.Context
 import com.example.sakina.data.local.database.dao.AzkarDao
-import com.example.sakina.data.local.repository.DuaRepository
+import com.example.sakina.data.local.database.dao.DuaDao
+import com.example.sakina.data.local.database.dao.ChecklistDao
+import com.example.sakina.data.local.database.dao.PrayerDao
+import com.example.sakina.data.local.database.dao.TasbeehDao
 import com.example.sakina.data.local.database.dao.QuranDao
 import com.example.sakina.data.local.database.entity.AyahEntity
 import com.example.sakina.data.local.database.entity.SurahEntity
@@ -16,8 +19,14 @@ import javax.inject.Inject
 class DataInitializer @Inject constructor(
     @ApplicationContext private val context: Context,
     private val azkarDao: AzkarDao ,
-    private val duaRepository: DuaRepository,
-    private val quranDao: QuranDao
+    private val duaDao: DuaDao,
+    private val quranDao: QuranDao,
+    private val tasbeehDao: TasbeehDao,
+    private val checklistDao: ChecklistDao,
+    private val prayerDao: PrayerDao
+
+
+
 ) {
 
     suspend fun initAzkarIfNeeded() = withContext(Dispatchers.IO) {

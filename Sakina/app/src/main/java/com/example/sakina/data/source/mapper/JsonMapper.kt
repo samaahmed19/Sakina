@@ -6,7 +6,7 @@ import com.example.sakina.data.local.database.entity.ZikrEntity
 import org.json.JSONObject
 
 object JsonMapper {
-
+   //Azkar
     fun mapCategories(json: String): Pair<List<CategoryEntity>, List<ZikrEntity>> {
         val categories = mutableListOf<CategoryEntity>()
         val azkar = mutableListOf<ZikrEntity>()
