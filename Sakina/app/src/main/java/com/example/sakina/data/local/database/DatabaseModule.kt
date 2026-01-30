@@ -7,6 +7,7 @@ import com.example.sakina.data.local.database.AppDatabase
 import com.example.sakina.data.local.database.dao.AzkarDao
 import com.example.sakina.data.local.database.dao.DuaDao
 import com.example.sakina.data.local.database.dao.PrayerDao
+import com.example.sakina.data.local.database.dao.QuranDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -43,6 +44,13 @@ object DatabaseModule {
     fun provideDuaDao(
         database: AppDatabase
     ): DuaDao = database.duaDao()
+    @Provides
+    fun provideQuranDao(
+        database: AppDatabase
+    ): QuranDao = database.quranDao()
+
 }
+
+
 
 
