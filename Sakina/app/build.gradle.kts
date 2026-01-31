@@ -45,8 +45,6 @@ android {
 }
 
 dependencies {
-    implementation("androidx.compose.runtime:runtime")
-    implementation("androidx.core:core-splashscreen:1.0.1")
     implementation("androidx.datastore:datastore-preferences:1.1.1")
     implementation("androidx.room:room-runtime:2.6.1")
     kapt("androidx.room:room-compiler:2.6.1")
@@ -54,8 +52,6 @@ dependencies {
     testImplementation("androidx.room:room-testing:2.6.1")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1")
     testImplementation("androidx.test:core-ktx:1.6.1")
-    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.4")
     implementation(libs.hilt.android)
     kapt(libs.hilt.compiler)
 
@@ -69,10 +65,6 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material3.adaptive.navigation.suite)
     testImplementation(libs.junit)
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.4")
-    implementation("com.google.android.gms:play-services-location:21.0.1")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3")
-    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
@@ -80,4 +72,10 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 }
-
+configurations.configureEach {
+    resolutionStrategy.eachDependency {
+        if (requested.group == "org.jetbrains.kotlin") {
+            useVersion("1.9.24")
+        }
+    }
+}
