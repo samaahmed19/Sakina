@@ -74,4 +74,3 @@ class SettingsViewModel @Inject constructor(
     fun updateLocation(value: String) =
         savePreference(PreferencesKeys.LOCATION, value)
 }
-
