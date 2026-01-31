@@ -10,11 +10,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3be14b64-c2b5-4889-989a-e75a14abf588" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sakina/.idea/deploymentTargetSelector.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sakina/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/Sakina/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Sakina/app/src/main/java/com/example/sakina/ui/Authentication/LoginScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/Sakina/app/src/main/java/com/example/sakina/ui/Authentication/LoginScreen.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Sakina/app/src/main/java/com/example/sakina/ui/Azkar/azkar_details/ZikrDetailsScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/Sakina/app/src/main/java/com/example/sakina/ui/Azkar/azkar_details/ZikrDetailsScreen.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Sakina/app/src/main/java/com/example/sakina/ui/Azkar/azkar_list/AzkarListScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/Sakina/app/src/main/java/com/example/sakina/ui/Azkar/azkar_list/AzkarListScreen.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Sakina/app/src/main/java/com/example/sakina/ui/Checklist/ChecklistScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/Sakina/app/src/main/java/com/example/sakina/ui/Checklist/ChecklistScreen.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Sakina/app/src/main/java/com/example/sakina/ui/Gwame3Dua/DuaListScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/Sakina/app/src/main/java/com/example/sakina/ui/Gwame3Dua/DuaListScreen.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Sakina/app/src/main/java/com/example/sakina/ui/HolyQuran/surah_details/SurahDetailsScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/Sakina/app/src/main/java/com/example/sakina/ui/HolyQuran/surah_details/SurahDetailsScreen.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Sakina/app/src/main/java/com/example/sakina/ui/HolyQuran/surah_list/SurahListScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/Sakina/app/src/main/java/com/example/sakina/ui/HolyQuran/surah_list/SurahListScreen.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Sakina/app/src/main/java/com/example/sakina/ui/Home/HomeScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/Sakina/app/src/main/java/com/example/sakina/ui/Home/HomeScreen.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Sakina/app/src/main/java/com/example/sakina/ui/Splash/SplashScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/Sakina/app/src/main/java/com/example/sakina/ui/Splash/SplashScreen.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -109,7 +113,7 @@
     "RunOnceActivity.readMode.enableVisualFormatting": "true",
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
-    "git-widget-placeholder": "master",
+    "git-widget-placeholder": "Home+Azkar-Features",
     "last_opened_file_path": "C:/Users/ms1/AndroidStudioProjects/Sakina",
     "project.structure.last.edited": "Project",
     "project.structure.proportion": "0.17",
