@@ -404,7 +404,7 @@
         }
       ]
     },{
-      "id": "after_prayer",
+      "id": "after prayer",
       "title": "أذكار بعد الصلاة",
       "icon": "carpet",
       "azkar": [
@@ -476,7 +476,7 @@
         }
       ]
     },{
-      "id": "wake_up",
+      "id": "wake up",
       "title": "أذكار الاستيقاظ من النوم",
       "icon": "wakeup",
       "azkar": [
@@ -559,7 +559,7 @@
           ]
         },
         {
-          "id": "raise_from_ruku",
+          "id": "raise from ruku",
           "title": "أدعية الرفع من الركوع",
           "azkar": [
             {
@@ -629,7 +629,7 @@
           ]
         },
         {
-          "id": "between_sujood",
+          "id": "between sujood",
           "title": "الجلوس بين السجدتين",
           "azkar": [
             {
@@ -664,7 +664,7 @@
           ]
         },
         {
-          "id": "before_salam",
+          "id": "before salam",
           "title": "أدعية قبل السلام",
           "azkar": [
             {

@@ -2,19 +2,23 @@ package com.example.sakina.ui.settings
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.sakina.data.local.datastore.PreferencesKeys
+import com.example.sakina.data.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.io.IOException
 import javax.inject.Inject
-import com.example.sakina.data.local.datastore.UserPreferences
+
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    private val dataStore: DataStore<Preferences>
+    private val dataStore: DataStore<Preferences>,
+    private val userRepository: UserRepository
 ) : ViewModel() {
 
     data class SettingsState(
@@ -27,29 +31,27 @@ class SettingsViewModel @Inject constructor(
         val language: String = "العربية"
     )
 
-    // Reactive StateFlow that automatically updates when DataStore changes
-    val state: StateFlow<SettingsState> = dataStore.data
-        .catch { exception ->
-            // Handle exceptions safely
-            if (exception is IOException) emit(emptyPreferences())
-            else throw exception
+    // دمج بيانات المستخدم من Room مع إعدادات DataStore
+    val state: StateFlow<SettingsState> = combine(
+        userRepository.getUser(),
+        dataStore.data.catch { e ->
+            if (e is IOException) emit(emptyPreferences()) else throw e
         }
-        .map { prefs ->
-            SettingsState(
-                name = prefs[PreferencesKeys.NAME] ?: "",
-                email = prefs[PreferencesKeys.EMAIL] ?: "",
-                location = prefs[PreferencesKeys.LOCATION] ?: "غير محدد",
-                prayerNotifications = prefs[PreferencesKeys.PRAYER_NOTIF] ?: true,
-                azkarNotifications = prefs[PreferencesKeys.AZKAR_NOTIF] ?: true,
-                darkMode = prefs[PreferencesKeys.DARK_MODE] ?: false,
-                language = prefs[PreferencesKeys.LANGUAGE] ?: "العربية"
-            )
-        }
-        .stateIn(
-            viewModelScope,
-            SharingStarted.Eagerly,
-            SettingsState()
+    ) { user, prefs ->
+        SettingsState(
+            name = user?.name?.takeIf { it.isNotBlank() } ?: (prefs[PreferencesKeys.NAME] ?: ""),
+            email = user?.email?.takeIf { it.isNotBlank() } ?: (prefs[PreferencesKeys.EMAIL] ?: ""),
+            location = (prefs[PreferencesKeys.LOCATION]?.takeIf { it.isNotBlank() } ?: user?.location?.takeIf { it.isNotBlank() }) ?: "غير محدد",
+            prayerNotifications = prefs[PreferencesKeys.PRAYER_NOTIF] ?: true,
+            azkarNotifications = prefs[PreferencesKeys.AZKAR_NOTIF] ?: true,
+            darkMode = prefs[PreferencesKeys.DARK_MODE] ?: false,
+            language = prefs[PreferencesKeys.LANGUAGE] ?: "العربية"
         )
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.Eagerly,
+        SettingsState()
+    )
 
     // Generic function to save any preference
     private fun <T> savePreference(key: Preferences.Key<T>, value: T) {
@@ -71,6 +73,7 @@ class SettingsViewModel @Inject constructor(
     fun updateLanguage(value: String) =
         savePreference(PreferencesKeys.LANGUAGE, value)
 
-    fun updateLocation(value: String) =
+    fun updateLocation(value: String) {
         savePreference(PreferencesKeys.LOCATION, value)
+    }
 }
