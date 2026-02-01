@@ -25,7 +25,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.sakina.ui.AppViewModel
 import com.example.sakina.ui.authentication.LoginScreen
 import com.example.sakina.ui.Home.HomeScreen
 import com.example.sakina.ui.settings.SettingsScreen
@@ -48,44 +47,15 @@ class MainActivity : ComponentActivity() {
 @PreviewScreenSizes
 @Composable
 fun SakinaApp(
-    appViewModel: AppViewModel = viewModel()
+
 ) {
-    val user by appViewModel.user.collectAsState()
 
-    if (user == null) {
-        LoginScreen()
-    } else {
-        var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
 
-        NavigationSuiteScaffold(
-            navigationSuiteItems = {
-                AppDestinations.entries.forEach {
-                    item(
-                        icon = {
-                            Icon(
-                                it.icon,
-                                contentDescription = it.label
-                            )
-                        },
-                        label = { Text(it.label) },
-                        selected = it == currentDestination,
-                        onClick = { currentDestination = it }
-                    )
-                }
-            }
-        ) {
-            Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                when (currentDestination) {
-                    AppDestinations.HOME -> HomeScreen(modifier = Modifier.padding(innerPadding))
-                    AppDestinations.FAVORITES -> Text("المفضلة", modifier = Modifier.padding(innerPadding))
-                    AppDestinations.PROFILE -> SettingsScreen(
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
-            }
-        }
+
+
+
     }
-}
+
 
 enum class AppDestinations(
     val label: String,
