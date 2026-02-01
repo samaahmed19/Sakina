@@ -26,6 +26,7 @@ val NeonCyan = Color(0xFF00FFD1)
 val NeonPurple = Color(0xFFBD00FF)
 val NeonGold = Color(0xFFFFD700)
 
+
 @Composable
 fun GalaxyBackground(content: @Composable () -> Unit) {
     Box(

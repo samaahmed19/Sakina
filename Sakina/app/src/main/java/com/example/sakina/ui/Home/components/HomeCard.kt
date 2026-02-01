@@ -10,7 +10,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.ui.text.TextStyle
-import com.example.sakina.R
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -64,7 +63,7 @@ fun HomeCard(
             ) { isPressed = !isPressed }
 
             .shadow(
-                elevation = if (isPressed) 25.dp else 0.dp,
+                elevation = if (isPressed) 30.dp else 10.dp,
                 shape = RoundedCornerShape(24.dp),
                 spotColor = activeColor.copy(alpha = neonAlpha),
                 ambientColor = activeColor.copy(alpha = neonAlpha)
@@ -82,13 +81,13 @@ fun HomeCard(
                 width = borderThickness,
                 brush = Brush.linearGradient(
                     colors = if (isPressed) listOf(activeColor, activeColor.copy(alpha = 0.3f))
-                    else listOf(Color.White.copy(alpha = 0.2f), Color.Transparent)
+                    else listOf(activeColor, activeColor.copy(alpha = 0.5f), Color.Transparent)
                 )
             )
         ) {
             Row(
                 modifier = Modifier
-                    .padding(20.dp)
+                    .padding(15.dp)
                     .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
