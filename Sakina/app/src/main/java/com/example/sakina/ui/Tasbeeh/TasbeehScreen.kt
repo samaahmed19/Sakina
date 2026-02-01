@@ -1,6 +1,7 @@
 package com.example.sakina
 
-
+import com.example.sakina.ui.Tasbeeh.TasbeehViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import android.os.Bundle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.activity.ComponentActivity
