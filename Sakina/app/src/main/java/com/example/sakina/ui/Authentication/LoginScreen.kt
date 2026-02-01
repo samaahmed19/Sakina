@@ -193,7 +193,7 @@ fun LoginScreen(
 @Composable
 private fun SakinaLogoIcon() {
     Image(
-        painter = painterResource(id = R.drawable.sakina_logo),
+        painter = painterResource(id = R.drawable.splash),
         contentDescription = "سَكِينَة",
         modifier = Modifier
             .size(100.dp)
