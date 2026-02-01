@@ -1,4 +1,4 @@
-package com.example.sakina.data.local.repository
+package com.example.sakina.data.repository
 
 import com.example.sakina.data.local.database.dao.DuaDao
 import com.example.sakina.data.local.database.entity.DuaEntity
