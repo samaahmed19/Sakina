@@ -180,7 +180,6 @@ fun SmartNeonCard(
 @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun AzkarListScreen(viewModel: AzkarViewModel = hiltViewModel() ) {
-    val categories by viewModel.categories.collectAsState()
     val neonColors = listOf(
         Color(0xFFFFD700),
         Color(0xFFBD00FF),
@@ -188,6 +187,8 @@ fun SmartNeonCard(
         Color(0xFFFF4D4D),
         Color(0xFF4DFF88)
     )
+        val categories by viewModel.categories.collectAsState()
+
         CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
             Box(
                 modifier = Modifier
