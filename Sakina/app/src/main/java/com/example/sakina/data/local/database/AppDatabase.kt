@@ -16,6 +16,7 @@ import com.example.sakina.data.local.database.dao.ChecklistDao
 import com.example.sakina.data.local.database.entity.ChecklistEntity
 import com.example.sakina.data.local.database.dao.TasbeehDao
 import com.example.sakina.data.local.database.dao.UserDao
+import com.example.sakina.data.local.database.entity.DuaCategoryEntity
 import com.example.sakina.data.local.database.entity.TasbeehEntity
 import com.example.sakina.data.local.database.entity.UserEntity
 
@@ -26,6 +27,7 @@ import com.example.sakina.data.local.database.entity.UserEntity
         ZikrEntity::class,
         PrayerEntity::class,
         DuaEntity::class,
+        DuaCategoryEntity::class,
         SurahEntity::class,
         AyahEntity::class,
         ChecklistEntity::class,

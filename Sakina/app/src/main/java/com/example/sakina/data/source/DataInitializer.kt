@@ -83,16 +83,16 @@ class DataInitializer @Inject constructor(
     }
 
     suspend fun initDuasIfNeeded() = withContext(Dispatchers.IO) {
-        if (duaDao.getCount() > 0) return@withContext
+        if (duaDao.getAllCategories().isNotEmpty()) return@withContext
 
         val json = context.assets
             .open("dua.json")
             .bufferedReader()
             .use { it.readText() }
 
-        val duasList = JsonMapper.mapDuas(json)
-
-        duaDao.insertAll(duasList)
+        val (categories, duas) = JsonMapper.mapDuas(json)
+        duaDao.insertCategories(categories)
+        duaDao.insertAll(duas)
     }
 
     suspend fun initTasbeehIfNeeded() = withContext(Dispatchers.IO) {
