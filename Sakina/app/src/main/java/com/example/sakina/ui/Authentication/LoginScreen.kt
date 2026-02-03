@@ -100,7 +100,7 @@ fun LoginScreen(
                 )
             )
     ) {
-        // ⭐ النجوم
+
         Canvas(modifier = Modifier.fillMaxSize()) {
             repeat(150) {
                 drawCircle(
@@ -114,7 +114,7 @@ fun LoginScreen(
             }
         }
 
-        // البطاقة الزجاجية
+
         Box(
             modifier = Modifier
                 .align(Alignment.Center)
@@ -127,13 +127,13 @@ fun LoginScreen(
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // أيقونة التطبيق
+
                 SakinaLogoIcon()
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = "ميصال",
+                    text = "سكن",
                     fontSize = 32.sp,
                     fontWeight = FontWeight.Bold,
                     color = LightPurple
@@ -142,7 +142,7 @@ fun LoginScreen(
                 Spacer(modifier = Modifier.height(6.dp))
 
                 Text(
-                    text = "رحلتك الروحانية تبدأ هنا",
+                    text = "Your Spiritual Abode",
                     fontSize = 14.sp,
                     color = TextMuted
                 )
@@ -157,12 +157,12 @@ fun LoginScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // صندوق معلومات الموقع
+
                 LocationInfoBox()
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // زر تحديد الموقع
+
                 SetLocationButton(
                     onClick = { onSetLocationClick() },
                     isLoading = state.isLoadingLocation,
@@ -172,7 +172,7 @@ fun LoginScreen(
                 Spacer(modifier = Modifier.height(24.dp))
 
                 GlowButton(
-                    text = "ابدأ رحلتك الروحانية",
+                    text = "ابدأ رحلتك ",
                     loading = state.isLoading,
                     onClick = viewModel::onStartClick
                 )
@@ -193,8 +193,8 @@ fun LoginScreen(
 @Composable
 private fun SakinaLogoIcon() {
     Image(
-        painter = painterResource(id = R.drawable.splash),
-        contentDescription = "سَكِينَة",
+        painter = painterResource(id = R.drawable.appicon),
+        contentDescription = "",
         modifier = Modifier
             .size(100.dp)
             .clip(RoundedCornerShape(50)),
@@ -354,7 +354,7 @@ private fun GlowButton(
 private fun LoginScreenPreview() {
     val fakeState = remember {
         object {
-            val name = "محمد"
+            val name = " "
             val isLoading = false
         }
     }

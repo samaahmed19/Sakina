@@ -199,7 +199,8 @@ fun TasbeehScreen(viewModel: TasbeehViewModel = viewModel()) {
                         )
                         .border(1.5.dp, selectedTasbeeh.color.copy(0.5f), CircleShape)
                         .clickable {
-                            count++
+                            viewModel.incrementCount()
+                            println("Debug: Count is now ${viewModel.count}")
                             if (!hasStartedByClick) hasStartedByClick = true
                         },
                     contentAlignment = Alignment.Center
@@ -215,7 +216,7 @@ fun TasbeehScreen(viewModel: TasbeehViewModel = viewModel()) {
                                 fontSize = 14.sp, color = Color.White.copy(0.5f)
                             )
                         }
-                        Text(text = count.toString(), fontSize = 60.sp, fontWeight = FontWeight.Light, color = Color.White)
+                        Text(text = viewModel.count.toString(), fontSize = 60.sp, fontWeight = FontWeight.Light, color = Color.White)
                     }
                 }
             }
