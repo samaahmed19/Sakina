@@ -8,5 +8,8 @@ data class ChecklistEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val taskName: String,
     val isCompleted: Boolean = false,
-    val createdAt: Long = System.currentTimeMillis()
+    val createdAt: Long = System.currentTimeMillis(),
+
+    val lastStreakDay: Long = -1L,
+    val streakDays: Int = 0
 )

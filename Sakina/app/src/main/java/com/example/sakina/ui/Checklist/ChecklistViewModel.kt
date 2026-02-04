@@ -1,5 +1,7 @@
 package com.example.sakina.ui.Checklist
 
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.sakina.data.local.database.dao.ChecklistDao
@@ -15,19 +17,52 @@ class ChecklistViewModel @Inject constructor(
 
     val allTasks = checklistDao.getAllTasks()
 
-    fun addNewTask(name: String) {
+    private val _streakDays = mutableStateOf(0)
+    val streakDays: State<Int> = _streakDays
+
+    private var lastCompletedDay: Long = -1L
+
+    init {
         viewModelScope.launch {
-            if (name.isNotBlank()) {
-                checklistDao.addTask(ChecklistEntity(taskName = name))
+            allTasks.collect { tasks ->
+                updateStreak(tasks)
             }
         }
     }
-    fun toggleTask(task: ChecklistEntity) {
-        viewModelScope.launch {
-            checklistDao.updateTaskStatus(task.copy(isCompleted = !task.isCompleted))
+
+    private fun updateStreak(tasks: List<ChecklistEntity>) {
+        if (tasks.isEmpty()) return
+
+        val today = System.currentTimeMillis() / (24 * 60 * 60 * 1000)
+        val allCompleted = tasks.all { it.isCompleted }
+
+        if (allCompleted && lastCompletedDay != today) {
+            _streakDays.value += 1
+            lastCompletedDay = today
+        }
+
+        if (!allCompleted && lastCompletedDay == today) {
+            _streakDays.value -= 1
+            lastCompletedDay = -1L
         }
     }
-    fun removeTask(task: ChecklistEntity) {
+
+    fun addNewTask(name: String) {
+        if (name.isBlank()) return
+        viewModelScope.launch {
+            checklistDao.addTask(ChecklistEntity(taskName = name))
+        }
+    }
+
+    fun toggleTask(task: ChecklistEntity) {
+        viewModelScope.launch {
+            checklistDao.updateTaskStatus(
+                task.copy(isCompleted = !task.isCompleted)
+            )
+        }
+    }
+
+    fun deleteTask(task: ChecklistEntity) {
         viewModelScope.launch {
             checklistDao.deleteTask(task)
         }
