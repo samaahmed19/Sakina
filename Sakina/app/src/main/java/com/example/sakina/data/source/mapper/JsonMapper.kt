@@ -1,5 +1,6 @@
 package com.example.sakina.data.source.mapper
 
+import com.example.sakina.data.local.database.entity.AyahEntity
 import com.example.sakina.data.local.database.entity.CategoryEntity
 import com.example.sakina.data.local.database.entity.DuaEntity
 import com.example.sakina.data.local.database.entity.ZikrEntity
@@ -98,5 +99,30 @@ object JsonMapper {
             )
         }
         return result
+    }
+    // ===== Quran =====
+    fun mapQuran(jsonString: String): List<AyahEntity> {
+        val ayahsList = mutableListOf<AyahEntity>()
+        val rootObject = JSONObject(jsonString)
+
+        val surahKeys = rootObject.keys()
+
+        while (surahKeys.hasNext()) {
+            val surahKey = surahKeys.next()
+            val ayahsArray = rootObject.getJSONArray(surahKey)
+
+            for (i in 0 until ayahsArray.length()) {
+                val ayahJson = ayahsArray.getJSONObject(i)
+
+                ayahsList.add(
+                    AyahEntity(
+                        surahId = ayahJson.getInt("chapter"),
+                        number = ayahJson.getInt("verse"),
+                        text = ayahJson.getString("text")
+                    )
+                )
+            }
+        }
+        return ayahsList
     }
 }

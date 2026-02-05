@@ -56,7 +56,10 @@ dependencies {
     testImplementation("androidx.test:core-ktx:1.6.1")
     implementation(libs.hilt.android)
     kapt(libs.hilt.compiler)
-
+    implementation("androidx.compose.material:material-icons-extended:1.7.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+    implementation("com.google.code.gson:gson:2.10.1")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

@@ -7,7 +7,8 @@ import com.example.sakina.data.local.database.entity.AyahEntity
 import com.example.sakina.data.local.database.entity.SurahEntity
 @Dao
 interface QuranDao {
-
+    @Query("SELECT COUNT(*) FROM ayahs")
+    suspend fun getAyahsCount(): Int
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSurahs(surahs: List<SurahEntity>)
 

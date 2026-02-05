@@ -34,20 +34,19 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
+import androidx.hilt.navigation.compose.hiltViewModel
 
 // ================== DATA MODEL ==================
 
@@ -103,26 +102,25 @@ fun GalaxyBackground(content: @Composable () -> Unit) {
 // ================== MAIN SCREEN ==================
 
 @Composable
-fun SurahListScreen(surahList: List<Surah>) {
+fun SurahListScreen(
+    viewModel: SurahListViewModel = hiltViewModel(),
+    onSurahClick: (Surah) -> Unit
+) {
+    val surahList by viewModel.filteredSurahs.collectAsState()
+    val searchQuery by viewModel.searchQuery.collectAsState()
+    val selectedFilter by viewModel.selectedFilter.collectAsState()
+
     var visible by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) {
-        visible = true
-    }
+    LaunchedEffect(Unit) { visible = true }
 
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
         GalaxyBackground {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp)
-            ) {
+            Column(modifier = Modifier.fillMaxSize().padding(16.dp)){
                 Row(
-                    modifier = Modifier.fillMaxWidth()
-                        .padding(top = 20.dp),
+                    modifier = Modifier.fillMaxWidth().padding(top = 20.dp),
                     horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically ,)
-                {
-
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Text(
                         text = "القرآن الكريم",
                         fontSize = 28.sp,
@@ -132,9 +130,7 @@ fun SurahListScreen(surahList: List<Surah>) {
                     Image(
                         painter = painterResource(id = R.drawable.quran),
                         contentDescription = null,
-                        modifier = Modifier
-                            .size(50.dp)
-                            .padding(start = 8.dp, bottom = 8.dp)
+                        modifier = Modifier.size(50.dp).padding(start = 8.dp, bottom = 8.dp)
                     )
                 }
 
@@ -148,23 +144,21 @@ fun SurahListScreen(surahList: List<Surah>) {
                 )
 
                 Spacer(modifier = Modifier.height(20.dp))
-                SearchBar()
+                SearchBar(query = searchQuery, onQueryChange = { viewModel.onSearchQueryChanged(it) })
                 Spacer(modifier = Modifier.height(14.dp))
-                FilterChips()
+                FilterChips(selectedFilter = selectedFilter, onFilterSelected = { viewModel.onFilterSelected(it) })
                 Spacer(modifier = Modifier.height(18.dp))
+
                 AnimatedVisibility(
                     visible = visible,
-                    enter = fadeIn(animationSpec = tween(1000)) +
-                            slideInVertically(
-                                initialOffsetY = { it / 2 },
-                                animationSpec = tween(1000)
-                            )
+                    enter = fadeIn(animationSpec = tween(1000)) + slideInVertically(initialOffsetY = { it / 2 }, animationSpec = tween(1000))
                 ) {
-                    LazyColumn(
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
+                    LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         items(surahList) { surah ->
-                            SurahCard(surah)
+                            SurahCard(
+                                surah = surah,
+                                modifier = Modifier.clickable { onSurahClick(surah) }
+                            )
                         }
                     }
                 }
@@ -174,7 +168,7 @@ fun SurahListScreen(surahList: List<Surah>) {
 }
 // ================== SEARCH ==================
 @Composable
-fun SearchBar() {
+fun SearchBar(query: String, onQueryChange: (String) -> Unit) {
     var text by remember { mutableStateOf("") }
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
@@ -184,8 +178,8 @@ fun SearchBar() {
     )
 
     OutlinedTextField(
-        value = text,
-        onValueChange = { text = it },
+        value = query,
+        onValueChange = onQueryChange,
         interactionSource = interactionSource,
         placeholder = { Text("ابحث عن سورة...", color = Color.Gray) },
         leadingIcon = {
@@ -216,41 +210,23 @@ fun SearchBar() {
 // ================== FILTER CHIPS ==================
 
 @Composable
-fun FilterChips() {
-    var selectedFilter by remember { mutableStateOf("الكل") }
-
+fun FilterChips(selectedFilter: String, onFilterSelected: (String) -> Unit) {
+    val filters = listOf("الكل", "مدنية", "مكية", "قصيرة")
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.Center
+        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)
     ) {
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-
+        filters.forEach { filter ->
             FilterChipItem(
-                text = "الكل",
-                selected = selectedFilter == "الكل",
-                selectedColor = Color(0xFFFFD700),
-                onSelected = { selectedFilter = "الكل" }
-            )
-
-            FilterChipItem(
-                text = "مدنية",
-                selected = selectedFilter == "مدنية",
-                selectedColor = Color(0xFF81A9F9),
-                onSelected = { selectedFilter = "مدنية" }
-            )
-
-            FilterChipItem(
-                text = "مكية",
-                selected = selectedFilter == "مكية",
-                selectedColor = Color(0xFF4FD9C7),
-                onSelected = { selectedFilter = "مكية" }
-            )
-
-            FilterChipItem(
-                text = "قصيرة",
-                selected = selectedFilter == "قصيرة",
-                selectedColor = Color(0xFFB59FF4),
-                onSelected = { selectedFilter = "قصيرة" }
+                text = filter,
+                selected = selectedFilter == filter,
+                selectedColor = when(filter) {
+                    "مدنية" -> Color(0xFF81A9F9)
+                    "مكية" -> Color(0xFF4FD9C7)
+                    "قصيرة" -> Color(0xFFB59FF4)
+                    else -> Color(0xFFFFD700)
+                },
+                onSelected = { onFilterSelected(filter) }
             )
         }
     }
@@ -288,31 +264,48 @@ fun FilterChipItem(
 
 // ================== SURAH CARD ==================
 @Composable
-fun SurahCard(surah: Surah) {
+fun SurahCard(
+    surah: Surah,
+    modifier: Modifier = Modifier
+) {
     var pressed by remember { mutableStateOf(false) }
+    val glowColor = Color(0xFFBFA14A).copy(alpha = if (pressed) 0.6f else 0.3f)
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
-            .shadow(
-                elevation = if (pressed) 20.dp else 4.dp,
-                shape = RoundedCornerShape(22.dp),
-                ambientColor = Color(0xFFBFA14A),
-                spotColor = Color(0xFFBFA14A)
-            )
+            .drawBehind {
+                val shadowRadius = if (pressed) 30.dp.toPx() else 15.dp.toPx()
+                val spread = if (pressed) 2.dp.toPx() else 0.dp.toPx()
+
+                drawIntoCanvas { canvas ->
+                    val paint = androidx.compose.ui.graphics.Paint()
+                    val frameworkPaint = paint.asFrameworkPaint()
+                    frameworkPaint.color = glowColor.toArgb()
+                    frameworkPaint.setShadowLayer(
+                        shadowRadius,
+                        0f, 0f,
+                        glowColor.toArgb()
+                    )
+                    canvas.drawRoundRect(
+                        left = spread,
+                        top = spread,
+                        right = size.width - spread,
+                        bottom = size.height - spread,
+                        radiusX = 22.dp.toPx(),
+                        radiusY = 22.dp.toPx(),
+                        paint = paint
+                    )
+                }
+            }
             .clip(RoundedCornerShape(22.dp))
             .background(
                 Brush.horizontalGradient(
-                    listOf(
-                        Color(0xFF0B1220),
-                        Color(0xFF111827),
-                        Color(0xFF0B1220)
-                    )
+                    listOf(Color(0xFF0B1220), Color(0xFF111827), Color(0xFF0B1220))
                 )
             )
-            .border(1.dp, Color(0xFF1F2937), RoundedCornerShape(22.dp))
-            .clickable { pressed = !pressed }
+            .border(1.dp, Color(0xFF1F2937).copy(alpha = 0.5f), RoundedCornerShape(22.dp))
             .padding(18.dp)
     ) {
         Row(
@@ -323,22 +316,12 @@ fun SurahCard(surah: Surah) {
                 number = surah.number,
                 icon = R.drawable.islamic_pattern
             )
-            Column(
-                verticalArrangement = Arrangement.Center
-            ) {
+            Column(verticalArrangement = Arrangement.Center) {
                 Text(
                     text = surah.nameAr,
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.White
-                )
-
-                Spacer(Modifier.height(4.dp))
-
-                Text(
-                    text = "${surah.nameEn} • ${surah.ayahCount} آية",
-                    fontSize = 13.sp,
-                    color = Color(0xFF94A3B8)
                 )
             }
         }
@@ -411,36 +394,3 @@ fun SurahTypeBadge(type: String) {
     }
 }
 
-
-// ================== PREVIEW DATA ==================
-
-val sampleSurahs = listOf(
-    Surah(1, "الفاتحة", "Al-Fatihah", 7, "مكية"),
-    Surah(2, "البقرة", "Al-Baqarah", 286, "مدنية"),
-    Surah(3, "آل عمران", "Ali 'Imran", 200, "مدنية"),
-    Surah(4, "النساء", "An-Nisa", 176, "مدنية"),
-    Surah(5, "المائدة", "Al-Ma'idah", 120, "مدنية")
-)
-
-// ================== PREVIEW ==================
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun SurahListPreview() {
-    SurahListScreen(sampleSurahs)
-}
-@Preview(showBackground = true, backgroundColor = 0xFF020617)
-@Composable
-fun SurahCardPreview() {
-    val mockSurah = Surah(
-        number = 1,
-        nameAr = "الفاتحة",
-        nameEn = "Al-Fatihah",
-        ayahCount = 7,
-        type = "مكية"
-    )
-
-    Box(modifier = Modifier.padding(16.dp)) {
-        SurahCard(surah = mockSurah)
-    }
-}

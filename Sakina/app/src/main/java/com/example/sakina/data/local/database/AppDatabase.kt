@@ -13,8 +13,10 @@ import com.example.sakina.data.local.database.entity.DuaEntity
 import com.example.sakina.data.local.database.entity.SurahEntity
 import com.example.sakina.data.local.database.entity.AyahEntity
 import com.example.sakina.data.local.database.dao.ChecklistDao
+import com.example.sakina.data.local.database.dao.TafsirDao
 import com.example.sakina.data.local.database.entity.ChecklistEntity
 import com.example.sakina.data.local.database.dao.TasbeehDao
+import com.example.sakina.data.local.database.entity.TafsirEntity
 import com.example.sakina.data.local.database.entity.TasbeehEntity
 
 
@@ -27,7 +29,8 @@ import com.example.sakina.data.local.database.entity.TasbeehEntity
         SurahEntity::class,
         AyahEntity::class,
         ChecklistEntity::class,
-        TasbeehEntity::class
+        TasbeehEntity::class,
+        TafsirEntity::class
     ],
     version = 2, // as schema changed
     exportSchema = false
@@ -40,7 +43,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun duaDao(): DuaDao
 
     abstract fun quranDao(): QuranDao
-
+    abstract fun tafsirDao(): TafsirDao
     abstract fun checklistDao(): ChecklistDao
 
     abstract fun tasbeehDao(): TasbeehDao
