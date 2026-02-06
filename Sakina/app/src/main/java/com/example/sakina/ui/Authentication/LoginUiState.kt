@@ -5,5 +5,7 @@ data class LoginUiState(
     val email: String = "",
     val location: String = "",
     val isLoading: Boolean = false,
-    val isLoadingLocation: Boolean = false
+    val isLoadingLocation: Boolean = false,
+    val nameError: String? = null      // 👈 الجديد
+
 )

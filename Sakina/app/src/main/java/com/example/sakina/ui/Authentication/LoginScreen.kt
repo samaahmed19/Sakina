@@ -114,7 +114,6 @@ fun LoginScreen(
             }
         }
 
-
         Box(
             modifier = Modifier
                 .align(Alignment.Center)
@@ -149,19 +148,19 @@ fun LoginScreen(
 
                 Spacer(modifier = Modifier.height(28.dp))
 
+                // حقل الاسم مع الفاليديشن
                 GlassTextField(
                     hint = "الاسم",
                     value = state.name,
-                    onChange = viewModel::onNameChange
+                    onChange = viewModel::onNameChange,
+                    error = state.nameError
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-
                 LocationInfoBox()
 
                 Spacer(modifier = Modifier.height(16.dp))
-
 
                 SetLocationButton(
                     onClick = { onSetLocationClick() },
@@ -206,27 +205,43 @@ private fun SakinaLogoIcon() {
 private fun GlassTextField(
     hint: String,
     value: String,
-    onChange: (String) -> Unit
+    onChange: (String) -> Unit,
+    error: String? = null
 ) {
-    TextField(
-        value = value,
-        onValueChange = onChange,
-        placeholder = {
-            Text(hint, color = TextMuted)
-        },
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp)),
-        colors = TextFieldDefaults.colors(
-            focusedContainerColor = InputFieldBg,
-            unfocusedContainerColor = InputFieldBg,
-            focusedIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent,
-            focusedTextColor = Color.White,
-            unfocusedTextColor = Color.White
-        ),
-        shape = RoundedCornerShape(16.dp)
-    )
+    Column {
+        TextField(
+            value = value,
+            onValueChange = onChange,
+            placeholder = {
+                Text(hint, color = TextMuted)
+            },
+            isError = error != null,
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(16.dp)),
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = InputFieldBg,
+                unfocusedContainerColor = InputFieldBg,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+                focusedTextColor = Color.White,
+                unfocusedTextColor = Color.White,
+                errorContainerColor = InputFieldBg,
+                errorIndicatorColor = Color.Transparent,
+                errorTextColor = Color.White
+            ),
+            shape = RoundedCornerShape(16.dp)
+        )
+
+        if (error != null) {
+            Text(
+                text = error,
+                color = Color(0xFFFF6B6B),
+                fontSize = 12.sp,
+                modifier = Modifier.padding(start = 4.dp, top = 4.dp)
+            )
+        }
+    }
 }
 
 @Composable
@@ -418,7 +433,7 @@ private fun LoginScreenPreview() {
                 SetLocationButton(onClick = {}, isLoading = false, locationText = "")
                 Spacer(modifier = Modifier.height(24.dp))
                 GlowButton(
-                    text = "ابدأ رحلتك الروحانية",
+                    text = "ابدأ رحلتك الرحانية",
                     loading = fakeState.isLoading,
                     onClick = {}
                 )
