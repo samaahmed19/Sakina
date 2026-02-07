@@ -5,6 +5,7 @@ import com.example.sakina.data.local.database.entity.CategoryEntity
 import com.example.sakina.data.local.database.entity.DuaEntity
 import com.example.sakina.data.local.database.entity.ZikrEntity
 import com.example.sakina.data.local.database.entity.TasbeehEntity
+import com.example.sakina.data.local.database.entity.DuaCategoryEntity
 import org.json.JSONObject
 
 object JsonMapper {
@@ -79,7 +80,8 @@ object JsonMapper {
                 )
             }
         }
-        return Pair(categories, duas)
+
+        return Pair(categories.toList(), duas.toList())
     }
 
     // ===== Tasbeeh  =====

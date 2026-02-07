@@ -49,7 +49,7 @@ fun TotalProgressHeader(completedCount: Int, totalAzkarCount: Int) {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // عرض النسبة (مثلاً 1 / 4 كما في الصورة)
+
                 Text(
                     text = "$completedCount / $totalAzkarCount",
                     color = Color(0xFFFFC107),
@@ -65,7 +65,7 @@ fun TotalProgressHeader(completedCount: Int, totalAzkarCount: Int) {
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // شريط التقدم الكلي
+
             LinearProgressIndicator(
                 progress = if (totalAzkarCount > 0) completedCount.toFloat() / totalAzkarCount else 0f,
                 modifier = Modifier
@@ -139,7 +139,7 @@ fun AzkarDetailsScreen(categoryId: String, viewModel: AzkarViewModel = viewModel
             containerColor = Color(0xFF0A0E14),
             topBar = {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    // التايتل الآن ديناميكي من الباك اند
+
                     Text(
                         text = viewModel.categoryTitle,
                         fontSize = 28.sp,
@@ -176,10 +176,10 @@ fun ZikrCard(zikr: ZikrItemState, onCounterClick: () -> Unit) {
         border = if (isCompleted) BorderStroke(1.dp, Color(0xFF23C4B6)) else null
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            // نص الذكر
+
             Text(zikr.text, fontSize = 20.sp, color = Color.White, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
 
-            // كارد المعنى / الفضل (Reward)
+
             if (zikr.reward.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(8.dp))
                 Box(
@@ -197,7 +197,7 @@ fun ZikrCard(zikr: ZikrItemState, onCounterClick: () -> Unit) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // العداد
+
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Text("التكرار", color = Color.Gray)
                 Text("${zikr.currentCount} / ${zikr.maxCount}", color = Color(0xFFFFC107), fontWeight = FontWeight.Bold)

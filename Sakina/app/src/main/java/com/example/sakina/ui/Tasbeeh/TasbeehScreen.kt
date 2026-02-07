@@ -75,11 +75,11 @@ fun TasbeehScreen(viewModel: TasbeehViewModel = hiltViewModel()) {
     // قائمة الخيارات اللي انت صممتها بألوانها
     val tasbeehOptions = remember {
         listOf(
-            TasbeehOption("subhan", "سبحان الله", Color(0xFF00FFD1)),
-            TasbeehOption("alhamdulillah", "الحمد لله", Color(0xFFBD00FF)),
-            TasbeehOption("allahu", "الله أكبر", Color(0xFFFFD700)),
-            TasbeehOption("istighfar", "أستغفر الله", Color(0xFF4DFF88)),
-            TasbeehOption("salawat", "اللهم صل على محمد", Color(0xFFF63978))
+            TasbeehOption("subhan", "سبحان الله", Color(0xFF7DDECC)),
+            TasbeehOption("alhamdulillah", "الحمد لله", Color(0xFFC36BE1)),
+            TasbeehOption("allahu", "الله أكبر", Color(0xFFEED973)),
+            TasbeehOption("istighfar", "أستغفر الله", Color(0xFF77EFA0)),
+            TasbeehOption("salawat", "اللهم صل على محمد", Color(0xFFFF6294))
         )
     }
 
