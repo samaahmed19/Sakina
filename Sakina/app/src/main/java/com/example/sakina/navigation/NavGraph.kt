@@ -10,11 +10,8 @@ import com.example.sakina.ui.Azkar.azkar_list.AzkarListScreen
 import com.example.sakina.ui.Azkar.azkar_details.AzkarDetailsScreen
 import com.example.sakina.ui.Home.HomeScreen
 import com.example.sakina.ui.Splash.SplashScreen
-import com.example.sakina.navigation.Screen
-
-
-
-
+import com.example.sakina.ui.HolyQuran.surah_details.SurahDetailsScreen
+import com.example.sakina.ui.HolyQuran.surah_list.SurahListScreen
 
 @Composable
 fun AppNavGraph(navController: NavHostController) {
@@ -53,7 +50,38 @@ fun AppNavGraph(navController: NavHostController) {
         }
         //  Quran List Screen
         composable(Screen.Quran.route) {
+            SurahListScreen(
+                onSurahClick = { surah ->
 
-            }
+                    navController.navigate(
+                        Screen.SurahDetails.createRoute(
+                            id = surah.number,
+                            name = surah.nameAr,
+                            count = surah.ayahCount
+                        )
+                    )
+                }
+            )
+        }
+
+        // 2. Surah Details Screen
+        composable(
+            route = Screen.SurahDetails.route,
+            arguments = listOf(
+                navArgument("surahId") { type = NavType.IntType },
+                navArgument("surahName") { type = NavType.StringType },
+                navArgument("ayahCount") { type = NavType.IntType }
+            )
+        ) { backStackEntry ->
+            val surahId = backStackEntry.arguments?.getInt("surahId") ?: 1
+            val surahName = backStackEntry.arguments?.getString("surahName") ?: ""
+            val ayahCount = backStackEntry.arguments?.getInt("ayahCount") ?: 0
+
+            SurahDetailsScreen(
+                surahId = surahId,
+                surahName = surahName,
+                ayahCount = ayahCount
+            )
         }
     }
+}
