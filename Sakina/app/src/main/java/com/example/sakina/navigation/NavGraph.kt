@@ -8,10 +8,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.sakina.ui.Azkar.azkar_list.AzkarListScreen
 import com.example.sakina.ui.Azkar.azkar_details.AzkarDetailsScreen
+import com.example.sakina.ui.Checklist.ChecklistScreen
 import com.example.sakina.ui.Home.HomeScreen
 import com.example.sakina.ui.Splash.SplashScreen
 import com.example.sakina.ui.HolyQuran.surah_details.SurahDetailsScreen
 import com.example.sakina.ui.HolyQuran.surah_list.SurahListScreen
+import com.example.sakina.ui.Prayers.PrayerScreen
 
 @Composable
 fun AppNavGraph(navController: NavHostController) {
@@ -83,5 +85,24 @@ fun AppNavGraph(navController: NavHostController) {
                 ayahCount = ayahCount
             )
         }
+        //  Salah Screen
+        composable(Screen.Salah.route) {
+            PrayerScreen()
+        }
+
+        //  Tasbeeh Screen
+        /* composable(Screen.Tasbeeh.route) {
+             TasbeehScreen()
+         }*/
+
+        //  Checklist Screen
+        composable(Screen.Checklist.route) {
+            ChecklistScreen()
+        }
+
+        //  Dua Screen
+        /* composable(Screen.Dua.route) {
+             DuaListScreen()
+         }*/
     }
 }
