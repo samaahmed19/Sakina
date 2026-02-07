@@ -157,7 +157,7 @@ fun HomeScreen(
                     onClick = {onQuranCardClick()})
              }
             item {
-                    HomeCard("الأذكار", " ", NeonPink, R.drawable.helal,onClick = { onAzkarCardClick() })
+                    HomeCard("الأذكار", " ", NeonPurple, R.drawable.decoration,onClick = { onAzkarCardClick() })
                 }
             item {
                 HomeCard("جوامع الدعاء", " ", NeonRed, R.drawable.islamic_pattern,onClick = { onDuaCardClick() })
@@ -170,19 +170,19 @@ fun HomeScreen(
                 ) {
                     HomeCard2(
                         title = "تسبيح",
-                        subtitle = "Counter",
+                        subtitle = "250",
                         activeColor = NeonGreen,
                         imageRes = R.drawable.tasbih,
-                        modifier = Modifier.weight(1f)
-                            .clickable { onTasbeehCardClick()}
+                        modifier = Modifier.weight(1f),
+                                onClick = { onTasbeehCardClick() }
                     )
                     HomeCard2(
-                        title = "Check",
+                        title = "هعمل ايه النهاردة؟",
                         subtitle = "",
-                        activeColor = NeonPurple,
+                        activeColor = NeonPink,
                         imageRes = R.drawable.arabic,
-                        modifier = Modifier.weight(1f)
-                            .clickable { onCheckCardClick() }
+                        modifier = Modifier.weight(1f),
+                                onClick = { onCheckCardClick() }
                     )
                             }
                 }
@@ -197,13 +197,13 @@ fun PreviewHomeScreen() {
 }
 @Composable
 fun DuaCard() {
-    val cyanColor = Color(0xFF948B29)
+    val cyanColor = Color(0xFF2075B7)
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 1.dp)
-            .shadow(elevation = 1.dp, shape = RoundedCornerShape(24.dp), spotColor = cyanColor)
-            .background(cyanColor.copy(alpha = 0.3f), RoundedCornerShape(24.dp))
+            .shadow(elevation = 0.dp, shape = RoundedCornerShape(24.dp), spotColor = cyanColor)
+            .background(cyanColor.copy(alpha = 0.35f), RoundedCornerShape(34.dp))
             .border(BorderStroke(4.dp, Brush.verticalGradient(listOf(cyanColor, Color.Transparent))), RoundedCornerShape(24.dp))
             .padding(12.dp),
         contentAlignment = Alignment.Center
@@ -212,14 +212,14 @@ fun DuaCard() {
             Text(
                 text = " \"لا اله الا الله وحده لا شريك له ,له الملك وله الحمد وهو على كل شئ قدير\" ",
                 color = Color.White,
-                fontSize = 19.sp,
+                fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center
             )
             Text(
                 text = "دعاء اليوم",
                 color = Color.White,
-                fontSize = 19.sp,
+                fontSize = 12.sp,
                 modifier = Modifier.padding(top = 8.dp)
             )
         }
