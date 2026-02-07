@@ -74,7 +74,7 @@ fun GalaxyBackground(content: @Composable () -> Unit) {
     }
 }
 
-@Preview(showBackground = true)
+
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
@@ -126,8 +126,7 @@ fun HomeScreen(
                 }
             }
             item { DuaCard() }
-            item { Box(modifier = Modifier.clickable { onSalahCardClick() }){
-                HomeCard("صلاتي", "المغرب 6:32", NeonGold, R.drawable.pray,
+            item { HomeCard("صلاتي", "المغرب 6:32", NeonGold, R.drawable.pray,
                     trailingContent = {
 
                         Box(
@@ -135,15 +134,15 @@ fun HomeScreen(
                                 .size(50.dp)
                                 .border(2.dp, NeonGold.copy(alpha = 0.5f), CircleShape)
                                 .background(NeonGold.copy(alpha = 0.2f), CircleShape),
-                            contentAlignment = Alignment.Center
+                            contentAlignment = Alignment.Center,
                         ) {
                             Text("3/5", color = NeonGold, fontWeight = FontWeight.Bold)
                         }
-                    }
-                )
-            } }
-            item {Box(modifier = Modifier.clickable { onQuranCardClick() }){
-                HomeCard("القرءان الكريم", "اقرأ وردك", NeonCyan, R.drawable.koran,
+                    },
+                onClick = {onSalahCardClick()})
+
+            }
+            item { HomeCard("القرءان الكريم", "اقرأ وردك", NeonCyan, R.drawable.koran,
                 trailingContent = {
                     Icon(
                         imageVector = Icons.Default.PlayArrow,
@@ -154,14 +153,13 @@ fun HomeScreen(
                             .background(NeonPurple.copy(alpha = 0.3f), CircleShape)
                             .padding(8.dp)
                     )
-                })}
+                },
+                    onClick = {onQuranCardClick()})
              }
             item {
-
-                Box(modifier = Modifier.clickable { onAzkarCardClick() }) {
-                    HomeCard("أذكار الصباح", " ", NeonPink, R.drawable.helal)
+                    HomeCard("الأذكار", " ", NeonPink, R.drawable.helal,onClick = { onAzkarCardClick() })
                 }
-            }
+
             item {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -173,6 +171,7 @@ fun HomeScreen(
                         activeColor = NeonGreen,
                         imageRes = R.drawable.tasbih,
                         modifier = Modifier.weight(1f)
+                            .clickable { onTasbeehCardClick()}
                     )
                     HomeCard2(
                         title = "Check",
@@ -180,7 +179,11 @@ fun HomeScreen(
                         activeColor = NeonPurple,
                         imageRes = R.drawable.arabic,
                         modifier = Modifier.weight(1f)
-                    ) }}}
+                            .clickable { onCheckCardClick() }
+                    )
+                            }
+                }
+            }
     }
 }
 

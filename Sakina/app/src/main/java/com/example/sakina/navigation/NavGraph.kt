@@ -28,24 +28,12 @@ fun AppNavGraph(navController: NavHostController) {
 
         //  Home Screen
         composable(Screen.Home.route) {
-             HomeScreen(onAzkarCardClick = {
-                navController.navigate(Screen.Categories.route)
-             })
-            HomeScreen(onQuranCardClick = {
-                navController.navigate(Screen.Quran.route)
-            })
-            HomeScreen(onSalahCardClick = {
-                navController.navigate(Screen.Salah.route)
-            })
-            HomeScreen(onDuaCardClick = {
-                navController.navigate(Screen.Dua.route)
-            })
-            HomeScreen(onTasbeehCardClick = {
-                navController.navigate(Screen.Tasbeeh.route)
-            })
-            HomeScreen(onCheckCardClick = {
-                navController.navigate(Screen.Checklist.route)
-            })
+             HomeScreen(onAzkarCardClick = { navController.navigate(Screen.Categories.route) },
+        onQuranCardClick = { navController.navigate(Screen.Quran.route) },
+        onSalahCardClick = { navController.navigate(Screen.Salah.route) },
+        onDuaCardClick = { navController.navigate(Screen.Dua.route) },
+        onTasbeehCardClick = { navController.navigate(Screen.Tasbeeh.route) },
+        onCheckCardClick = { navController.navigate(Screen.Checklist.route) })
         }
 
         //  Azkar List Screen

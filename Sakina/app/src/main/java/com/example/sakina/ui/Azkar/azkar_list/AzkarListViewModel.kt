@@ -29,9 +29,13 @@ class AzkarViewModel @Inject constructor(
 
     private fun loadCategories() {
         viewModelScope.launch {
-            val data = repository.getAllCategories()
-            _allCategories.value = data
-            _filteredCategories.value = data
+
+            val testData = listOf(
+                CategoryEntity(id = "1", title = "أذكار الصباح", icon = "sun"),
+                CategoryEntity(id = "2", title = "أذكار المساء", icon = "moon")
+            )
+            _allCategories.value = testData
+            _filteredCategories.value = testData
         }
     }
 

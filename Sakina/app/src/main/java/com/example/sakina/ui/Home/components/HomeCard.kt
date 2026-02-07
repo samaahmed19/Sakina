@@ -41,7 +41,9 @@ fun HomeCard(
     subtitle: String,
     activeColor: Color,
     imageRes: Int,
-    trailingContent: @Composable () -> Unit = {}
+    trailingContent: @Composable () -> Unit = {},
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {}
 ) {
 
     var isPressed by remember { mutableStateOf(false) }
@@ -58,13 +60,14 @@ fun HomeCard(
     )
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(vertical = 3.dp)
             .clickable(
                 indication = null,
                 interactionSource = remember { MutableInteractionSource() }
-            ) { isPressed = !isPressed }
+            ) { isPressed = !isPressed
+                onClick()}
 
             .shadow(
                 elevation = if (isPressed) 30.dp else 10.dp,
@@ -158,7 +161,8 @@ fun HomeCard2(
     subtitle: String,
     activeColor: Color,
     imageRes: Int,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {}
 ) {
 
     var isPressed by remember { mutableStateOf(false) }
@@ -181,7 +185,8 @@ fun HomeCard2(
             .clickable(
                 indication = null,
                 interactionSource = remember { MutableInteractionSource() }
-            ) { isPressed = !isPressed }
+            ) { isPressed = !isPressed
+                onClick()}
 
             .shadow(
                 elevation = if (isPressed) 30.dp else 10.dp,
