@@ -11,6 +11,14 @@ import com.example.sakina.ui.Azkar.azkar_details.AzkarDetailsScreen
 import com.example.sakina.ui.Home.HomeScreen
 import com.example.sakina.ui.Splash.SplashScreen
 import com.example.sakina.navigation.Screen
+import com.example.sakina.ui.HolyQuran.surah_list.SurahListScreen
+import com.example.sakina.ui.Prayers.PrayerScreen
+//import com.example.sakina.ui.Tasbeeh.TasbeehScreen
+import com.example.sakina.ui.Checklist.ChecklistScreen
+//import com.example.sakina.ui.Gwame3Dua.DuaListScreen
+
+
+
 
 
 
@@ -52,8 +60,31 @@ fun AppNavGraph(navController: NavHostController) {
             AzkarDetailsScreen(categoryId = categoryId)
         }
         //  Quran List Screen
-        composable(Screen.Quran.route) {
 
-            }
+        /*composable(Screen.Quran.route) {
+            SurahListScreen()
+        }*/
+
+        //  Salah Screen
+        composable(Screen.Salah.route) {
+            PrayerScreen()
         }
+
+        //  Tasbeeh Screen
+       /* composable(Screen.Tasbeeh.route) {
+            TasbeehScreen()
+        }*/
+
+        //  Checklist Screen
+        composable(Screen.Checklist.route) {
+            ChecklistScreen()
+        }
+
+        //  Dua Screen
+       /* composable(Screen.Dua.route) {
+            DuaListScreen()
+        }*/
     }
+}
+
+
