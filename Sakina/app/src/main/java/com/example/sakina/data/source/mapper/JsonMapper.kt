@@ -47,30 +47,39 @@ object JsonMapper {
     }
 
     // ===== Duas =====
-    fun mapDuas(json: String): List<DuaEntity> {
+    fun mapDuas(json: String): Pair<List<DuaCategoryEntity>, List<DuaEntity>> {
+        val categories = mutableListOf<DuaCategoryEntity>()
         val duas = mutableListOf<DuaEntity>()
         val root = JSONObject(json)
         val categoryArray = root.getJSONArray("categories")
 
         for (i in 0 until categoryArray.length()) {
-            val categoryObj = categoryArray.getJSONObject(i)
-            val categoryId = categoryObj.getInt("id")
-            val categoryName = categoryObj.getString("name")
+            val catObj = categoryArray.getJSONObject(i)
+            val catId = catObj.getString("id")
 
-            val duasArray = categoryObj.getJSONArray("duas")
+            val duasArray = catObj.getJSONArray("duas")
+            val currentCategoryDuaCount = duasArray.length()
+
+            categories.add(
+                DuaCategoryEntity(
+                    id = catId,
+                    title = catObj.getString("name"),
+                    icon = "splash",
+                    count = currentCategoryDuaCount
+                )
+            )
+
             for (j in 0 until duasArray.length()) {
                 val duaObj = duasArray.getJSONObject(j)
                 duas.add(
                     DuaEntity(
-                        id = duaObj.getInt("id"),
-                        text = duaObj.getString("text"),
-                        categoryId = categoryId,
-                        categoryName = categoryName
+                        categoryId = catId,
+                        text = duaObj.getString("text")
                     )
                 )
             }
         }
-        return duas
+        return Pair(categories, duas)
     }
 
     // ===== Tasbeeh  =====
