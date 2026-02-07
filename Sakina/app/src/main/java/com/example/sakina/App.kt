@@ -21,7 +21,7 @@ class App : Application() {
             dataInitializer.initAzkarIfNeeded()
             dataInitializer.initQuranIfNeeded()
             dataInitializer.initDuasIfNeeded()
-            dataInitializer.initTasbeehIfNeeded() // 👈 الجزء بتاعك
+            dataInitializer.initTasbeehIfNeeded()
         }
     }
 }
