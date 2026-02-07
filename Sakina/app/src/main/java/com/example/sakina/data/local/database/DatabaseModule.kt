@@ -36,12 +36,7 @@ object DatabaseModule {
             AppDatabase::class.java,
             "sakina_db"
         )
-            .addCallback(object : RoomDatabase.Callback() {
-                override fun onCreate(db: SupportSQLiteDatabase) {
-                    super.onCreate(db)
-                }
-            })
-            // Dev-stage safety: avoids crash when version changes and you don't have migrations yet
+            // ده أهم سطر: لو غيرت أي Entity، هيمسح القديم ويعمل الجديد بدل ما يعمل Crash
             .fallbackToDestructiveMigration()
             .build()
     }
