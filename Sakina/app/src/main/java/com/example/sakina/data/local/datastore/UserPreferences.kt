@@ -23,23 +23,28 @@ class UserPreferences @Inject constructor(
         val FIRST_LAUNCH = booleanPreferencesKey("first_launch")
     }
 
-    val userName: Flow<String?> =
-        context.dataStore.data.map { it[USER_NAME] }
+    val userName: Flow<String> =
+        context.dataStore.data.map { it[USER_NAME] ?: "" }
 
-    suspend fun saveUserName(name: String) {
-        context.dataStore.edit {
-            it[USER_NAME] = name
-        }
-    }
+    val userEmail: Flow<String> =
+        context.dataStore.data.map { it[USER_EMAIL] ?: "" }
 
-    suspend fun setFirstLaunch(value: Boolean) {
-        context.dataStore.edit {
-            it[FIRST_LAUNCH] = value
-        }
-    }
+    val location: Flow<String> =
+        context.dataStore.data.map { it[LOCATION] ?: "" }
 
     val isFirstLaunch: Flow<Boolean> =
-        context.dataStore.data.map {
-            it[FIRST_LAUNCH] ?: true
+        context.dataStore.data.map { it[FIRST_LAUNCH] ?: true }
+
+    suspend fun saveUser(
+        name: String,
+        email: String,
+        location: String
+    ) {
+        context.dataStore.edit {
+            it[USER_NAME] = name
+            it[USER_EMAIL] = email
+            it[LOCATION] = location
+            it[FIRST_LAUNCH] = false
         }
+    }
 }

@@ -1,4 +1,5 @@
 package com.example.sakina
+
 import android.app.Application
 import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
@@ -19,7 +20,8 @@ class App : Application() {
         CoroutineScope(Dispatchers.IO).launch {
             dataInitializer.initAzkarIfNeeded()
             dataInitializer.initQuranIfNeeded()
-
+            dataInitializer.initDuasIfNeeded()
+            dataInitializer.initTasbeehIfNeeded() // 👈 الجزء بتاعك
         }
     }
 }
