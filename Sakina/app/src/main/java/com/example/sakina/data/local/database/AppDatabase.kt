@@ -10,6 +10,7 @@ import com.example.sakina.data.local.database.entity.PrayerEntity
 import com.example.sakina.data.local.database.dao.DuaDao
 import com.example.sakina.data.local.database.dao.QuranDao
 import com.example.sakina.data.local.database.entity.DuaEntity
+import com.example.sakina.data.local.database.entity.DuaCategoryEntity
 import com.example.sakina.data.local.database.entity.SurahEntity
 import com.example.sakina.data.local.database.entity.AyahEntity
 import com.example.sakina.data.local.database.dao.ChecklistDao
@@ -28,6 +29,7 @@ import com.example.sakina.data.local.database.entity.UserEntity
         ZikrEntity::class,
         PrayerEntity::class,
         DuaEntity::class,
+        DuaCategoryEntity::class,
         SurahEntity::class,
         AyahEntity::class,
         ChecklistEntity::class,
