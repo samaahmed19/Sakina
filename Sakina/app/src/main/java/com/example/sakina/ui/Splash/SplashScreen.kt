@@ -11,13 +11,16 @@ import androidx.compose.ui.res.painterResource
 import com.example.sakina.R
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.graphics.Color
 import kotlinx.coroutines.delay
+import com.example.sakina.navigation.AppNavGraph
 
 
-@Preview(showBackground = true)
 @Composable
-fun SplashScreen() {
+fun SplashScreen(onTimeout: () -> Unit) {
+    LaunchedEffect(Unit) { delay(2000)
+        onTimeout() }
     Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
         Image(
             painter = painterResource(id = R.drawable.splash),
@@ -25,5 +28,7 @@ fun SplashScreen() {
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Fit
         )
+
+
     }
 }

@@ -266,7 +266,7 @@ fun SmartNeonCard(
                         AzkarFiltersBar(
                             selectedFilter = viewModel.selectedFilter.value,
                             onFilterSelected = { selected ->
-                                viewModel.onFilterChanged(selected)
+                                viewModel.onFilterTextChanged(selected)
                             }
                         )
                     }
