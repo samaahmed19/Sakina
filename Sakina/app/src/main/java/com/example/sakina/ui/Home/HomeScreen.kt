@@ -35,9 +35,9 @@ import androidx.compose.ui.text.style.TextAlign
 val NeonCyan = Color(0xFF00FFD1)
 val NeonPurple = Color(0xFFBD00FF)
 val NeonGold = Color(0xFFFFD700)
-val NeonRed =Color(0xFFFF4D4D)
+val NeonRed =Color(0xFFFF7171)
 val NeonGreen =Color(0xFF4DFF88)
-val NeonPink =Color(0xFFF63978)
+val NeonPink =Color(0xFFFA2C71)
 
 
 
@@ -159,6 +159,9 @@ fun HomeScreen(
             item {
                     HomeCard("الأذكار", " ", NeonPink, R.drawable.helal,onClick = { onAzkarCardClick() })
                 }
+            item {
+                HomeCard("جوامع الدعاء", " ", NeonRed, R.drawable.islamic_pattern,onClick = { onDuaCardClick() })
+            }
 
             item {
                 Row(
@@ -175,7 +178,7 @@ fun HomeScreen(
                     )
                     HomeCard2(
                         title = "Check",
-                        subtitle = "Task1",
+                        subtitle = "",
                         activeColor = NeonPurple,
                         imageRes = R.drawable.arabic,
                         modifier = Modifier.weight(1f)
