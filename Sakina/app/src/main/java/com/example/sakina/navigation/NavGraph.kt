@@ -10,19 +10,8 @@ import com.example.sakina.ui.Azkar.azkar_list.AzkarListScreen
 import com.example.sakina.ui.Azkar.azkar_details.AzkarDetailsScreen
 import com.example.sakina.ui.Home.HomeScreen
 import com.example.sakina.ui.Splash.SplashScreen
-import com.example.sakina.navigation.Screen
+import com.example.sakina.ui.HolyQuran.surah_details.SurahDetailsScreen
 import com.example.sakina.ui.HolyQuran.surah_list.SurahListScreen
-import com.example.sakina.ui.Prayers.PrayerScreen
-//import com.example.sakina.ui.Tasbeeh.TasbeehScreen
-import com.example.sakina.ui.Checklist.ChecklistScreen
-//import com.example.sakina.ui.Gwame3Dua.DuaListScreen
-
-
-
-
-
-
-
 
 @Composable
 fun AppNavGraph(navController: NavHostController) {
@@ -60,31 +49,39 @@ fun AppNavGraph(navController: NavHostController) {
             AzkarDetailsScreen(categoryId = categoryId)
         }
         //  Quran List Screen
+        composable(Screen.Quran.route) {
+            SurahListScreen(
+                onSurahClick = { surah ->
 
-        /*composable(Screen.Quran.route) {
-            SurahListScreen()
-        }*/
-
-        //  Salah Screen
-        composable(Screen.Salah.route) {
-            PrayerScreen()
+                    navController.navigate(
+                        Screen.SurahDetails.createRoute(
+                            id = surah.number,
+                            name = surah.nameAr,
+                            count = surah.ayahCount
+                        )
+                    )
+                }
+            )
         }
 
-        //  Tasbeeh Screen
-       /* composable(Screen.Tasbeeh.route) {
-            TasbeehScreen()
-        }*/
+        // 2. Surah Details Screen
+        composable(
+            route = Screen.SurahDetails.route,
+            arguments = listOf(
+                navArgument("surahId") { type = NavType.IntType },
+                navArgument("surahName") { type = NavType.StringType },
+                navArgument("ayahCount") { type = NavType.IntType }
+            )
+        ) { backStackEntry ->
+            val surahId = backStackEntry.arguments?.getInt("surahId") ?: 1
+            val surahName = backStackEntry.arguments?.getString("surahName") ?: ""
+            val ayahCount = backStackEntry.arguments?.getInt("ayahCount") ?: 0
 
-        //  Checklist Screen
-        composable(Screen.Checklist.route) {
-            ChecklistScreen()
+            SurahDetailsScreen(
+                surahId = surahId,
+                surahName = surahName,
+                ayahCount = ayahCount
+            )
         }
-
-        //  Dua Screen
-       /* composable(Screen.Dua.route) {
-            DuaListScreen()
-        }*/
     }
 }
-
-

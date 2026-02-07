@@ -15,4 +15,9 @@ sealed class Screen(val route: String) {
     object Checklist : Screen("check")
     object Dua : Screen("dua")
     object Quran : Screen("quran")
+    object SurahDetails : Screen("surah_details/{surahId}/{surahName}/{ayahCount}") {
+        fun createRoute(id: Int, name: String, count: Int): String {
+            return "surah_details/$id/$name/$count"
+        }
+    }
 }
