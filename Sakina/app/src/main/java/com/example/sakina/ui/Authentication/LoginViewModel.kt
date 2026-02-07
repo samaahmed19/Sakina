@@ -22,7 +22,10 @@ class LoginViewModel @Inject constructor(
 
     fun onNameChange(value: String) {
         _uiState.update {
-            it.copy(name = value)
+            it.copy(
+                name = value,
+                nameError = null          // امسح رسالة الخطأ أول ما يبدأ يكتب
+            )
         }
     }
 
@@ -46,9 +49,16 @@ class LoginViewModel @Inject constructor(
     }
 
     fun onStartClick() {
-        val currentName = _uiState.value.name
+        val currentState = _uiState.value
+        val currentName = currentState.name
 
-        if (currentName.isBlank()) return
+        // فاليديشن الاسم
+        if (currentName.isBlank()) {
+            _uiState.update {
+                it.copy(nameError = "ادخل اسمك أولًا")
+            }
+            return
+        }
 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
@@ -56,7 +66,7 @@ class LoginViewModel @Inject constructor(
             userRepository.saveUser(
                 name = currentName.trim(),
                 email = null,
-                location = _uiState.value.location.ifBlank { null }
+                location = currentState.location.ifBlank { null }
             )
 
             _uiState.update { it.copy(isLoading = false) }
