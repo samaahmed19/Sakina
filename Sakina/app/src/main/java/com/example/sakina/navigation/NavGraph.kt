@@ -24,33 +24,16 @@ fun AppNavGraph(navController: NavHostController) {
     ) {
         // Splash Screen
         composable(Screen.Splash.route) {
-            // SplashScreen(onAnimationFinished = {
-            //    navController.navigate(Screen.Home.route) {
-            //        popUpTo(Screen.Splash.route) { inclusive = true }
-            //    }
-            // })
-        }
+            SplashScreen(onTimeout = { navController.navigate(Screen.Home.route) { popUpTo(Screen.Splash.route) { inclusive = true } } }) }
 
         //  Home Screen
         composable(Screen.Home.route) {
-             HomeScreen(onAzkarCardClick = {
-                navController.navigate(Screen.Categories.route)
-             })
-            HomeScreen(onQuranCardClick = {
-                navController.navigate(Screen.Quran.route)
-            })
-            HomeScreen(onSalahCardClick = {
-                navController.navigate(Screen.Salah.route)
-            })
-            HomeScreen(onDuaCardClick = {
-                navController.navigate(Screen.Dua.route)
-            })
-            HomeScreen(onTasbeehCardClick = {
-                navController.navigate(Screen.Quran.route)
-            })
-            HomeScreen(onCheckCardClick = {
-                navController.navigate(Screen.Quran.route)
-            })
+             HomeScreen(onAzkarCardClick = { navController.navigate(Screen.Categories.route) },
+        onQuranCardClick = { navController.navigate(Screen.Quran.route) },
+        onSalahCardClick = { navController.navigate(Screen.Salah.route) },
+        onDuaCardClick = { navController.navigate(Screen.Dua.route) },
+        onTasbeehCardClick = { navController.navigate(Screen.Tasbeeh.route) },
+        onCheckCardClick = { navController.navigate(Screen.Checklist.route) })
         }
 
         //  Azkar List Screen
