@@ -39,49 +39,58 @@ class DataInitializer @Inject constructor(
         azkarDao.insertCategories(categories)
         azkarDao.insertAzkar(azkar)
     }
-
+    private val surahNamesAr = arrayOf(
+        "الفاتحة", "البقرة", "آل عمران", "النساء", "المائدة", "الأنعام", "الأعراف", "الأنفال", "التوبة", "يونس", "هود", "يوسف", "الرعد", "إبراهيم", "الحجر", "النحل", "الإسراء", "الكهف", "مريم", "طه", "الأنبياء", "الحج", "المؤمنون", "النور", "الفرقان", "الشعراء", "النمل", "القصص", "العنكبوت", "الروم", "لقمان", "السجدة", "الأحزاب", "سبأ", "فاطر", "يس", "الصافات", "ص", "الزمر", "غافر", "فصلت", "الشورى", "الزخرف", "الدخان", "الجاثية", "الأحقاف", "محمد", "الفتح", "الحجرات", "ق", "الذاريات", "الطور", "النجم", "القمر", "الرحمن", "الواقعة", "الحديد", "المجادلة", "الحشر", "الممتحنة", "الصف", "الجمعة", "المنافقون", "التغابن", "الطلاق", "التحريم", "الملك", "القلم", "الحاقة", "المعارج", "نوح", "الجن", "المزمل", "المدثر", "القيامة", "الإنسان", "المرسلات", "النبأ", "النازعات", "عبس", "التكوير", "الانفطار", "المطففين", "الانشقاق", "البروج", "الطارق", "الأعلى", "الغاشية", "الفجر", "البلد", "الشمس", "الليل", "الضحى", "الشرح", "التين", "العلق", "القدر", "البينة", "الزلزلة", "العاديات", "القارعة", "التكاثر", "العصر", "الهمزة", "الفيل", "قريش", "الماعون", "الكوثر", "الكافرون", "النصر", "المسد", "الإخلاص", "الفلق", "الناس"
+    )
     suspend fun initQuranIfNeeded() = withContext(Dispatchers.IO) {
-        if (quranDao.getAllSurahs().isNotEmpty()) return@withContext
+        if (quranDao.getAyahsCount() > 0) return@withContext
 
-        val jsonString = context.assets
-            .open("quran.json")
-            .bufferedReader()
-            .use { it.readText() }
+        try {
+            val jsonString = context.assets
+                .open("quran.json")
+                .bufferedReader()
+                .use { it.readText() }
 
-        val jsonArray = JSONArray(jsonString)
-        val surahs = mutableListOf<SurahEntity>()
-        val ayahs = mutableListOf<AyahEntity>()
+            val rootObject = org.json.JSONObject(jsonString)
+            val ayahs = mutableListOf<AyahEntity>()
+            val surahs = mutableListOf<SurahEntity>()
+            val surahKeys = rootObject.keys()
 
-        for (i in 0 until jsonArray.length()) {
-            val surahObject = jsonArray.getJSONObject(i)
-            val surahId = surahObject.getInt("id")
+            while (surahKeys.hasNext()) {
+                val surahKey = surahKeys.next()
+                val ayahsArray = rootObject.getJSONArray(surahKey)
 
-            surahs.add(
-                SurahEntity(
-                    id = surahId,
-                    nameAr = surahObject.getString("name"),
-                    nameEn = surahObject.getString("englishName"),
-                    ayahCount = surahObject.getJSONArray("verses").length()
-                )
-            )
+                val surahId = surahKey.toInt()
 
-            val versesArray = surahObject.getJSONArray("verses")
-            for (j in 0 until versesArray.length()) {
-                val verseObject = versesArray.getJSONObject(j)
-                ayahs.add(
-                    AyahEntity(
-                        surahId = surahId,
-                        text = verseObject.getString("text"),
-                        number = verseObject.getInt("numberInSurah")
+
+                val name = if (surahId <= 114) surahNamesAr[surahId - 1] else "سورة $surahId"
+
+                surahs.add(
+                    SurahEntity(
+                        id = surahId,
+                        nameAr = name,
+                        nameEn = "Surah $surahId",
+                        ayahCount = ayahsArray.length()
                     )
                 )
+                for (i in 0 until ayahsArray.length()) {
+                    val ayahJson = ayahsArray.getJSONObject(i)
+                    ayahs.add(
+                        AyahEntity(
+                            surahId = surahId,
+                            text = ayahJson.getString("text"),
+                            number = ayahJson.getInt("verse")
+                        )
+                    )
+                }
             }
+            quranDao.insertSurahs(surahs)
+            quranDao.insertAyahs(ayahs)
+
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
-
-        quranDao.insertSurahs(surahs)
-        quranDao.insertAyahs(ayahs)
     }
-
     suspend fun initDuasIfNeeded() = withContext(Dispatchers.IO) {
         if (duaDao.getCount() > 0) return@withContext
 
