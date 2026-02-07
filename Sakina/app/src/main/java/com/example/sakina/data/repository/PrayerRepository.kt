@@ -57,7 +57,8 @@ class PrayerRepository @Inject constructor(
         val totalFardCount = fardItems.size
         val isAllFardCompleted = completedFardCount == totalFardCount
 
-        val shouldCelebrate = isAllFardCompleted
+        // Delegate celebration logic to the domain use case
+        val shouldCelebrate = shouldCelebrateUseCase(items)
 
         return PrayerDaySummary(
             date = date,

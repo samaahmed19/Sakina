@@ -2,6 +2,7 @@ package com.example.sakina.ui.Azkar.azkar_list
 
 import androidx.compose.runtime.Composable
 import androidx.compose.material3.Text
+import androidx.compose.foundation.clickable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
@@ -176,10 +177,11 @@ fun SmartNeonCard(
         }
     }
 
-@Preview(showBackground = true)
+
 @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun AzkarListScreen(viewModel: AzkarViewModel = hiltViewModel() ) {
+    fun AzkarListScreen(viewModel: AzkarViewModel = hiltViewModel() ,
+                        onCategoryClick: (String) -> Unit) {
     val neonColors = listOf(
         Color(0xFFFFD700),
         Color(0xFFBD00FF),
@@ -260,9 +262,13 @@ fun SmartNeonCard(
                     }
                     item { AyahCard() }
                     item {
-                        AzkarFiltersBar(onFilterSelected = { selected ->
-                            /* Handle filter selection */
-                        })
+
+                        AzkarFiltersBar(
+                            selectedFilter = viewModel.selectedFilter.value,
+                            onFilterSelected = { selected ->
+                                viewModel.onFilterTextChanged(selected)
+                            }
+                        )
                     }
                     // Samples
                     itemsIndexed(categories) { index, category ->
@@ -272,18 +278,17 @@ fun SmartNeonCard(
                         SmartNeonCard(
                             title = category.title,
                             subtitle = " ",
-                            tag = "${category.id}",
+                            tag = "استكشف",
                             activeColor = cardColor,
-                            imageRes = getIconResource(category.icon)
-                        ) {
+                            imageRes = getIconResource(category.icon),
+                           onClick = { onCategoryClick(category.id) }
+                        )
 
-                            // navController.navigate("details/${category.id}")
-                        }
-                    }
-                }
+
+                    }}}
             }
         }
-}
+
 
 
 @Composable
@@ -291,10 +296,16 @@ fun getIconResource(iconName: String): Int {
     return when (iconName) {
         "sun" -> R.drawable.sun
         "moon" -> R.drawable.moon
-        "bed" -> R.drawable.sun
-        "wakeup" -> R.drawable.sun
-        "carpet" -> R.drawable.moon
-        else -> R.drawable.splash
+        "bed" -> R.drawable.bed
+        "carpet" -> R.drawable.prayerrug
+        "wakeup"-> R.drawable.morning
+        "carpet2"-> R.drawable.prayer
+        "mosque"-> R.drawable.mosque
+        "azan"-> R.drawable.prophet
+         "water"-> R.drawable.wudu
+         "home"-> R.drawable.house
+        "food"-> R.drawable.cutlery
+        else -> R.drawable.arabic
     }
 }
 
@@ -303,10 +314,11 @@ fun getIconResource(iconName: String): Int {
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun AzkarFiltersBar(
+    selectedFilter: String,
     onFilterSelected: (String) -> Unit
 ) {
-    val filters = listOf("الكل", "حسب الوقت", "حسب الحالة", "حسب المكان", "حسب المناسبة")
-    var selectedFilter by remember { mutableStateOf("الكل") }
+    val filters = listOf("الكل", "الصباح", "المساء", "النوم", "الصلاة")
+
 
     LazyRow(
         modifier = Modifier
@@ -321,7 +333,7 @@ fun AzkarFiltersBar(
             FilterChip(
                 selected = isSelected,
                 onClick = {
-                    selectedFilter = filter
+
                     onFilterSelected(filter)
                 },
                 label = {
@@ -387,4 +399,4 @@ fun AyahCard() {
             )
         }
     }
-}
+    }

@@ -15,15 +15,13 @@ import androidx.compose.runtime.mutableStateOf
 @HiltViewModel
 class AzkarViewModel @Inject constructor(
     private val repository: AzkarRepository
-
 ) : ViewModel() {
-    var selectedFilterId = mutableStateOf<String?>(null)
+    private val _allCategories = MutableStateFlow<List<CategoryEntity>>(emptyList())
+    private val _filteredCategories = MutableStateFlow<List<CategoryEntity>>(emptyList())
+    val categories: StateFlow<List<CategoryEntity>> = _filteredCategories
 
-    fun onFilterChanged(newId: String?) {
-        selectedFilterId.value = newId
-    }
-    private val _categories = MutableStateFlow<List<CategoryEntity>>(emptyList())
-    val categories: StateFlow<List<CategoryEntity>> = _categories
+    var selectedFilter = mutableStateOf("الكل")
+    var selectedFilterId = mutableStateOf<String?>(null)
 
     init {
         loadCategories()
@@ -31,8 +29,30 @@ class AzkarViewModel @Inject constructor(
 
     private fun loadCategories() {
         viewModelScope.launch {
-            val data = repository.getAllCategories()
-            _categories.value = data
+
+            val testData = listOf(
+                CategoryEntity(id = "1", title = "أذكار الصباح", icon = "sun"),
+                CategoryEntity(id = "2", title = "أذكار المساء", icon = "moon")
+            )
+            _allCategories.value = testData
+            _filteredCategories.value = testData
         }
+    }
+
+
+    fun onFilterTextChanged(filter: String) {
+        selectedFilter.value = filter
+        if (filter == "الكل") {
+            _filteredCategories.value = _allCategories.value
+        } else {
+            _filteredCategories.value = _allCategories.value.filter {
+                it.title.contains(filter.replace("حسب ", ""))
+            }
+        }
+    }
+
+
+    fun onFilterIdChanged(newId: String?) {
+        selectedFilterId.value = newId
     }
 }
