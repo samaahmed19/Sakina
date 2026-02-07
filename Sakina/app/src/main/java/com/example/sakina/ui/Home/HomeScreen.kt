@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.*
+import androidx.compose.foundation.clickable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -77,6 +78,12 @@ fun GalaxyBackground(content: @Composable () -> Unit) {
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
+    onAzkarCardClick: () -> Unit = {},
+    onDuaCardClick: () -> Unit = {},
+    onQuranCardClick: () -> Unit = {},
+    onTasbeehCardClick: () -> Unit = {},
+    onCheckCardClick: () -> Unit = {},
+    onSalahCardClick: () -> Unit = {}
 
 ) {
 
@@ -119,21 +126,24 @@ fun HomeScreen(
                 }
             }
             item { DuaCard() }
-            item { HomeCard("صلاتي", "المغرب 6:32", NeonGold, R.drawable.pray,
-                trailingContent = {
+            item { Box(modifier = Modifier.clickable { onSalahCardClick() }){
+                HomeCard("صلاتي", "المغرب 6:32", NeonGold, R.drawable.pray,
+                    trailingContent = {
 
-                    Box(
-                        modifier = Modifier
-                            .size(50.dp)
-                            .border(2.dp, NeonGold.copy(alpha = 0.5f), CircleShape)
-                            .background(NeonGold.copy(alpha = 0.2f), CircleShape),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text("3/5", color = NeonGold, fontWeight = FontWeight.Bold)
+                        Box(
+                            modifier = Modifier
+                                .size(50.dp)
+                                .border(2.dp, NeonGold.copy(alpha = 0.5f), CircleShape)
+                                .background(NeonGold.copy(alpha = 0.2f), CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("3/5", color = NeonGold, fontWeight = FontWeight.Bold)
+                        }
                     }
-                }
-            ) }
-            item { HomeCard("القرءان الكريم", "اقرأ وردك", NeonCyan, R.drawable.koran,
+                )
+            } }
+            item {Box(modifier = Modifier.clickable { onQuranCardClick() }){
+                HomeCard("القرءان الكريم", "اقرأ وردك", NeonCyan, R.drawable.koran,
                 trailingContent = {
                     Icon(
                         imageVector = Icons.Default.PlayArrow,
@@ -144,10 +154,14 @@ fun HomeScreen(
                             .background(NeonPurple.copy(alpha = 0.3f), CircleShape)
                             .padding(8.dp)
                     )
-                }
-            ) }
-            item { HomeCard("أذكار الصباح", " ", NeonPink, R.drawable.helal) }
+                })}
+             }
+            item {
 
+                Box(modifier = Modifier.clickable { onAzkarCardClick() }) {
+                    HomeCard("أذكار الصباح", " ", NeonPink, R.drawable.helal)
+                }
+            }
             item {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
