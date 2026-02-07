@@ -6,7 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.sakina.BreathPhase
+import com.example.sakina.ui.Tasbeeh.BreathPhase
 import com.example.sakina.data.local.database.entity.TasbeehEntity
 import com.example.sakina.data.repository.TasbeehRepository
 import dagger.hilt.android.lifecycle.HiltViewModel

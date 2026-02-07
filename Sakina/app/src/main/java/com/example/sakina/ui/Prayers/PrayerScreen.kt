@@ -4,6 +4,9 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.Icon
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -182,8 +185,8 @@ private fun PrayerList(
 
 @Composable
 private fun HeaderSection(summary: PrayerDaySummary) {
-    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Text(text = "صلاتي", color = Color.White, fontSize = 30.sp)
+    Column(verticalArrangement = Arrangement.spacedBy(15.dp)) {
+        Text(text = "صلاتي", color =Color(0xFFFFD700), fontSize = 35.sp)
 
         Text(
             text = "${summary.completedFardCount} من ${summary.totalFardCount} صلوات",
@@ -258,6 +261,15 @@ private fun CelebrationDialog(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
+
+                Icon(
+                    imageVector = Icons.Filled.Star,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(60.dp)
+                        .padding(bottom = 8.dp),
+                    tint = Color(0xFFFFD700)
+                )
                 Text(
                     "بارك الله فيك!",
                     color = Color(0xFFFFD700),
@@ -320,7 +332,7 @@ private fun PrayerCard(
 ) {
     val glowElevation by animateDpAsState(
         // Softer glow so it looks smoother on different screens
-        targetValue = if (prayer.isCompleted) 10.dp else 0.dp,
+        targetValue = if (prayer.isCompleted) 30.dp else 0.dp,
         label = "glowElevation"
     )
 
@@ -331,9 +343,9 @@ private fun PrayerCard(
 
     val borderBrush = Brush.linearGradient(
         colors = if (prayer.isCompleted) {
-            listOf(accent.copy(alpha = 0.95f), accent.copy(alpha = 0.25f), Color.Transparent)
+            listOf(accent.copy(alpha = 3f), accent.copy(alpha = 1.5f))
         } else {
-            listOf(accent.copy(alpha = 0.65f), Color.Transparent)
+            listOf(accent.copy(alpha = 1f), Color.Transparent)
         }
     )
 
@@ -423,7 +435,7 @@ fun AyahCard() {
         modifier = Modifier
             .fillMaxWidth()
             .shadow(
-                elevation = 12.dp,
+                elevation = 0.dp,
                 shape = RoundedCornerShape(24.dp),
                 ambientColor = cyan.copy(alpha = 0.22f),
                 spotColor = cyan.copy(alpha = 0.26f)

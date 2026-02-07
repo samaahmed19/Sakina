@@ -14,6 +14,11 @@ import com.example.sakina.ui.Splash.SplashScreen
 import com.example.sakina.ui.HolyQuran.surah_details.SurahDetailsScreen
 import com.example.sakina.ui.HolyQuran.surah_list.SurahListScreen
 import com.example.sakina.ui.Prayers.PrayerScreen
+import com.example.sakina.ui.Tasbeeh.TasbeehScreen
+import com.example.sakina.navigation.Screen
+import com.example.sakina.ui.Gwame3Dua.DuaListScreen
+
+
 
 @Composable
 fun AppNavGraph(navController: NavHostController) {
@@ -91,9 +96,9 @@ fun AppNavGraph(navController: NavHostController) {
         }
 
         //  Tasbeeh Screen
-        /* composable(Screen.Tasbeeh.route) {
+         composable(Screen.Tasbeeh.route) {
              TasbeehScreen()
-         }*/
+         }
 
         //  Checklist Screen
         composable(Screen.Checklist.route) {
@@ -101,8 +106,8 @@ fun AppNavGraph(navController: NavHostController) {
         }
 
         //  Dua Screen
-        /* composable(Screen.Dua.route) {
+         composable(Screen.Dua.route) {
              DuaListScreen()
-         }*/
+         }
     }
 }

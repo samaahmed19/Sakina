@@ -33,6 +33,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
@@ -180,8 +181,8 @@ fun HomeCard2(
 
     Box(
         modifier = modifier
-            .aspectRatio(1f)
-            .padding(8.dp)
+            .heightIn(min = 160.dp)
+            .padding(6.dp)
             .clickable(
                 indication = null,
                 interactionSource = remember { MutableInteractionSource() }
@@ -211,7 +212,7 @@ fun HomeCard2(
         ) {
             Column(
                 modifier = Modifier
-                    .padding(16.dp)
+                    .padding(12.dp)
                     .fillMaxSize(),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -219,7 +220,7 @@ fun HomeCard2(
 
                 Box(
                     modifier = Modifier
-                        .size(70.dp)
+                        .size(60.dp)
                         .drawBehind {
                             if (isPressed) {
                                 drawCircle(
@@ -247,7 +248,9 @@ fun HomeCard2(
                     Text(
                         text = title,
                         color = Color.White,
-                        fontSize = 25.sp,
+                        fontSize = 20.sp,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth(),
                         fontWeight = FontWeight.Bold,
                         style = TextStyle(
                             shadow = Shadow(

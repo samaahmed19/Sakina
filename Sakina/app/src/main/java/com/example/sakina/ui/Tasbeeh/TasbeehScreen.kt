@@ -1,4 +1,4 @@
-package com.example.sakina
+package com.example.sakina.ui.Tasbeeh
 
 import com.example.sakina.ui.Tasbeeh.TasbeehViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -36,11 +36,6 @@ data class TasbeehOption(
     val text: String,
     val color: Color
 )
-
-
-enum class BreathPhase {
-    INHALE, HOLD, EXHALE
-}
 
 
 
