@@ -818,8 +818,8 @@
         }
       ]
     },{
-      "categoryId": "wudu",
-      "categoryName": "أذكار الوضوء",
+      "id": "wudu",
+      "title": "أذكار الوضوء",
       "icon": "water",
       "azkar": [
         {
@@ -861,7 +861,7 @@
       "id": "food",
       "title": "أذكار الطعام",
       "icon": "food",
-      "azar"
+      "azkar"
       : [
         {
           "id": 1,

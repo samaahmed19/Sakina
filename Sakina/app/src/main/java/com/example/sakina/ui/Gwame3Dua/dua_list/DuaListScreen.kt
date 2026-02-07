@@ -1,4 +1,4 @@
-package com.example.sakina.ui.Dua.dua_list
+package com.example.sakina.ui.Gwame3Dua
 
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.*

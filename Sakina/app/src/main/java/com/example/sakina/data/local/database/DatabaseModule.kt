@@ -3,6 +3,9 @@ package com.example.sakina.data.local.database
 
 import android.content.Context
 import androidx.room.Room
+
+import androidx.room.RoomDatabase
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.example.sakina.data.local.database.AppDatabase
 import com.example.sakina.data.local.database.dao.AzkarDao
 import com.example.sakina.data.local.database.dao.DuaDao
@@ -33,6 +36,11 @@ object DatabaseModule {
             AppDatabase::class.java,
             "sakina_db"
         )
+            .addCallback(object : RoomDatabase.Callback() {
+                override fun onCreate(db: SupportSQLiteDatabase) {
+                    super.onCreate(db)
+                }
+            })
             // Dev-stage safety: avoids crash when version changes and you don't have migrations yet
             .fallbackToDestructiveMigration()
             .build()
