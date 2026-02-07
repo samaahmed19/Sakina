@@ -3,9 +3,8 @@ package com.example.sakina
 import com.example.sakina.ui.Tasbeeh.TasbeehViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import android.os.Bundle
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.text.style.TextAlign
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -98,11 +97,11 @@ fun TasbeehScreen(viewModel: TasbeehViewModel = viewModel()) {
 
     val tasbeehOptions = remember {
         listOf(
-            TasbeehOption("subhan", "سبحان الله", Color(0xFF7C9FF5)),
-            TasbeehOption("alhamdulillah", "الحمد لله", Color(0xFF9B8FCC)),
-            TasbeehOption("allahu", "الله أكبر", Color(0xFF6B9DC6)),
-            TasbeehOption("istighfar", "أستغفر الله", Color(0xFFB8A4D4)),
-            TasbeehOption("salawat", "اللهم صل على محمد", Color(0xFF8FB3C9))
+            TasbeehOption("subhan", "سبحان الله", Color(0xFF00FFD1)),
+            TasbeehOption("alhamdulillah", "الحمد لله", Color(0xFFBD00FF)),
+            TasbeehOption("allahu", "الله أكبر", Color(0xFFFFD700)),
+            TasbeehOption("istighfar", "أستغفر الله", Color(0xFF4DFF88)),
+            TasbeehOption("salawat", "اللهم صل على محمد", Color(0xFFF63978))
         )
     }
 

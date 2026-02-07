@@ -12,6 +12,7 @@ import com.example.sakina.R
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
 import androidx.compose.ui.graphics.Color
+import kotlinx.coroutines.delay
 
 
 @Preview(showBackground = true)

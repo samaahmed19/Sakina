@@ -17,13 +17,11 @@ class AzkarViewModel @Inject constructor(
     private val repository: AzkarRepository
 
 ) : ViewModel() {
-    var selectedFilterId = mutableStateOf<String?>(null)
+    private val _allCategories = MutableStateFlow<List<CategoryEntity>>(emptyList())
+    private val _filteredCategories = MutableStateFlow<List<CategoryEntity>>(emptyList())
+    val categories: StateFlow<List<CategoryEntity>> = _filteredCategories
 
-    fun onFilterChanged(newId: String?) {
-        selectedFilterId.value = newId
-    }
-    private val _categories = MutableStateFlow<List<CategoryEntity>>(emptyList())
-    val categories: StateFlow<List<CategoryEntity>> = _categories
+    var selectedFilter = mutableStateOf("الكل")
 
     init {
         loadCategories()
@@ -32,7 +30,28 @@ class AzkarViewModel @Inject constructor(
     private fun loadCategories() {
         viewModelScope.launch {
             val data = repository.getAllCategories()
-            _categories.value = data
+            _allCategories.value = data
+            _filteredCategories.value = data
         }
     }
-}
+
+    fun onFilterChanged(filter: String) {
+        selectedFilter.value = filter
+        if (filter == "الكل") {
+            _filteredCategories.value = _allCategories.value
+        } else {
+
+            _filteredCategories.value = _allCategories.value.filter {
+
+                it.title.contains(filter.replace("حسب ", "")) || filter == "الكل"
+            }
+        }
+    }
+    var selectedFilterId = mutableStateOf<String?>(null)
+
+    fun onFilterChanged(newId: String?) {
+        selectedFilterId.value = newId
+    }
+
+
+    }
