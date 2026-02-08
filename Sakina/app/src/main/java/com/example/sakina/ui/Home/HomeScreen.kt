@@ -30,7 +30,8 @@ import com.example.sakina.ui.Home.components.HomeCard2
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.text.style.TextAlign
-
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 val NeonCyan = Color(0xFF00FFD1)
 val NeonPurple = Color(0xFFBD00FF)
@@ -81,13 +82,15 @@ fun HomeScreen(
     onAzkarCardClick: () -> Unit = {},
     onDuaCardClick: () -> Unit = {},
     onQuranCardClick: () -> Unit = {},
+    onNavigateToSurahDetails: (Int, String, Int) -> Unit,
     onTasbeehCardClick: () -> Unit = {},
     onCheckCardClick: () -> Unit = {},
-    onSalahCardClick: () -> Unit = {}
-
+    onSalahCardClick: () -> Unit = {},
+    viewModel: HomeViewModel = hiltViewModel()
 ) {
-
-
+    LaunchedEffect(Unit) {
+        viewModel.refreshLastRead()
+    }
     GalaxyBackground {
         LazyColumn(
             modifier = modifier
@@ -142,20 +145,34 @@ fun HomeScreen(
                 onClick = {onSalahCardClick()})
 
             }
-            item { HomeCard("القرءان الكريم", "اقرأ وردك", NeonCyan, R.drawable.koran,
-                trailingContent = {
-                    Icon(
-                        imageVector = Icons.Default.PlayArrow,
-                        contentDescription = null,
-                        tint = Color.White,
-                        modifier = Modifier
-                            .size(45.dp)
-                            .background(NeonPurple.copy(alpha = 0.3f), CircleShape)
-                            .padding(8.dp)
-                    )
-                },
-                    onClick = {onQuranCardClick()})
-             }
+            item {
+                HomeCard(
+                    title = "القرءان الكريم",
+                    subtitle = viewModel.subTitle(),
+                    activeColor = NeonCyan,
+                    imageRes =  R.drawable.koran,
+                    trailingContent = {
+                        Icon(
+                            imageVector = Icons.Default.PlayArrow,
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier
+                                .size(45.dp)
+                                .background(NeonPurple.copy(alpha = 0.3f), CircleShape)
+                                .padding(8.dp)
+                        )
+                    },
+                    onClick = { val id = viewModel.lastSurahId.value
+                        val name = viewModel.lastSurahName.value
+                        val count = viewModel.lastAyahCount.value
+
+                        if (id != -1) {
+                            onNavigateToSurahDetails(id, name, count)
+                        } else {
+                            onQuranCardClick()
+                        }}
+                )
+            }
             item {
                     HomeCard("الأذكار", " ", NeonPurple, R.drawable.decoration,onClick = { onAzkarCardClick() })
                 }
@@ -191,10 +208,7 @@ fun HomeScreen(
 }
 
 @Preview(showBackground = true, heightDp = 1500)
-@Composable
-fun PreviewHomeScreen() {
-    HomeScreen()
-}
+
 @Composable
 fun DuaCard() {
     val cyanColor = Color(0xFF2075B7)

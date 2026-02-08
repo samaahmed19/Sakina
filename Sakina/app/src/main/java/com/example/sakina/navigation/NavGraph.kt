@@ -16,7 +16,7 @@ import com.example.sakina.ui.HolyQuran.surah_list.SurahListScreen
 import com.example.sakina.ui.Prayers.PrayerScreen
 import com.example.sakina.ui.Tasbeeh.TasbeehScreen
 import com.example.sakina.navigation.Screen
-import com.example.sakina.ui.Gwame3Dua.DuaListScreen
+
 
 
 
@@ -34,6 +34,9 @@ fun AppNavGraph(navController: NavHostController) {
         composable(Screen.Home.route) {
              HomeScreen(onAzkarCardClick = { navController.navigate(Screen.Categories.route) },
         onQuranCardClick = { navController.navigate(Screen.Quran.route) },
+                 onNavigateToSurahDetails = { id, name, count ->
+                     navController.navigate(Screen.SurahDetails.createRoute(id, name, count))
+                 },
         onSalahCardClick = { navController.navigate(Screen.Salah.route) },
         onDuaCardClick = { navController.navigate(Screen.Dua.route) },
         onTasbeehCardClick = { navController.navigate(Screen.Tasbeeh.route) },
@@ -107,7 +110,7 @@ fun AppNavGraph(navController: NavHostController) {
 
         //  Dua Screen
          composable(Screen.Dua.route) {
-             DuaListScreen()
+
          }
     }
 }

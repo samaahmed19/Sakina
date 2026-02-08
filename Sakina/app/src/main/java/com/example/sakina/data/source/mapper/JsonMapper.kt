@@ -2,6 +2,7 @@ package com.example.sakina.data.source.mapper
 
 import com.example.sakina.data.local.database.entity.AyahEntity
 import com.example.sakina.data.local.database.entity.CategoryEntity
+import com.example.sakina.data.local.database.entity.DuaCategoryEntity
 import com.example.sakina.data.local.database.entity.DuaEntity
 import com.example.sakina.data.local.database.entity.ZikrEntity
 import com.example.sakina.data.local.database.entity.TasbeehEntity
