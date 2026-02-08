@@ -35,6 +35,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.lifecycle.compose.LifecycleResumeEffect
 val NeonCyan = Color(0xFF00FFD1)
 val NeonPurple = Color(0xFFBD00FF)
 val NeonGold = Color(0xFFFFD700)
@@ -91,8 +92,16 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val user by viewModel.userFlow.collectAsState(initial = null)
+    val prayerCompleted by viewModel.prayerCompleted.collectAsState(initial = 0)
+    val prayerTotal by viewModel.prayerTotal.collectAsState(initial = 5)
+    val tasbeehCount by viewModel.tasbeehCount.collectAsState(initial = 0)
     LaunchedEffect(Unit) {
         viewModel.refreshLastRead()
+        viewModel.loadPrayerAndTasbeeh()
+    }
+    LifecycleResumeEffect(Unit) {
+        viewModel.loadPrayerAndTasbeeh()
+        onPauseOrDispose { }
     }
     GalaxyBackground {
         LazyColumn(
@@ -144,7 +153,7 @@ fun HomeScreen(
                                 .background(NeonGold.copy(alpha = 0.2f), CircleShape),
                             contentAlignment = Alignment.Center,
                         ) {
-                            Text("3/5", color = NeonGold, fontWeight = FontWeight.Bold)
+                            Text("$prayerCompleted/$prayerTotal", color = NeonGold, fontWeight = FontWeight.Bold)
                         }
                     },
                 onClick = {onSalahCardClick()})
@@ -192,7 +201,7 @@ fun HomeScreen(
                 ) {
                     HomeCard2(
                         title = "تسبيح",
-                        subtitle = "250",
+                        subtitle = tasbeehCount.toString(),
                         activeColor = NeonGreen,
                         imageRes = R.drawable.tasbih,
                         modifier = Modifier.weight(1f),

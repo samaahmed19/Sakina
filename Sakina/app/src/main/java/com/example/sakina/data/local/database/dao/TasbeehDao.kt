@@ -12,6 +12,9 @@ interface TasbeehDao {
     @Query("SELECT * FROM tasbeeh ORDER BY priority ASC")
     suspend fun getAll(): List<TasbeehEntity>
 
+    @Query("SELECT COALESCE(SUM(currentCount), 0) FROM tasbeeh")
+    suspend fun getTotalCount(): Int
+
     @Query("UPDATE tasbeeh SET currentCount = currentCount + 1 WHERE id = :id")
     suspend fun increment(id: Int)
 
