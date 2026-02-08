@@ -35,6 +35,7 @@ import com.example.sakina.ui.settings.SettingsScreen
 import com.example.sakina.ui.theme.SakinaTheme
 import dagger.hilt.android.AndroidEntryPoint
 import com.example.sakina.navigation.AppNavGraph
+import com.example.sakina.navigation.SakinaBottomBar
 import com.example.sakina.ui.Checklist.DailyResetWorker
 import java.util.concurrent.TimeUnit
 
@@ -45,7 +46,15 @@ class MainActivity : ComponentActivity() {
         scheduleDailyReset()
         setContent {
             val navController = rememberNavController()
-            AppNavGraph(navController = navController)
+            Scaffold(
+                modifier = Modifier.fillMaxSize(),
+                bottomBar = { SakinaBottomBar(navController = navController) }
+            ) { paddingValues ->
+                AppNavGraph(
+                    navController = navController,
+                    modifier = Modifier.padding(paddingValues)
+                )
+            }
         }
     }
     private fun scheduleDailyReset() {
