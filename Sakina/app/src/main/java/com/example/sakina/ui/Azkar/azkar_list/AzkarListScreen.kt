@@ -61,7 +61,8 @@ fun SmartNeonCard(
     tag: String,
     activeColor: Color,
     imageRes: Int,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+
 ) {
     var isPressed by remember { mutableStateOf(false) }
 
@@ -180,7 +181,7 @@ fun SmartNeonCard(
 
 @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun AzkarListScreen(viewModel: AzkarViewModel = hiltViewModel() ,
+    fun ZikrListScreen(viewModel: AzkarViewModel = hiltViewModel() ,
                         onCategoryClick: (String) -> Unit) {
     val neonColors = listOf(
         Color(0xFFFFD700),
@@ -281,7 +282,7 @@ fun SmartNeonCard(
                             tag = "استكشف",
                             activeColor = cardColor,
                             imageRes = getIconResource(category.icon),
-                           onClick = { onCategoryClick(category.id) }
+                            onClick = { onCategoryClick(category.id) }
                         )
 
 

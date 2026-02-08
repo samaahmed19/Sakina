@@ -6,8 +6,8 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.example.sakina.ui.Azkar.azkar_list.AzkarListScreen
-import com.example.sakina.ui.Azkar.azkar_details.AzkarDetailsScreen
+import com.example.sakina.ui.Azkar.azkar_list.ZikrListScreen
+import com.example.sakina.ui.Azkar.azkar_details.ZikrDetailsScreen
 import com.example.sakina.ui.Checklist.ChecklistScreen
 import com.example.sakina.ui.Home.HomeScreen
 import com.example.sakina.ui.Splash.SplashScreen
@@ -42,18 +42,22 @@ fun AppNavGraph(navController: NavHostController) {
 
         //  Azkar List Screen
         composable(Screen.Categories.route) {
-            AzkarListScreen(onCategoryClick = { categoryId ->
-                navController.navigate(Screen.Details.createRoute(categoryId))
+            ZikrListScreen(onCategoryClick = { categoryId ->
+                navController.navigate("azkar_details/$categoryId")
             })
         }
 
         // ِAzkar Details Screen
         composable(
-            route = Screen.Details.route,
-            arguments = listOf(navArgument("categoryId") { type = NavType.StringType })
+            route = "azkar_details/{catId}",
+            arguments = listOf(navArgument("catId") { type = NavType.StringType })
         ) { backStackEntry ->
-            val categoryId = backStackEntry.arguments?.getString("categoryId") ?: ""
-            AzkarDetailsScreen(categoryId = categoryId)
+            val catId = backStackEntry.arguments?.getString("catId") ?: ""
+
+            ZikrDetailsScreen(
+                categoryId = catId,
+                onBackClick = { navController.popBackStack() }
+            )
         }
         //  Quran List Screen
         composable(Screen.Quran.route) {
