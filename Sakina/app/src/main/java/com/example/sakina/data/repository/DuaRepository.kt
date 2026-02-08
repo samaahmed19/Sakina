@@ -44,4 +44,8 @@ class DuaRepository @Inject constructor(
     suspend fun updateFavorite(id: Int, isFavorite: Boolean) {
         duaDao.updateFavorite(id, isFavorite)
     }
+
+    suspend fun getRandomDua(): DuaEntity? {
+        return duaDao.getRandomDua()
+    }
 }

@@ -37,4 +37,7 @@ interface DuaDao {
 
     @Query("SELECT COUNT(*) FROM dua_table")
     suspend fun getCount(): Int
+
+    @Query("SELECT * FROM dua_table ORDER BY RANDOM() LIMIT 1")
+    suspend fun getRandomDua(): DuaEntity
 }

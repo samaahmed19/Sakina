@@ -13,17 +13,13 @@ import javax.inject.Inject
 
 @HiltViewModel
 class DuaViewModel @Inject constructor(
-    private val repository: DuaRepository,
+    private val repository: DuaRepository
 ) : ViewModel() {
+    private val _allCategories = MutableStateFlow<List<DuaCategoryEntity>>(emptyList())
+    private val _filteredCategories = MutableStateFlow<List<DuaCategoryEntity>>(emptyList())
+    val categories: StateFlow<List<DuaCategoryEntity>> = _filteredCategories
 
-    var selectedFilterId = mutableStateOf<String?>(null)
-
-    fun onFilterChanged(newId: String?) {
-        selectedFilterId.value = newId
-    }
-
-    private val _categories = MutableStateFlow<List<DuaCategoryEntity>>(emptyList())
-    val categories: StateFlow<List<DuaCategoryEntity>> = _categories
+    var selectedFilter = mutableStateOf("الكل")
 
     init {
         loadCategories()
@@ -32,7 +28,19 @@ class DuaViewModel @Inject constructor(
     private fun loadCategories() {
         viewModelScope.launch {
             val data = repository.getAllCategories()
-            _categories.value = data
+            _allCategories.value = data
+            _filteredCategories.value = data
+        }
+    }
+
+    fun onFilterChanged(filter: String) {
+        selectedFilter.value = filter
+        if (filter == "الكل") {
+            _filteredCategories.value = _allCategories.value
+        } else {
+            _filteredCategories.value = _allCategories.value.filter {
+                it.title.contains(filter)
+            }
         }
     }
 }

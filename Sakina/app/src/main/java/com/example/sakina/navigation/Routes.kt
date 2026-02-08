@@ -15,6 +15,12 @@ sealed class Screen(val route: String) {
     object Tasbeeh : Screen("tasbeeh")
     object Checklist : Screen("check")
     object Dua : Screen("dua")
+    object DuaDetails : Screen("dua_details/{categoryId}/{categoryTitle}") {
+        fun createRoute(id: Int, title: String): String {
+            val safeTitle = title.replace(" ", "_")
+            return "dua_details/$id/$safeTitle"
+        }
+    }
     object Quran : Screen("quran")
     object SurahDetails : Screen("surah_details/{surahId}/{surahName}/{ayahCount}") {
         fun createRoute(id: Int, name: String, count: Int): String {

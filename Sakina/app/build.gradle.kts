@@ -46,6 +46,8 @@ android {
 }
 
 dependencies {
+    implementation("io.coil-kt:coil-compose:2.5.0")
+    implementation("dev.shreyaspatil:capturable:2.1.0")
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
     implementation("androidx.compose.runtime:runtime")
     implementation("androidx.core:core-splashscreen:1.0.1")

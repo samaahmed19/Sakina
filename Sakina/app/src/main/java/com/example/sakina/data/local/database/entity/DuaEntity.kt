@@ -9,7 +9,7 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "dua_categories")
 data class DuaCategoryEntity(
     @PrimaryKey
-    val id: String,
+    val id: Int,
     val title: String,
     val icon: String,
     val count: Int
@@ -31,7 +31,7 @@ data class DuaEntity(
     @PrimaryKey(autoGenerate = true)
 
     val id: Int = 0,
-    val categoryId: String,
+    val categoryId: Int,
     val text: String,
     val isFavorite: Boolean = false
 )

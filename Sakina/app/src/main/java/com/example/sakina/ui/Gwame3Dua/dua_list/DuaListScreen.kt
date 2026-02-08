@@ -23,6 +23,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
@@ -50,7 +51,8 @@ fun DuaSmartNeonCard(
 
     val animatedAlpha by animateFloatAsState(targetValue = if (isPressed) 0.22f else 0.06f, label = "alpha")
     val animatedGlow by animateDpAsState(targetValue = if (isPressed) 22.dp else 0.dp, label = "glow")
-    val borderAlpha by animateFloatAsState(targetValue = if (isPressed) 0.9f else 0.4f, label = "border")
+
+    val iconScale by animateFloatAsState(targetValue = if (isPressed) 1.1f else 1.0f)
 
     Box(
         modifier = Modifier
@@ -97,51 +99,40 @@ fun DuaSmartNeonCard(
                 Column(
                     modifier = Modifier.fillMaxSize().padding(12.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
+                    verticalArrangement = Arrangement.SpaceBetween
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(72.dp)
-                            .drawBehind {
-                                drawCircle(
-                                    color = activeColor,
-                                    radius = size.maxDimension / 2 + 4.dp.toPx(),
-                                    alpha = if (isPressed) 0.25f else 0.1f
-                                )
-                                drawCircle(
-                                    color = activeColor,
-                                    style = Stroke(width = 2.dp.toPx()),
-                                    alpha = borderAlpha
-                                )
-                            },
+                            .weight(1.2f)
+                            .fillMaxWidth(),
                         contentAlignment = Alignment.Center
                     ) {
-                        Box(modifier = Modifier.size(64.dp).clip(CircleShape)) {
-                            Image(
-                                painter = painterResource(id = imageRes),
-                                contentDescription = null,
-                                modifier = Modifier.fillMaxSize(),
-                                contentScale = ContentScale.Crop
-                            )
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .background(activeColor.copy(alpha = 0.15f))
-                            )
-                        }
+                        Image(
+                            painter = painterResource(id = imageRes),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(85.dp)
+                                .graphicsLayer(
+                                    scaleX = iconScale,
+                                    scaleY = iconScale,
+                                    shadowElevation = if(isPressed) 20f else 0f
+                                ),
+                            contentScale = ContentScale.Fit
+                        )
                     }
-
-                    Spacer(modifier = Modifier.height(14.dp))
 
                     Text(
                         text = title,
                         color = Color.White,
                         fontSize = 17.sp,
                         fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
+                        maxLines = 2,
+                        modifier = Modifier
+                            .weight(0.8f)
+                            .padding(horizontal = 4.dp),
+                        lineHeight = 22.sp
                     )
-
-                    Spacer(modifier = Modifier.height(8.dp))
 
                     Surface(
                         color = activeColor.copy(alpha = 0.12f),
@@ -163,13 +154,24 @@ fun DuaSmartNeonCard(
 }
 
 @Composable
-fun DuaListScreen(viewModel: DuaViewModel = hiltViewModel()) {
+fun DuaListScreen(
+    viewModel: DuaViewModel = hiltViewModel(),
+    onCategoryClick: (DuaCategoryEntity) -> Unit
+) {
     val categories by viewModel.categories.collectAsState()
-    DuaListContent(categories = categories, onFilterSelected = { viewModel.onFilterChanged(it) })
+    DuaListContent(
+        categories = categories,
+        onFilterSelected = { viewModel.onFilterChanged(it) },
+        onCategoryClick = onCategoryClick
+    )
 }
 
 @Composable
-fun DuaListContent(categories: List<DuaCategoryEntity>, onFilterSelected: (String) -> Unit) {
+fun DuaListContent(
+    categories: List<DuaCategoryEntity>,
+    onFilterSelected: (String) -> Unit,
+    onCategoryClick: (DuaCategoryEntity) -> Unit
+) {
     val softNeonColors = listOf(
         Color(0xFFFFD700),
         Color(0xFFBD00FF),
@@ -185,22 +187,14 @@ fun DuaListContent(categories: List<DuaCategoryEntity>, onFilterSelected: (Strin
 
     val infiniteTransition = rememberInfiniteTransition(label = "stars")
     val starAlpha by infiniteTransition.animateFloat(
-        initialValue = 0.3f,
-        targetValue = 0.9f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(3000, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
+        initialValue = 0.3f, targetValue = 0.9f,
+        animationSpec = infiniteRepeatable(tween(3000, easing = LinearEasing), RepeatMode.Reverse),
         label = "starAlpha"
     )
 
     val starMovement by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1000f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(80000, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
+        initialValue = 0f, targetValue = 1000f,
+        animationSpec = infiniteRepeatable(tween(80000, easing = LinearEasing), RepeatMode.Restart),
         label = "starMovement"
     )
 
@@ -213,14 +207,10 @@ fun DuaListContent(categories: List<DuaCategoryEntity>, onFilterSelected: (Strin
             Canvas(modifier = Modifier.fillMaxSize()) {
                 val random = Random(42)
                 repeat(200) {
-                    val xBase = random.nextFloat() * size.width
-                    val yBase = random.nextFloat() * size.height
-                    val xPos = (xBase + starMovement) % size.width
-                    val yPos = (yBase + starMovement * 0.3f) % size.height
-                    val individualAlpha = random.nextFloat() * starAlpha
-
+                    val xPos = (random.nextFloat() * size.width + starMovement) % size.width
+                    val yPos = (random.nextFloat() * size.height + starMovement * 0.3f) % size.height
                     drawCircle(
-                        color = Color.White.copy(alpha = individualAlpha),
+                        color = Color.White.copy(alpha = random.nextFloat() * starAlpha),
                         radius = (0.5.dp + (random.nextFloat().dp)).toPx(),
                         center = Offset(xPos, yPos)
                     )
@@ -236,22 +226,13 @@ fun DuaListContent(categories: List<DuaCategoryEntity>, onFilterSelected: (Strin
             ) {
                 item(span = { GridItemSpan(2) }) {
                     Column(modifier = Modifier.padding(bottom = 8.dp)) {
-                        Text(
-                            text = "جوامع الدعاء",
-                            color = Color(0xFFFFD700),
-                            fontSize = 40.sp,
-                            fontWeight = FontWeight.Black
-                        )
-                        Text(
-                            text = "ادْعُ اللَّهَ بِمَا شِئْتَ مِنْ خَيْرَيِ الدُّنْيَا",
-                            color = Color.White.copy(alpha = 0.7f),
-                            fontSize = 16.sp,
-                            modifier = Modifier.padding(bottom = 20.dp)
-                        )
+                        Text("جوامع الدعاء", color = Color(0xFFFFD700), fontSize = 40.sp, fontWeight = FontWeight.Black)
+                        Text("ادْعُ اللَّهَ بِمَا شِئْتَ مِنْ خَيْرَيِ الدُّنْيَا وَالْآخِرَةِ", color = Color.White.copy(alpha = 0.7f), fontSize = 16.sp)
                     }
                 }
-
-                item(span = { GridItemSpan(2) }) { DuaAyahCard() }
+                item(span = { GridItemSpan(2) }) {
+                    DuaAyahCard()
+                }
                 item(span = { GridItemSpan(2) }) { DuaFiltersBar(onFilterSelected = onFilterSelected) }
 
                 itemsIndexed(categories) { index, category ->
@@ -259,35 +240,37 @@ fun DuaListContent(categories: List<DuaCategoryEntity>, onFilterSelected: (Strin
                         title = category.title,
                         activeColor = softNeonColors[index % softNeonColors.size],
                         imageRes = getDuaIconResource(category.icon),
-                        duaCount = category.count.toString()
-                    ) { /* Navigation */ }
+                        duaCount = category.count.toString(),
+                        onClick = { onCategoryClick(category) }
+                    )
                 }
             }
         }
     }
 }
-
 @Composable
-fun getDuaIconResource(iconName: String): Int {
+fun getDuaIconResource(iconName: String?): Int {
     return when (iconName) {
-        "maghfirah" -> R.drawable.repentance
+        "repentance" -> R.drawable.repentance
+        "Anbya"      -> R.drawable.star
         "guidance"   -> R.drawable.guidance
         "protection" -> R.drawable.protection
-        "rizq"      -> R.drawable.rizk
-        "knowledge"       -> R.drawable.book
-        "tranquility"      -> R.drawable.light
-        "comprehensive"       -> R.drawable.star
-        "wellness"     -> R.drawable.health
-        "hereafter"     -> R.drawable.hereafter
+        "rizk"       -> R.drawable.rizk
+        "Quran"      -> R.drawable.star
+        "book"       -> R.drawable.book
+        "light"      -> R.drawable.light
+        "star"       -> R.drawable.star
+        "health"     -> R.drawable.health
+        "hereafter"  -> R.drawable.hereafter
         "praise"     -> R.drawable.praise
-        else            -> R.drawable.splash
+        else         -> R.drawable.splash
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DuaFiltersBar(onFilterSelected: (String) -> Unit) {
-    val filters = listOf("الكل", "التوبة", "الهداية", "السكينة", "الرزق", "العلم", "الحماية", "الشكر", "الشفاء", "الآخرة")
+    val filters = listOf("الكل", "المغفرة" , "دعاء الأنبياء" , "الهداية", "الاستعاذة","أدعية القرآن" ,"الرزق", "العلم", "الطمأنينة", "جوامع", "العافية", "الآخرة", "الثناء")
     var selectedFilter by remember { mutableStateOf("الكل") }
     LazyRow(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
         items(filters) { filter ->
@@ -314,48 +297,53 @@ fun DuaFiltersBar(onFilterSelected: (String) -> Unit) {
     }
 }
 
+
 @Composable
 fun DuaAyahCard() {
-    val cyanColor = Color(0xFF00E5FF)
+    val cyanColor = Color(0x8500CCFF)
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 1.dp)
-            .shadow(elevation = 4.dp, shape = RoundedCornerShape(24.dp), spotColor = cyanColor)
-            .background(cyanColor.copy(alpha = 0.15f), RoundedCornerShape(24.dp))
-            .border(BorderStroke(1.5.dp, Brush.verticalGradient(listOf(cyanColor.copy(alpha = 0.6f), Color.Transparent))), RoundedCornerShape(24.dp))
-            .padding(16.dp),
+            .shadow(elevation = 0.dp, shape = RoundedCornerShape(24.dp), spotColor = cyanColor)
+            .background(cyanColor.copy(alpha = 0.3f), RoundedCornerShape(24.dp))
+            .border(BorderStroke(4.dp, Brush.verticalGradient(listOf(cyanColor, Color.Transparent))), RoundedCornerShape(24.dp))
+            .padding(7.dp),
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Spacer(modifier = Modifier.height(12.dp))
             Text(
-                text = " \"﴿ وَقَالَ رَبُّكُمُ ادْعُونِي أَسْتَجِبْ لَكُمْ ﴾\" ",
-                color = Color.White, fontSize = 17.sp,
-                fontWeight = FontWeight.Bold, textAlign = TextAlign.Center
+                text = " \"﴿ وَقَالَ رَبُّكُمُ ادْعُونِي أَسْتَجِبْ لَكُم ﴾\" ",
+                color = Color.White,
+                fontSize = 17.sp,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center
             )
             Text(
                 text = "سورة غافر - آية 60",
-                color = Color.White.copy(alpha = 0.6f),
-                fontSize = 13.sp, modifier = Modifier.padding(top = 4.dp)
+                color = Color.White,
+                fontSize = 14.sp,
+                modifier = Modifier.padding(top = 8.dp)
             )
         }
     }
 }
 
-@Preview(showBackground = true, device = "id:pixel_7")
-@Composable
-fun DuaListPreview() {
-    val sampleCategories = listOf(
-        DuaCategoryEntity("1", "أدعية التوبة", "maghfirah", 12),
-        DuaCategoryEntity("2", "أدعية الرزق", "rizq", 8),
-        DuaCategoryEntity("3", "أدعية السكينة", "tranquility", 5),
-        DuaCategoryEntity("4", "أدعية الهداية", "guidance", 10),
-        DuaCategoryEntity("5", "أدعية الشفاء", "wellness", 15),
-        DuaCategoryEntity("6", "أدعية العلم", "knowledge", 7),
-        DuaCategoryEntity("7", "أدعية الحماية", "protection", 9),
-        DuaCategoryEntity("8", "جوامع الدعاء", "comprehensive", 20),
-        DuaCategoryEntity("9", "أدعية الآخرة", "hereafter", 6),
-        DuaCategoryEntity("10", "أدعية الثناء", "praise", 11)
-    )
-    DuaListContent(categories = sampleCategories, onFilterSelected = {})
-}
+//@Preview(showBackground = true, device = "id:pixel_7")
+//@Composable
+//fun DuaListPreview() {
+//    val sampleCategories = listOf(
+//        DuaCategoryEntity("1", "أدعية التوبة", "maghfirah", 12),
+//        DuaCategoryEntity("2", "أدعية الرزق", "rizq", 8),
+//        DuaCategoryEntity("3", "أدعية السكينة", "tranquility", 5),
+//        DuaCategoryEntity("4", "أدعية الهداية", "guidance", 10),
+//        DuaCategoryEntity("5", "أدعية الشفاء", "wellness", 15),
+//        DuaCategoryEntity("6", "أدعية العلم", "knowledge", 7),
+//        DuaCategoryEntity("7", "أدعية الحماية", "protection", 9),
+//        DuaCategoryEntity("8", "جوامع الدعاء", "comprehensive", 20),
+//        DuaCategoryEntity("9", "أدعية الآخرة", "hereafter", 6),
+//        DuaCategoryEntity("10", "أدعية الثناء", "praise", 11)
+//    )
+//    DuaListContent(categories = sampleCategories, onFilterSelected = {}, onCategoryClick = {})
+//}

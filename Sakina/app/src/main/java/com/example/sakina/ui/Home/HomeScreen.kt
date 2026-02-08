@@ -121,9 +121,11 @@ fun HomeScreen(
     val prayerCompleted by viewModel.prayerCompleted.collectAsState(initial = 0)
     val prayerTotal by viewModel.prayerTotal.collectAsState(initial = 5)
     val tasbeehCount by viewModel.tasbeehCount.collectAsState(initial = 0)
+    val dailyDua by viewModel.dailyDua
     LaunchedEffect(Unit) {
         viewModel.refreshLastRead()
         viewModel.loadPrayerAndTasbeeh()
+        viewModel.loadDailyDua()
     }
     LifecycleResumeEffect(Unit) {
         viewModel.loadPrayerAndTasbeeh()
@@ -168,7 +170,9 @@ fun HomeScreen(
                     }
                 }
             }
-            item { DuaCard() }
+            item {
+                DuaCard(text = dailyDua?.text ?: "يا حي يا قيوم برحمتك أستغيث...")
+            }
             item { HomeCard("صلاتي", "المغرب 6:32", NeonGold, R.drawable.pray,
                     trailingContent = {
 
@@ -217,7 +221,15 @@ fun HomeScreen(
                     HomeCard("الأذكار", " ", NeonPurple, R.drawable.decoration,onClick = { onAzkarCardClick() })
                 }
             item {
-                HomeCard("جوامع الدعاء", " ", NeonRed, R.drawable.islamic_pattern,onClick = { onDuaCardClick() })
+                HomeCard(
+                    title = "جوامع الدعاء",
+                    subtitle = "مختصر الكلم وطيب الأثر",
+                    activeColor = NeonRed,
+                    imageRes = R.drawable.islamic_pattern,
+                    trailingContent = {
+                    },
+                    onClick = { onDuaCardClick() }
+                )
             }
 
             item {
@@ -247,10 +259,8 @@ fun HomeScreen(
     }
 }
 
-@Preview(showBackground = true, heightDp = 1500)
-
 @Composable
-fun DuaCard() {
+fun DuaCard(text: String) {
     val cyanColor = Color(0xFF2075B7)
     Box(
         modifier = Modifier
@@ -264,16 +274,16 @@ fun DuaCard() {
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
-                text = " \"لا اله الا الله وحده لا شريك له ,له الملك وله الحمد وهو على كل شئ قدير\" ",
+                text = text,
                 color = Color.White,
-                fontSize = 16.sp,
+                fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center
             )
             Text(
                 text = "دعاء اليوم",
                 color = Color.White,
-                fontSize = 14.sp,
+                fontSize = 12.sp,
                 modifier = Modifier.padding(top = 8.dp)
             )
         }
