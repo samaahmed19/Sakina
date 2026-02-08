@@ -1,11 +1,13 @@
 package com.example.sakina.data.repository
+import android.content.Context
 import com.example.sakina.data.local.database.dao.AzkarDao
 import com.example.sakina.data.local.database.entity.CategoryEntity
 import com.example.sakina.data.local.database.entity.ZikrEntity
+import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
 class AzkarRepository @Inject constructor(
-    private val azkarDao: AzkarDao
+    private val azkarDao: AzkarDao,@ApplicationContext private val context: Context
 ) {
 
     suspend fun getAllCategories(): List<CategoryEntity> {
@@ -26,5 +28,7 @@ class AzkarRepository @Inject constructor(
 
     suspend fun insertAzkar(azkar: List<ZikrEntity>) {
         azkarDao.insertAzkar(azkar)
+    }fun loadJsonFromAssets(fileName: String): String {
+        return context.assets.open(fileName).bufferedReader().use { it.readText() }
     }
 }
