@@ -3,15 +3,12 @@ package com.example.sakina.data.local.database
 
 import android.content.Context
 import androidx.room.Room
-
-import androidx.room.RoomDatabase
-import androidx.sqlite.db.SupportSQLiteDatabase
-import com.example.sakina.data.local.database.AppDatabase
 import com.example.sakina.data.local.database.dao.AzkarDao
 import com.example.sakina.data.local.database.dao.DuaDao
 import com.example.sakina.data.local.database.dao.ChecklistDao
 import com.example.sakina.data.local.database.dao.PrayerDao
 import com.example.sakina.data.local.database.dao.QuranDao
+import com.example.sakina.data.local.database.dao.StreakDao
 import com.example.sakina.data.local.database.dao.TafsirDao
 import com.example.sakina.data.local.database.dao.TasbeehDao
 import com.example.sakina.data.local.database.dao.UserDao
@@ -63,6 +60,10 @@ object DatabaseModule {
     fun provideChecklistDao(
         database: AppDatabase
     ): ChecklistDao = database.checklistDao()
+    @Provides
+    fun provideStreakDao(
+        database: AppDatabase
+    ): StreakDao = database.streakDao()
     @Provides
     fun provideTasbeehDao(
         database: AppDatabase

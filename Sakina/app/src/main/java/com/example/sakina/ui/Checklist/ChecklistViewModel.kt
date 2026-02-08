@@ -1,7 +1,7 @@
 package com.example.sakina.ui.Checklist
 
-import ChecklistDao
-import StreakDao
+import com.example.sakina.data.local.database.dao.ChecklistDao
+import com.example.sakina.data.local.database.dao.StreakDao
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
