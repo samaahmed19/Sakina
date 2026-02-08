@@ -53,22 +53,22 @@ val NeonPink =Color(0xFFFA2C71)
 
 
 fun getAdjustedHijrahDate(adjustment: Long = 0): String {
-    // 1. حساب التاريخ الهجري مع التعديل
+
     val hijrahDate = HijrahDate.now().plus(adjustment, ChronoUnit.DAYS)
 
-    // 2. مصفوفة أسماء الشهور الهجرية (عشان نضمن إنها تطلع عربي مش أرقام)
+
     val months = arrayOf(
         "المحرّم", "صفر", "ربيع الأول", "ربيع الآخر",
         "جمادى الأولى", "جمادى الآخرة", "رجب", "شعبان",
         "رمضان", "شوال", "ذو القعدة", "ذو الحجة"
     )
 
-    // 3. استخراج رقم اليوم، الشهر، والسنة من الكائن
+
     val day = hijrahDate.get(ChronoField.DAY_OF_MONTH)
     val monthIndex = hijrahDate.get(ChronoField.MONTH_OF_YEAR) - 1 // نطرح 1 لأن المصفوفة تبدأ من 0
     val year = hijrahDate.get(ChronoField.YEAR)
 
-    // 4. تجميع النص النهائي (مثلاً: 19 شعبان 1447)
+
     return "$day ${months[monthIndex]} $year"
 }
 
