@@ -1,13 +1,14 @@
 package com.example.sakina.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.example.sakina.ui.Azkar.azkar_list.AzkarListScreen
-import com.example.sakina.ui.Azkar.azkar_details.AzkarDetailsScreen
+import com.example.sakina.ui.Azkar.azkar_list.ZikrListScreen
+import com.example.sakina.ui.Azkar.azkar_details.ZikrDetailsScreen
 import com.example.sakina.ui.Checklist.ChecklistScreen
 import com.example.sakina.ui.Home.HomeScreen
 import com.example.sakina.ui.Splash.SplashScreen
@@ -16,20 +17,45 @@ import com.example.sakina.ui.HolyQuran.surah_list.SurahListScreen
 import com.example.sakina.ui.Prayers.PrayerScreen
 import com.example.sakina.ui.Tasbeeh.TasbeehScreen
 import com.example.sakina.navigation.Screen
+import com.example.sakina.ui.authentication.LoginScreen
 
 
 
 
 @Composable
-fun AppNavGraph(navController: NavHostController) {
+fun AppNavGraph(
+    navController: NavHostController,
+    modifier: Modifier = Modifier
+) {
     NavHost(
         navController = navController,
-        startDestination = Screen.Splash.route
+        startDestination = Screen.Splash.route,
+        modifier = modifier
     ) {
-        // Splash Screen
-        composable(Screen.Splash.route) {
-            SplashScreen(onTimeout = { navController.navigate(Screen.Home.route) { popUpTo(Screen.Splash.route) { inclusive = true } } }) }
 
+        composable(Screen.Splash.route) {
+            SplashScreen(
+                onNavigateToLogin = {
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(Screen.Splash.route) { inclusive = true }
+                    }
+                },
+                onNavigateToHome = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Splash.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+        composable(Screen.Login.route) {
+            LoginScreen(
+                onLoginSuccess = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Login.route) { inclusive = true }
+                    }
+                }
+            )
+        }
         //  Home Screen
         composable(Screen.Home.route) {
              HomeScreen(onAzkarCardClick = { navController.navigate(Screen.Categories.route) },
@@ -45,18 +71,22 @@ fun AppNavGraph(navController: NavHostController) {
 
         //  Azkar List Screen
         composable(Screen.Categories.route) {
-            AzkarListScreen(onCategoryClick = { categoryId ->
-                navController.navigate(Screen.Details.createRoute(categoryId))
+            ZikrListScreen(onCategoryClick = { categoryId ->
+                navController.navigate("azkar_details/$categoryId")
             })
         }
 
         // ِAzkar Details Screen
         composable(
-            route = Screen.Details.route,
-            arguments = listOf(navArgument("categoryId") { type = NavType.StringType })
+            route = "azkar_details/{catId}",
+            arguments = listOf(navArgument("catId") { type = NavType.StringType })
         ) { backStackEntry ->
-            val categoryId = backStackEntry.arguments?.getString("categoryId") ?: ""
-            AzkarDetailsScreen(categoryId = categoryId)
+            val catId = backStackEntry.arguments?.getString("catId") ?: ""
+
+            ZikrDetailsScreen(
+                categoryId = catId,
+                onBackClick = { navController.popBackStack() }
+            )
         }
         //  Quran List Screen
         composable(Screen.Quran.route) {

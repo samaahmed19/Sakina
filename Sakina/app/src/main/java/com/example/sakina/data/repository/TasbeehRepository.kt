@@ -13,6 +13,8 @@ class TasbeehRepository @Inject constructor(
         return dao.getAll()
     }
 
+    suspend fun getTotalCount(): Int = dao.getTotalCount()
+
     suspend fun increment(id: Int) {
         dao.increment(id)
     }

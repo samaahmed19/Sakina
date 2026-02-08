@@ -26,22 +26,56 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
 import com.example.sakina.ui.authentication.LoginScreen
 import com.example.sakina.ui.Home.HomeScreen
 import com.example.sakina.ui.settings.SettingsScreen
 import com.example.sakina.ui.theme.SakinaTheme
 import dagger.hilt.android.AndroidEntryPoint
 import com.example.sakina.navigation.AppNavGraph
+import com.example.sakina.navigation.SakinaBottomBar
+import com.example.sakina.ui.Checklist.DailyResetWorker
+import java.util.concurrent.TimeUnit
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        scheduleDailyReset()
         setContent {
             val navController = rememberNavController()
-            AppNavGraph(navController = navController)
+            Scaffold(
+                modifier = Modifier.fillMaxSize(),
+                bottomBar = { SakinaBottomBar(navController = navController) }
+            ) { paddingValues ->
+                AppNavGraph(
+                    navController = navController,
+                    modifier = Modifier.padding(paddingValues)
+                )
+            }
         }
     }
+    private fun scheduleDailyReset() {
+        val now = System.currentTimeMillis()
+        val millisInDay = 24 * 60 * 60 * 1000
+
+        val nextMidnight = ((now / millisInDay) + 1) * millisInDay
+        val delay = nextMidnight - now
+
+        val workRequest =
+            PeriodicWorkRequestBuilder<DailyResetWorker>(1, TimeUnit.DAYS)
+                .setInitialDelay(delay, TimeUnit.MILLISECONDS)
+                .build()
+
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+            "daily_task_reset",
+            ExistingPeriodicWorkPolicy.UPDATE,
+            workRequest
+        )
+    }
+
 }
 
 @PreviewScreenSizes

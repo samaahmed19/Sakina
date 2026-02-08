@@ -7,8 +7,11 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -189,7 +192,8 @@ fun ChecklistScreen(
                 items(tasks) { task ->
                     TaskCard(
                         task = task,
-                        onToggle = { viewModel.toggleTask(task) }
+                        onToggle = { viewModel.toggleTask(task) },
+                        onDelete = { viewModel.deleteTask(task) }
                     )
                 }
             }
@@ -295,10 +299,12 @@ private fun ProgressCard(
 
 /* ---------------- TASK CARD ---------------- */
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun TaskCard(
+fun TaskCard(
     task: ChecklistEntity,
-    onToggle: () -> Unit
+    onToggle: () -> Unit,
+    onDelete: () -> Unit
 ) {
     Card(
         shape = RoundedCornerShape(18.dp),
@@ -312,6 +318,13 @@ private fun TaskCard(
                 Color.White.copy(alpha = 0.15f),
                 RoundedCornerShape(18.dp)
             )
+            .combinedClickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                onClick = { /* optional */ },
+                onLongClick = { onDelete() }
+            )
+
     ) {
         Row(
             modifier = Modifier
@@ -353,6 +366,7 @@ private fun TaskCard(
         }
     }
 }
+
 @Composable
 private fun AddTaskCard(
     onAddClick: () -> Unit
@@ -484,7 +498,11 @@ fun ChecklistPreview() {
                     item { ProgressCard(1, 3) }
 
                     items(previewTasks) {
-                        TaskCard(task = it, onToggle = {})
+                        TaskCard(
+                            task = it,
+                            onToggle = {},
+                            onDelete = {}
+                        )
                     }
 
                     item {

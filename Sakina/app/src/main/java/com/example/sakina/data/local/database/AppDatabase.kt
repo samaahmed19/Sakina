@@ -14,7 +14,9 @@ import com.example.sakina.data.local.database.entity.DuaCategoryEntity
 import com.example.sakina.data.local.database.entity.SurahEntity
 import com.example.sakina.data.local.database.entity.AyahEntity
 import com.example.sakina.data.local.database.dao.ChecklistDao
+import com.example.sakina.data.local.database.dao.StreakDao
 import com.example.sakina.data.local.database.entity.ChecklistEntity
+import com.example.sakina.data.local.database.entity.StreakEntity
 import com.example.sakina.data.local.database.dao.TasbeehDao
 import com.example.sakina.data.local.database.dao.UserDao
 import com.example.sakina.data.local.database.dao.TafsirDao
@@ -33,11 +35,12 @@ import com.example.sakina.data.local.database.entity.UserEntity
         SurahEntity::class,
         AyahEntity::class,
         ChecklistEntity::class,
+        StreakEntity::class,
         TasbeehEntity::class,
         UserEntity::class,
         TafsirEntity::class
     ],
-    version = 3,
+    version = 4,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -50,6 +53,8 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun quranDao(): QuranDao
 
     abstract fun checklistDao(): ChecklistDao
+
+    abstract fun streakDao(): StreakDao
 
     abstract fun tasbeehDao(): TasbeehDao
 
