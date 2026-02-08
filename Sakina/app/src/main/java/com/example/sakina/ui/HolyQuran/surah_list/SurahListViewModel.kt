@@ -1,5 +1,7 @@
 package com.example.sakina.ui.HolyQuran.surah_list
 
+import android.app.Application
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.sakina.data.local.database.entity.SurahEntity
@@ -8,10 +10,12 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.getValue
 
 @HiltViewModel
 class SurahListViewModel @Inject constructor(
-    private val repository: QuranRepository
+    private val repository: QuranRepository,
+    application: Application
 ) : ViewModel() {
 
 
@@ -70,5 +74,23 @@ class SurahListViewModel @Inject constructor(
             ayahCount = this.ayahCount,
             type = if (medinaSurahIds.contains(this.id)) "مدنية" else "مكية"
         )
+    }
+
+    private val prefs by lazy {
+        application.getSharedPreferences("sakina_prefs", Context.MODE_PRIVATE)
+    }
+
+
+    private val _savedSurahId = MutableStateFlow<Int>(-1)
+    val savedSurahId = _savedSurahId.asStateFlow()
+
+
+    fun refreshSavedProgress() {
+        _savedSurahId.value = prefs.getInt("last_surah_id", -1)
+    }
+
+    init {
+        loadSurahsFromDb()
+        refreshSavedProgress()
     }
 }
