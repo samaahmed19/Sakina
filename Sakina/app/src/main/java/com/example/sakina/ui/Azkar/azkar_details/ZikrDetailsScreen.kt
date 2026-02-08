@@ -13,6 +13,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -28,9 +30,39 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.hilt.navigation.compose.hiltViewModel
 
 
-
+@Composable
+fun ZikrTopAppBar(title: String, onBackClick: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 40.dp, start = 8.dp, end = 16.dp, bottom = 8.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            IconButton(onClick = onBackClick) {
+                Icon(
+                    imageVector = Icons.Default.ArrowForward,
+                    contentDescription = "رجوع",
+                    tint = Color.White
+                )
+            }
+            Text(
+                text = title,
+                fontSize = 26.sp,
+                color = Color(0xFFFFD700),
+                fontWeight = FontWeight.Bold
+            )
+        }
+        Text(
+            text = "أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ",
+            color = Color.White.copy(alpha = 0.5f),
+            fontSize = 14.sp,
+            modifier = Modifier.padding(start = 48.dp)
+        )
+    }
+}
 @Composable
 fun TotalProgressHeader(completedCount: Int, totalAzkarCount: Int) {
     Card(
@@ -79,54 +111,12 @@ fun TotalProgressHeader(completedCount: Int, totalAzkarCount: Int) {
     }
 }
 
-
 @Composable
-fun ZikrDetailsScreen(categoryId: String, viewModel: AzkarViewModel = viewModel()) {
-    LaunchedEffect(categoryId) {
-        viewModel.loadAzkar(categoryId)
-    }
-
-    val azkarList = viewModel.azkarList
-    val completedCount = azkarList.count { it.currentCount >= it.maxCount }
-    val totalCount = azkarList.size
-
-
-    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-        Scaffold(
-            containerColor = Color(0xFF0A0E14),
-            topBar = {
-                Column(modifier = Modifier.padding(16.dp)) {
-                   Text(
-                            text = viewModel.categoryTitle,
-                    fontSize = 28.sp,
-                    color = Color(0xFFFFC107),
-                    fontWeight = FontWeight.Bold
-                    )
-                    Text("أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ", color = Color.Gray, fontSize = 14.sp)
-                }
-            }
-        ) { padding ->
-            LazyColumn(modifier = Modifier.padding(padding).fillMaxSize()) {
-
-                item {
-                    TotalProgressHeader(completedCount, totalCount)
-                }
-
-
-                items(azkarList) { zikr ->
-                    ZikrCard(
-                        zikr = zikr,
-                        onCounterClick = { viewModel.incrementCount(zikr.id) }
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun AzkarDetailsScreen(categoryId: String, viewModel: AzkarViewModel = viewModel()) {
-
+fun ZikrDetailsScreen(
+    categoryId: String,
+    viewModel: AzkarViewModel = hiltViewModel(),
+    onBackClick: () -> Unit
+) {
     LaunchedEffect(categoryId) {
         viewModel.loadAzkar(categoryId)
     }
@@ -138,26 +128,31 @@ fun AzkarDetailsScreen(categoryId: String, viewModel: AzkarViewModel = viewModel
         Scaffold(
             containerColor = Color(0xFF0A0E14),
             topBar = {
-                Column(modifier = Modifier.padding(16.dp)) {
 
-                    Text(
-                        text = viewModel.categoryTitle,
-                        fontSize = 28.sp,
-                        color = Color(0xFFFFC107),
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text("استعن بالله واذكر الله", color = Color.Gray, fontSize = 14.sp)
-                }
+                ZikrTopAppBar(
+                    title = viewModel.categoryTitle,
+                    onBackClick = onBackClick
+                )
             }
         ) { padding ->
-            LazyColumn(modifier = Modifier.padding(padding).fillMaxSize()) {
-                item { TotalProgressHeader(completedCount, azkarList.size) }
+            if (azkarList.isEmpty()) {
+                // حالة احتياطية لو البيانات لسه بتتحمل
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = Color(0xFFFFC107))
+                }
+            } else {
+                LazyColumn(modifier = Modifier.padding(padding).fillMaxSize()) {
+                    item { TotalProgressHeader(completedCount, azkarList.size) }
 
-                items(azkarList) { zikr ->
-                    ZikrCard(
-                        zikr = zikr,
-                        onCounterClick = { viewModel.incrementCount(zikr.id) }
-                    )
+                    items(
+                        items = azkarList,
+                        key = { it.id }
+                    ) { zikr ->
+                        ZikrCard(
+                            zikr = zikr,
+                            onCounterClick = { viewModel.incrementCount(zikr.id) }
+                        )
+                    }
                 }
             }
         }

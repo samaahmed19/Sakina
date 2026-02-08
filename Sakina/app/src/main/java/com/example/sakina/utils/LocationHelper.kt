@@ -24,13 +24,32 @@ class LocationHelper @Inject constructor(
     }
 
     suspend fun getCurrentLocation(): String? {
+
         if (!hasLocationPermission()) return null
+
         return try {
             val fusedClient = LocationServices.getFusedLocationProviderClient(context)
+
+
+            if (ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                return null
+            }
+
+            val lastLocation = fusedClient.lastLocation.await()
+            if (lastLocation != null) {
+                return "${lastLocation.latitude},${lastLocation.longitude}"
+            }
+
+
             val location = fusedClient.getCurrentLocation(
-                Priority.PRIORITY_BALANCED_POWER_ACCURACY,
+                Priority.PRIORITY_HIGH_ACCURACY,
                 null
             ).await()
+
             location?.let { "${it.latitude},${it.longitude}" }
         } catch (e: Exception) {
             null

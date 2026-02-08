@@ -8,8 +8,12 @@ data class ChecklistEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val taskName: String,
     val isCompleted: Boolean = false,
-    val createdAt: Long = System.currentTimeMillis(),
-
-    val lastStreakDay: Long = -1L,
-    val streakDays: Int = 0
+    val createdAt: Long = System.currentTimeMillis()
 )
+@Entity(tableName = "streak")
+data class StreakEntity(
+    @PrimaryKey val id: Int = 0,
+    val streakDays: Int,
+    val lastCompletedDay: Long
+)
+
