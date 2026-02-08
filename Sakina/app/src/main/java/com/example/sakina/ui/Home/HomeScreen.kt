@@ -1,40 +1,57 @@
 package com.example.sakina.ui.Home
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.runtime.*
-import androidx.compose.foundation.clickable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Icon
-import com.example.sakina.R
-import com.example.sakina.ui.Home.components.HomeCard
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.border
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import com.example.sakina.ui.Home.components.HomeCard2
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.text.style.TextAlign
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
-import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import com.example.sakina.R
+import com.example.sakina.ui.Home.components.HomeCard
+import com.example.sakina.ui.Home.components.HomeCard2
+import com.example.sakina.ui.Prayers.PrayerViewModel
+import com.example.sakina.utils.formatClockTime
+import com.example.sakina.utils.prayerTitleAr
+
 val NeonCyan = Color(0xFF00FFD1)
 val NeonPurple = Color(0xFFBD00FF)
 val NeonGold = Color(0xFFFFD700)
@@ -91,6 +108,33 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val user by viewModel.userFlow.collectAsState(initial = null)
+    val context = LocalContext.current
+
+    val prayerViewModel: PrayerViewModel = hiltViewModel()
+    val prayerUiState by prayerViewModel.uiState.collectAsState()
+    val completedFardCount = prayerUiState.summary?.completedFardCount ?: 0
+    val totalFardCount = prayerUiState.summary?.totalFardCount ?: 5
+    val salahSubtitle = run {
+        val key = prayerUiState.nextFardPrayerKey
+        val timeMillis = prayerUiState.nextFardPrayerTimeMillis
+        if (key != null && timeMillis != null) {
+            "${prayerTitleAr(key)} ${formatClockTime(context, timeMillis)}"
+        } else {
+            "حدد موقعك لعرض المواقيت"
+        }
+    }
+
+    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                prayerViewModel.load()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
     LaunchedEffect(Unit) {
         viewModel.refreshLastRead()
     }
@@ -134,7 +178,7 @@ fun HomeScreen(
                 }
             }
             item { DuaCard() }
-            item { HomeCard("صلاتي", "المغرب 6:32", NeonGold, R.drawable.pray,
+            item { HomeCard("صلاتي", salahSubtitle, NeonGold, R.drawable.pray,
                     trailingContent = {
 
                         Box(
@@ -144,7 +188,11 @@ fun HomeScreen(
                                 .background(NeonGold.copy(alpha = 0.2f), CircleShape),
                             contentAlignment = Alignment.Center,
                         ) {
-                            Text("3/5", color = NeonGold, fontWeight = FontWeight.Bold)
+                            Text(
+                                "$completedFardCount/$totalFardCount",
+                                color = NeonGold,
+                                fontWeight = FontWeight.Bold
+                            )
                         }
                     },
                 onClick = {onSalahCardClick()})

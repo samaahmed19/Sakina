@@ -50,6 +50,7 @@ dependencies {
     implementation("androidx.compose.runtime:runtime")
     implementation("androidx.core:core-splashscreen:1.0.1")
     implementation("androidx.datastore:datastore-preferences:1.1.1")
+    implementation("com.batoulapps.adhan:adhan:1.2.1")
     implementation("androidx.room:room-runtime:2.8.4")
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.compose.foundation)
