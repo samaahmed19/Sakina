@@ -22,7 +22,9 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
-
+    kotlin {
+        jvmToolchain(17)
+    }
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -33,11 +35,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "17"
     }
     buildFeatures {
         compose = true
@@ -48,14 +50,14 @@ dependencies {
     implementation("androidx.compose.runtime:runtime")
     implementation("androidx.core:core-splashscreen:1.0.1")
     implementation("androidx.datastore:datastore-preferences:1.1.1")
-    implementation("androidx.room:room-runtime:2.6.1")
+    implementation("androidx.room:room-runtime:2.8.4")
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.hilt.common)
-    kapt("androidx.room:room-compiler:2.6.1")
-    implementation("androidx.room:room-ktx:2.6.1")
-    testImplementation("androidx.room:room-testing:2.6.1")
+    kapt("androidx.room:room-compiler:2.8.4")
+    implementation("androidx.room:room-ktx:2.8.4")
+    testImplementation("androidx.room:room-testing:2.8.4")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1")
     testImplementation("androidx.test:core-ktx:1.6.1")
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
