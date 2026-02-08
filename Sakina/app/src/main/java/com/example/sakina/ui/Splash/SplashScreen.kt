@@ -43,7 +43,7 @@ fun SplashScreen(
             painter = painterResource(id = R.drawable.splash),
             contentDescription = null,
             modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Fit
+            contentScale = ContentScale.Crop
         )
     }
 }

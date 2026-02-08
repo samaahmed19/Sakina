@@ -2,6 +2,9 @@ package com.example.sakina.ui.Home
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import java.time.chrono.HijrahDate
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.*
@@ -22,6 +25,8 @@ import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import java.time.temporal.ChronoField
+import java.time.temporal.ChronoUnit
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.border
 import androidx.compose.foundation.shape.CircleShape
@@ -45,6 +50,27 @@ val NeonPink =Color(0xFFFA2C71)
 
 
 
+
+
+fun getAdjustedHijrahDate(adjustment: Long = 0): String {
+    // 1. حساب التاريخ الهجري مع التعديل
+    val hijrahDate = HijrahDate.now().plus(adjustment, ChronoUnit.DAYS)
+
+    // 2. مصفوفة أسماء الشهور الهجرية (عشان نضمن إنها تطلع عربي مش أرقام)
+    val months = arrayOf(
+        "المحرّم", "صفر", "ربيع الأول", "ربيع الآخر",
+        "جمادى الأولى", "جمادى الآخرة", "رجب", "شعبان",
+        "رمضان", "شوال", "ذو القعدة", "ذو الحجة"
+    )
+
+    // 3. استخراج رقم اليوم، الشهر، والسنة من الكائن
+    val day = hijrahDate.get(ChronoField.DAY_OF_MONTH)
+    val monthIndex = hijrahDate.get(ChronoField.MONTH_OF_YEAR) - 1 // نطرح 1 لأن المصفوفة تبدأ من 0
+    val year = hijrahDate.get(ChronoField.YEAR)
+
+    // 4. تجميع النص النهائي (مثلاً: 19 شعبان 1447)
+    return "$day ${months[monthIndex]} $year"
+}
 
 @Composable
 fun GalaxyBackground(content: @Composable () -> Unit) {
@@ -120,7 +146,7 @@ fun HomeScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = "أهلاً بك  ${user?.name ?: ""}",
+                            text = "أهلاً بك, ${user?.name ?: ""}",
                             color = Color.White,
                             fontSize = 32.sp,
                             fontWeight = FontWeight.ExtraBold,
@@ -134,7 +160,7 @@ fun HomeScreen(
                         )
 
                         Text(
-                            text = "9 رمضان 1447",
+                            text = getAdjustedHijrahDate(),
                             color = Color.Gray.copy(alpha = 0.8f),
                             fontSize = 18.sp,
                             textAlign = TextAlign.Center
@@ -240,14 +266,14 @@ fun DuaCard() {
             Text(
                 text = " \"لا اله الا الله وحده لا شريك له ,له الملك وله الحمد وهو على كل شئ قدير\" ",
                 color = Color.White,
-                fontSize = 14.sp,
+                fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center
             )
             Text(
                 text = "دعاء اليوم",
                 color = Color.White,
-                fontSize = 12.sp,
+                fontSize = 14.sp,
                 modifier = Modifier.padding(top = 8.dp)
             )
         }
