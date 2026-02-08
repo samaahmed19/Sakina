@@ -2,9 +2,12 @@ package com.example.sakina.data.source.mapper
 
 import com.example.sakina.data.local.database.entity.AyahEntity
 import com.example.sakina.data.local.database.entity.CategoryEntity
+import com.example.sakina.data.local.database.entity.DuaCategoryEntity
 import com.example.sakina.data.local.database.entity.DuaEntity
 import com.example.sakina.data.local.database.entity.ZikrEntity
 import com.example.sakina.data.local.database.entity.TasbeehEntity
+
+import org.json.JSONArray
 import org.json.JSONObject
 
 object JsonMapper {
@@ -13,91 +16,102 @@ object JsonMapper {
     fun mapCategories(json: String): Pair<List<CategoryEntity>, List<ZikrEntity>> {
         val categories = mutableListOf<CategoryEntity>()
         val azkar = mutableListOf<ZikrEntity>()
+        try {
+            val root = JSONObject(json)
+            val categoriesArray = root.getJSONArray("categories")
 
-        val root = JSONObject(json)
-        val categoriesArray = root.getJSONArray("categories")
-
-        for (i in 0 until categoriesArray.length()) {
-            val categoryObj = categoriesArray.getJSONObject(i)
-            val categoryId = categoryObj.getString("id")
-
-            categories.add(
-                CategoryEntity(
-                    id = categoryId,
-                    title = categoryObj.getString("title"),
-                    icon = categoryObj.getString("icon")
-                )
-            )
-
-            val azkarArray = categoryObj.getJSONArray("azkar")
-            for (j in 0 until azkarArray.length()) {
-                val zikrObj = azkarArray.getJSONObject(j)
-
-                azkar.add(
-                    ZikrEntity(
-                        categoryId = categoryId,
-                        text = zikrObj.getString("text"),
-                        repeat = zikrObj.optInt("repeat", 1),
-                        reward = zikrObj.optString("reward", null)
+            for (i in 0 until categoriesArray.length()) {
+                val categoryObj = categoriesArray.getJSONObject(i)
+                val categoryId = categoryObj.optString("id", i.toString())
+                categories.add(
+                    CategoryEntity(
+                        id = categoryId,
+                        title = categoryObj.optString("title", "بدون عنوان"),
+                        icon = categoryObj.optString("icon", "")
                     )
                 )
-            }
+
+                val azkarArray = categoryObj.optJSONArray("azkar") ?: JSONArray()
+                for (j in 0 until azkarArray.length()) {
+                    val zikrObj = azkarArray.getJSONObject(j)
+
+                    azkar.add(
+                        ZikrEntity(
+                            categoryId = categoryId,
+                            text = zikrObj.optString("text", ""),
+                            repeat = zikrObj.optInt("repeat", 1),
+                            reward = zikrObj.optString("reward", null)
+                        )
+                    )
+                }
+            }}
+            catch(e: Exception) { e.printStackTrace() }
+            return Pair(categories, azkar)
         }
-        return Pair(categories, azkar)
-    }
 
     // ===== Duas =====
-    fun mapDuas(json: String): List<DuaEntity> {
+    fun mapDuas(json: String): Pair<List<DuaCategoryEntity>, List<DuaEntity>> {
+        val categories = mutableListOf<DuaCategoryEntity>()
         val duas = mutableListOf<DuaEntity>()
         val root = JSONObject(json)
         val categoryArray = root.getJSONArray("categories")
 
         for (i in 0 until categoryArray.length()) {
-            val categoryObj = categoryArray.getJSONObject(i)
-            val categoryId = categoryObj.getInt("id")
-            val categoryName = categoryObj.getString("name")
+            val catObj = categoryArray.getJSONObject(i)
+            val catId = catObj.getString("id")
 
-            val duasArray = categoryObj.getJSONArray("duas")
+            val duasArray = catObj.getJSONArray("duas")
+            val currentCategoryDuaCount = duasArray.length()
+
+            categories.add(
+                DuaCategoryEntity(
+                    id = catId,
+                    title = catObj.getString("name"),
+                    icon = "splash",
+                    count = currentCategoryDuaCount
+                )
+            )
+
             for (j in 0 until duasArray.length()) {
                 val duaObj = duasArray.getJSONObject(j)
                 duas.add(
                     DuaEntity(
-                        id = duaObj.getInt("id"),
-                        text = duaObj.getString("text"),
-                        categoryId = categoryId,
-                        categoryName = categoryName
+                        categoryId = catId,
+                        text = duaObj.getString("text")
                     )
                 )
             }
         }
-        return duas
+
+        return Pair(categories.toList(), duas.toList())
     }
 
     // ===== Tasbeeh  =====
     fun mapTasbeeh(json: String): List<TasbeehEntity> {
         val result = mutableListOf<TasbeehEntity>()
-        val root = JSONObject(json)
-        val tasbeehArray = root.getJSONArray("tasbeeh")
+        try {
+            val root = JSONObject(json)
+            val tasbeehArray = root.getJSONArray("tasbeeh")
 
-        for (i in 0 until tasbeehArray.length()) {
-            val obj = tasbeehArray.getJSONObject(i)
-            val targetsJson = obj.getJSONArray("targets").toString()
+            for (i in 0 until tasbeehArray.length()) {
+                val obj = tasbeehArray.getJSONObject(i)
+                val targetsJson = obj.optJSONArray("targets")?.toString() ?: "[]"
 
-            result.add(
-                TasbeehEntity(
-                    id = obj.getInt("id"),
-                    slug = obj.getString("slug"),
-                    text = obj.getString("text"),
-                    targets = targetsJson,
-                    category = obj.getString("category"),
-                    virtue = obj.getString("virtue"),
-                    source = obj.getString("source"),
-                    priority = obj.getInt("priority"),
-                    isDefault = obj.getBoolean("isDefault"),
-                    currentCount = 0
-                )
-            )
-        }
+                result.add(
+                    TasbeehEntity(
+                        id = obj.optInt("id", i),
+                        slug = obj.optString("slug", ""),
+                        text = obj.optString("text", ""),
+                        targets = targetsJson,
+                        category = obj.optString("category", "عام"),
+                        virtue = obj.optString("virtue", ""),
+                        source = obj.optString("source", ""),
+                        priority = obj.optInt("priority", 0),
+                        isDefault = obj.optBoolean("isDefault", false),
+                        currentCount = 0
+                    )
+            )}} catch (e: Exception) { e.printStackTrace() }
+
         return result
     }
     // ===== Quran =====

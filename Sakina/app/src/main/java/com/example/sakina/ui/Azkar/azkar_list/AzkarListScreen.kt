@@ -61,7 +61,8 @@ fun SmartNeonCard(
     tag: String,
     activeColor: Color,
     imageRes: Int,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+
 ) {
     var isPressed by remember { mutableStateOf(false) }
 
@@ -180,7 +181,7 @@ fun SmartNeonCard(
 
 @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun AzkarListScreen(viewModel: AzkarViewModel = hiltViewModel() ,
+    fun ZikrListScreen(viewModel: AzkarViewModel = hiltViewModel() ,
                         onCategoryClick: (String) -> Unit) {
     val neonColors = listOf(
         Color(0xFFFFD700),
@@ -254,7 +255,7 @@ fun SmartNeonCard(
                         Text(
                             text = "لِمَنْ أَرَادَ أَنْ يَذَّكَّرَ أَوْ أَرَادَ شُكُورًا",
                             color = Color.White.copy(alpha = 0.7f),
-                            fontSize = 20.sp,
+                            fontSize = 17.sp,
                             modifier = Modifier
                                 .padding(bottom = 32.dp)
                                 .fillMaxWidth()
@@ -281,7 +282,7 @@ fun SmartNeonCard(
                             tag = "استكشف",
                             activeColor = cardColor,
                             imageRes = getIconResource(category.icon),
-                           onClick = { onCategoryClick(category.id) }
+                            onClick = { onCategoryClick(category.id) }
                         )
 
 
@@ -317,7 +318,7 @@ fun AzkarFiltersBar(
     selectedFilter: String,
     onFilterSelected: (String) -> Unit
 ) {
-    val filters = listOf("الكل", "الصباح", "المساء", "النوم", "الصلاة")
+    val filters = listOf("الكل", "الصباح", "المساء", "النوم", "الصلاة", "المسجد", "المنزل")
 
 
     LazyRow(
@@ -370,31 +371,25 @@ fun AyahCard() {
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 1.dp)
-            .shadow(elevation = 3.dp, shape = RoundedCornerShape(24.dp), spotColor = cyanColor)
+            .shadow(elevation = 0.dp, shape = RoundedCornerShape(24.dp), spotColor = cyanColor)
             .background(cyanColor.copy(alpha = 0.3f), RoundedCornerShape(24.dp))
             .border(BorderStroke(4.dp, Brush.verticalGradient(listOf(cyanColor, Color.Transparent))), RoundedCornerShape(24.dp))
             .padding(7.dp),
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Icon(
-                painter = painterResource(id = R.drawable.splash),
-                contentDescription = null,
-                tint = cyanColor,
-                modifier = Modifier.size(40.dp)
-            )
             Spacer(modifier = Modifier.height(12.dp))
             Text(
                 text = " \"﴿ فَاذْكُرُونِي أَذْكُرْكُمْ وَاشْكُرُوا لِي وَلَا تَكْفُرُونِ ﴾\" ",
                 color = Color.White,
-                fontSize = 18.sp,
+                fontSize = 17.sp,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center
             )
             Text(
                 text = "سورة البقرة - آية 152",
                 color = Color.White,
-                fontSize = 15.sp,
+                fontSize = 14.sp,
                 modifier = Modifier.padding(top = 8.dp)
             )
         }

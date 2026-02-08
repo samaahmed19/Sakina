@@ -15,6 +15,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
@@ -33,6 +34,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
@@ -46,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.sakina.R
+import kotlinx.coroutines.delay
 import java.util.Random
 // ================= BACKGROUND =================
 @Composable
@@ -126,15 +129,30 @@ fun SurahDetailsScreen(
     ayahCount: Int,
     viewModel: SurahDetailsViewModel = hiltViewModel()
 ) {
+    val listState = rememberLazyListState()
     val fontSize by viewModel.fontSize
     val isBookmarked by viewModel.isBookmarked
     val ayat by viewModel.ayatList.collectAsState()
     val expandedAyahIndex by viewModel.expandedAyahIndex
     val tafsirMap by viewModel.tafsirMap.collectAsState()
     var showSettings by remember { mutableStateOf(false) }
+
+    val lastSavedIndex by viewModel.lastSavedAyahIndex
+
+
     LaunchedEffect(surahId) {
         viewModel.loadSurahData(surahId)
     }
+    LaunchedEffect(ayat, lastSavedIndex) {
+        if (ayat.isNotEmpty() && lastSavedIndex != null && lastSavedIndex != -1) {
+            delay(600)
+            listState.animateScrollToItem(
+                index = lastSavedIndex!!,
+                scrollOffset = -200
+            )
+        }
+    }
+
     GalaxyBackground {
         CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
             Column(
@@ -169,14 +187,14 @@ fun SurahDetailsScreen(
                     )
                 }
                 LazyColumn(
+                    state = listState,
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     contentPadding = PaddingValues(bottom = 24.dp)
                 ) {
-                    itemsIndexed(ayat) { index, ayah ->
-                        // 3. جلب التفسير الحقيقي من الـ Map باستخدام رقم الآية
+                    itemsIndexed(items = ayat,
+                        key = { _, ayah -> ayah.number }) { index, ayah ->
                         val currentTafsir = tafsirMap[ayah.number] ?: "جاري تحميل التفسير..."
-
                         AyahCard(
                             number = ayah.number,
                             text = ayah.text,
@@ -184,7 +202,11 @@ fun SurahDetailsScreen(
                             isExpanded = expandedAyahIndex == index,
                             onCardClick = { viewModel.toggleAyahExpansion(index) },
                             tafsir = currentTafsir, // تمرير التفسير الفعلي
-                            index=index
+                            index=index,
+                            isLastRead = (lastSavedIndex ?: -1) == index,
+                            onBookmarkAyah = {
+                                viewModel.saveLastRead(surahId, surahName, index, ayahCount)
+                            }
                         )
                     }
                 }
@@ -201,6 +223,7 @@ fun SurahHeader(
     onBookmarkClick: () -> Unit,
     onSettingsClick: () -> Unit
 ) {
+
     Box(modifier = Modifier.fillMaxWidth().padding(top = 16.dp)) {
         Row(
             modifier = Modifier
@@ -303,101 +326,130 @@ fun AyahCard(
     isExpanded: Boolean,
     onCardClick: () -> Unit,
     tafsir: String,
-    index: Int
+    index: Int,
+    isLastRead: Boolean,
+    onBookmarkAyah: () -> Unit
 ) {
-    val visibleState = remember {
-        MutableTransitionState(false).apply {
-            targetState = true
-        }
-    }
-    androidx.compose.animation.AnimatedVisibility(
-        visibleState = visibleState,
-        enter = slideInVertically(
-            initialOffsetY = { it / 2 },
+    val translationY = remember { Animatable(50f) }
+    LaunchedEffect(Unit) {
+        translationY.animateTo(
+            targetValue = 0f,
             animationSpec = tween(
-                durationMillis = 400,
-                delayMillis = (index * 30).coerceAtMost(300),
-                        easing = FastOutSlowInEasing
+                durationMillis = 500,
+                delayMillis = (index * 50).coerceAtMost(500),
+                easing = FastOutSlowInEasing
             )
-        ) + fadeIn(
-            animationSpec = tween(400, delayMillis = (index * 30).coerceAtMost(300))
         )
-    ) {
-        val glowColor = if (isExpanded) Color(0xFFFFD700).copy(alpha = 0.4f) else Color(0xFFBFA14A).copy(alpha = 0.15f)
-        val annotatedString = buildAnnotatedString {
-            append(text)
-            append(" ")
-            appendInlineContent("ayah_number", "[number]")
+    }
+    val glowColor = if (isLastRead) {
+        Color(0xFFFFD700).copy(alpha = 0.5f)
+    } else if (isExpanded) {
+        Color(0xFFFFD700).copy(alpha = 0.4f)
+    } else {
+        Color(0xFFBFA14A).copy(alpha = 0.15f)
+    }
+
+    val annotatedString = buildAnnotatedString {
+        append(text)
+        append(" ")
+        appendInlineContent("ayah_number", "[number]")
+    }
+
+    val inlineContent = mapOf(
+        "ayah_number" to InlineTextContent(
+            Placeholder(
+                width = (fontSize * 1.5f).sp,
+                height = (fontSize * 1.5f).sp,
+                placeholderVerticalAlign = PlaceholderVerticalAlign.Center
+            )
+        ) {
+            IslamicNumberCircle(number)
         }
+    )
 
-        val inlineContent = mapOf(
-            "ayah_number" to InlineTextContent(
-                Placeholder(
-                    width = (fontSize * 1.5f).sp,
-                    height = (fontSize * 1.5f).sp,
-                    placeholderVerticalAlign = PlaceholderVerticalAlign.Center
-                )
-            ) {
-                IslamicNumberCircle(number)
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 10.dp, horizontal = 6.dp)
+            .graphicsLayer(translationY = translationY.value)
+            .drawBehind {
+                val shadowRadius = if (isLastRead || isExpanded) 40.dp.toPx() else 15.dp.toPx()
+                drawIntoCanvas { canvas ->
+                    val paint = androidx.compose.ui.graphics.Paint()
+                    val frameworkPaint = paint.asFrameworkPaint()
+                    frameworkPaint.color = glowColor.toArgb()
+                    frameworkPaint.setShadowLayer(shadowRadius, 0f, 0f, glowColor.toArgb())
+
+                    canvas.drawRoundRect(
+                        0f, 0f, size.width, size.height,
+                        20.dp.toPx(), 20.dp.toPx(), paint
+                    )
+                }
             }
-        )
-
+            .clip(RoundedCornerShape(20.dp))
+            .background(Color(0xFF0F172A))
+            .border(
+                width = if (isLastRead) 2.5.dp else 1.dp,
+                color = if (isLastRead) Color(0xFFFFD700)
+                else if (isExpanded) Color(0xFFFFD700).copy(alpha = 0.5f)
+                else Color(0xFF1E293B),
+                shape = RoundedCornerShape(20.dp)
+            )
+            .clickable { onCardClick() }
+            .padding(20.dp)
+    ) {
         Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 10.dp, horizontal = 6.dp)
-                .drawBehind {
-                    val shadowRadius = if (isExpanded) 35.dp.toPx() else 15.dp.toPx()
-                    drawIntoCanvas { canvas ->
-                        val paint = androidx.compose.ui.graphics.Paint()
-                        val frameworkPaint = paint.asFrameworkPaint()
-                        frameworkPaint.color = glowColor.toArgb()
-                        frameworkPaint.setShadowLayer(shadowRadius, 0f, 0f, glowColor.toArgb())
-
-                        canvas.drawRoundRect(
-                            0f, 0f, size.width, size.height,
-                            20.dp.toPx(), 20.dp.toPx(), paint
-                        )
-                    }
-                }
-                .clip(RoundedCornerShape(20.dp))
-                .background(Color(0xFF0F172A))
-                .border(
-                    width = 1.dp,
-                    color = if (isExpanded) Color(0xFFFFD700).copy(alpha = 0.5f) else Color(0xFF1E293B),
-                    shape = RoundedCornerShape(20.dp)
-                )
-                .clickable { onCardClick() }
-                .padding(20.dp)
+                .align(Alignment.TopStart)
+                .offset(x = (-8).dp, y = (-8).dp)
+                .clip(RoundedCornerShape(bottomEnd = 12.dp))
+                .clickable { onBookmarkAyah() }
+                .padding(8.dp)
         ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    text = annotatedString,
-                    inlineContent = inlineContent,
-                    color = Color.White,
-                    fontSize = fontSize.sp,
-                    lineHeight = (fontSize * 1.6f).sp,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                androidx.compose.animation.AnimatedVisibility(
-                    visible = isExpanded,
-                    enter = expandVertically() + fadeIn(),
-                    exit = shrinkVertically() + fadeOut()
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Divider(modifier = Modifier.padding(vertical = 16.dp), color = Color.White.copy(alpha = 0.1f))
-                        Text(text = "التفسير الميسر:", color = Color(0xFFFFD700), fontSize = 14.sp, fontWeight = FontWeight.Bold)
-                        Spacer(Modifier.height(8.dp))
-                        Text(
-                            text = tafsir,
-                            color = Color(0xFFECECEC),
-                            fontSize = (fontSize - 4).coerceAtLeast(14f).sp,
-                            lineHeight = ((fontSize - 4).coerceAtLeast(14f) * 1.5f).sp,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
+            Icon(
+                imageVector = if (isLastRead) Icons.Filled.Bookmark else Icons.Default.BookmarkBorder,
+                contentDescription = "Save Progress",
+                tint = if (isLastRead) Color(0xFFFFD700) else Color.White.copy(alpha = 0.3f),
+                modifier = Modifier.size(22.dp)
+            )
+        }
+
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                text = annotatedString,
+                inlineContent = inlineContent,
+                color = Color.White,
+                fontSize = fontSize.sp,
+                lineHeight = (fontSize * 1.6f).sp,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+            )
+
+            androidx.compose.animation.AnimatedVisibility(
+                visible = isExpanded,
+                enter = expandVertically() + fadeIn(),
+                exit = shrinkVertically() + fadeOut()
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Divider(
+                        modifier = Modifier.padding(vertical = 16.dp),
+                        color = Color.White.copy(alpha = 0.1f)
+                    )
+                    Text(
+                        text = "التفسير الميسر:",
+                        color = Color(0xFFFFD700),
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        text = tafsir,
+                        color = Color(0xFFECECEC),
+                        fontSize = (fontSize - 4).coerceAtLeast(14f).sp,
+                        lineHeight = ((fontSize - 4).coerceAtLeast(14f) * 1.5f).sp,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 }
             }
         }

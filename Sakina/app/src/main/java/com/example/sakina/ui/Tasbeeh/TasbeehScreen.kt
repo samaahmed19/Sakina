@@ -1,10 +1,5 @@
 package com.example.sakina.ui.Tasbeeh
 
-import com.example.sakina.ui.Tasbeeh.TasbeehViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
-import android.os.Bundle
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -24,25 +19,23 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.delay
 import kotlin.random.Random
 
-
-
+// الـ TasbeehOption هنسيبه عشان الألوان اللي انت اخترتها في الـ UI
 data class TasbeehOption(
     val id: String,
     val text: String,
     val color: Color
 )
 
-
-
 @Composable
 fun StarryBackground() {
     val infiniteTransition = rememberInfiniteTransition(label = "serenity")
-
     val offsetAnim by infiniteTransition.animateFloat(
         initialValue = 0f,
         targetValue = 1000f,
@@ -51,10 +44,7 @@ fun StarryBackground() {
             repeatMode = RepeatMode.Reverse
         ), label = ""
     )
-
-    val stars = remember {
-        List(60) { Offset(Random.nextFloat(), Random.nextFloat()) }
-    }
+    val stars = remember { List(60) { Offset(Random.nextFloat(), Random.nextFloat()) } }
 
     Box(modifier = Modifier.fillMaxSize().background(Color(0xFF0A0E1A))) {
         Canvas(modifier = Modifier.fillMaxSize()) {
@@ -65,13 +55,9 @@ fun StarryBackground() {
                     center = Offset(starOffset.x * size.width, starOffset.y * size.height)
                 )
             }
-
             drawCircle(
                 brush = Brush.radialGradient(
-                    colors = listOf(
-                        Color(0xFF1E2644).copy(alpha = 0.4f),
-                        Color.Transparent
-                    ),
+                    colors = listOf(Color(0xFF1E2644).copy(alpha = 0.4f), Color.Transparent),
                     center = Offset(offsetAnim, size.height / 2),
                     radius = 800f
                 ),
@@ -82,60 +68,58 @@ fun StarryBackground() {
     }
 }
 
-
 @Composable
-fun TasbeehScreen(viewModel: TasbeehViewModel = viewModel()) {
-    var count by remember { mutableIntStateOf(0) }
-    var breathPhase by remember { mutableStateOf(BreathPhase.INHALE) }
+fun TasbeehScreen(viewModel: TasbeehViewModel = hiltViewModel()) {
+    // استخدمنا الـ hiltViewModel عشان نمنع الـ Crash
 
-    var hasStartedByClick by remember { mutableStateOf(false) }
-
+    // قائمة الخيارات اللي انت صممتها بألوانها
     val tasbeehOptions = remember {
         listOf(
-            TasbeehOption("subhan", "سبحان الله", Color(0xFF00FFD1)),
-            TasbeehOption("alhamdulillah", "الحمد لله", Color(0xFFBD00FF)),
-            TasbeehOption("allahu", "الله أكبر", Color(0xFFFFD700)),
-            TasbeehOption("istighfar", "أستغفر الله", Color(0xFF4DFF88)),
-            TasbeehOption("salawat", "اللهم صل على محمد", Color(0xFFF63978))
+            TasbeehOption("subhan", "سبحان الله", Color(0xFF7DDECC)),
+            TasbeehOption("alhamdulillah", "الحمد لله", Color(0xFFC36BE1)),
+            TasbeehOption("allahu", "الله أكبر", Color(0xFFEED973)),
+            TasbeehOption("istighfar", "أستغفر الله", Color(0xFF77EFA0)),
+            TasbeehOption("salawat", "اللهم صل على محمد", Color(0xFFFF6294))
         )
     }
 
-    var selectedTasbeeh by remember { mutableStateOf(tasbeehOptions[0]) }
+    // ربط الاختيار الافتراضي من القائمة اللي فوق مع الـ ViewModel
+    var uiSelectedOption by remember { mutableStateOf(tasbeehOptions[0]) }
 
     val INHALE_DURATION = 5500L
     val HOLD_DURATION = 2000L
     val EXHALE_DURATION = 6500L
 
-    LaunchedEffect(hasStartedByClick) {
-        if (hasStartedByClick) {
+    // التحكم في مراحل التنفس من خلال الـ ViewModel
+    LaunchedEffect(viewModel.hasStartedByClick) {
+        if (viewModel.hasStartedByClick) {
             while (true) {
-                breathPhase = BreathPhase.INHALE
+                viewModel.updateBreathPhase(BreathPhase.INHALE)
                 delay(INHALE_DURATION)
-                breathPhase = BreathPhase.HOLD
+                viewModel.updateBreathPhase(BreathPhase.HOLD)
                 delay(HOLD_DURATION)
-                breathPhase = BreathPhase.EXHALE
+                viewModel.updateBreathPhase(BreathPhase.EXHALE)
                 delay(EXHALE_DURATION)
             }
         }
     }
 
-    val animationDuration = when (breathPhase) {
+    val animationDuration = when (viewModel.breathPhase) {
         BreathPhase.INHALE -> INHALE_DURATION.toInt()
         BreathPhase.HOLD -> HOLD_DURATION.toInt()
         else -> EXHALE_DURATION.toInt()
     }
 
     val scale by animateFloatAsState(
-        targetValue = if (!hasStartedByClick) 1.0f else when (breathPhase) {
+        targetValue = if (!viewModel.hasStartedByClick) 1.0f else when (viewModel.breathPhase) {
             BreathPhase.INHALE -> 1.15f
             BreathPhase.HOLD -> 1.15f
             BreathPhase.EXHALE -> 0.92f
         },
-        animationSpec = if (breathPhase == BreathPhase.HOLD || !hasStartedByClick) snap()
+        animationSpec = if (viewModel.breathPhase == BreathPhase.HOLD || !viewModel.hasStartedByClick) snap()
         else tween(durationMillis = animationDuration, easing = LinearOutSlowInEasing),
         label = "breathing_scale"
     )
-
 
     Box(modifier = Modifier.fillMaxSize()) {
         StarryBackground()
@@ -153,8 +137,8 @@ fun TasbeehScreen(viewModel: TasbeehViewModel = viewModel()) {
             Spacer(modifier = Modifier.height(10.dp))
 
             Text(
-                text = if (!hasStartedByClick) "اضغط على الدائرة لتبدأ الشهيق والذكر..."
-                else when(breathPhase) {
+                text = if (!viewModel.hasStartedByClick) "اضغط على الدائرة لتبدأ الشهيق والذكر..."
+                else when(viewModel.breathPhase) {
                     BreathPhase.INHALE -> "استشعر السكينة مع الشهيق وتأمل الذكر..."
                     BreathPhase.HOLD -> "تأمل في عظمة الخالق..."
                     else -> "أخرج كل ما يشغلك مع الزفير..."
@@ -163,20 +147,21 @@ fun TasbeehScreen(viewModel: TasbeehViewModel = viewModel()) {
                 modifier = Modifier.height(50.dp)
             )
 
-
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 tasbeehOptions.forEach { option ->
-                    TasbeehButton(option, selectedTasbeeh.id == option.id) { selectedTasbeeh = option }
+                    TasbeehButton(option, uiSelectedOption.id == option.id) {
+                        uiSelectedOption = option
+                        // لو عندك Entity في الـ ViewModel بنفس الاسم ممكن تربطهم هنا
+                    }
                 }
             }
 
             Spacer(modifier = Modifier.weight(1f))
 
-
             Box(contentAlignment = Alignment.Center, modifier = Modifier.size(280.dp)) {
-                if (hasStartedByClick) {
+                if (viewModel.hasStartedByClick) {
                     repeat(3) { index ->
-                        OuterRing(breathPhase, selectedTasbeeh.color, index * 400L, animationDuration)
+                        OuterRing(viewModel.breathPhase, uiSelectedOption.color, index * 400L, animationDuration)
                     }
                 }
 
@@ -184,25 +169,24 @@ fun TasbeehScreen(viewModel: TasbeehViewModel = viewModel()) {
                     modifier = Modifier
                         .size(180.dp)
                         .scale(scale)
-                        .shadow(25.dp, CircleShape, ambientColor = selectedTasbeeh.color)
+                        .shadow(25.dp, CircleShape, ambientColor = uiSelectedOption.color)
                         .background(
                             brush = Brush.radialGradient(
-                                colors = listOf(selectedTasbeeh.color.copy(0.4f), Color(0xFF1A1F33).copy(0.95f))
+                                colors = listOf(uiSelectedOption.color.copy(0.4f), Color(0xFF1A1F33).copy(0.95f))
                             ),
                             shape = CircleShape
                         )
-                        .border(1.5.dp, selectedTasbeeh.color.copy(0.5f), CircleShape)
+                        .border(1.5.dp, uiSelectedOption.color.copy(0.5f), CircleShape)
                         .clickable {
                             viewModel.incrementCount()
-                            println("Debug: Count is now ${viewModel.count}")
-                            if (!hasStartedByClick) hasStartedByClick = true
+                            if (!viewModel.hasStartedByClick) viewModel.hasStartedByClick = true
                         },
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        if (hasStartedByClick) {
+                        if (viewModel.hasStartedByClick) {
                             Text(
-                                text = when(breathPhase) {
+                                text = when(viewModel.breathPhase) {
                                     BreathPhase.INHALE -> "شهيق"
                                     BreathPhase.HOLD -> "ثبات"
                                     else -> "زفير"
@@ -218,8 +202,8 @@ fun TasbeehScreen(viewModel: TasbeehViewModel = viewModel()) {
             Spacer(modifier = Modifier.height(30.dp))
 
             Text(
-                text = selectedTasbeeh.text,
-                fontSize = 32.sp, fontWeight = FontWeight.Bold, color = selectedTasbeeh.color,
+                text = uiSelectedOption.text,
+                fontSize = 32.sp, fontWeight = FontWeight.Bold, color = uiSelectedOption.color,
                 textAlign = TextAlign.Center
             )
 
@@ -233,7 +217,7 @@ fun TasbeehScreen(viewModel: TasbeehViewModel = viewModel()) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             IconButton(
-                onClick = { count = 0 },
+                onClick = { viewModel.resetCount() },
                 modifier = Modifier
                     .size(50.dp)
                     .background(Color.White.copy(0.05f), CircleShape)
@@ -279,6 +263,3 @@ fun OuterRing(breathPhase: BreathPhase, color: Color, delay: Long, animationDura
             .border(1.dp, color.copy(alpha = 0.08f), CircleShape)
     )
 }
-
-
-
