@@ -5,19 +5,62 @@ import android.content.Context
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import com.example.sakina.data.repository.TasbeehRepository
 import com.example.sakina.data.repository.UserRepository
+import com.example.sakina.domain.usecase.GetDayPrayersUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     userRepository: UserRepository,
-    application: Application
+    application: Application,
+    private val getDayPrayers: GetDayPrayersUseCase,
+    private val tasbeehRepository: TasbeehRepository
 ) : ViewModel() {
 
     val userFlow = userRepository.getUser()
+
+    private val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
+    private fun today() = dateFormat.format(Date())
+
+    private val _prayerCompleted = MutableStateFlow(0)
+    private val _prayerTotal = MutableStateFlow(5)
+    val prayerCompleted: StateFlow<Int> = _prayerCompleted.asStateFlow()
+    val prayerTotal: StateFlow<Int> = _prayerTotal.asStateFlow()
+
+    private val _tasbeehCount = MutableStateFlow(0)
+    val tasbeehCount: StateFlow<Int> = _tasbeehCount.asStateFlow()
+
+    init {
+        loadPrayerAndTasbeeh()
+    }
+
+    fun loadPrayerAndTasbeeh() {
+        viewModelScope.launch {
+            runCatching {
+                getDayPrayers(today())
+            }.onSuccess { summary ->
+                _prayerCompleted.value = summary.completedFardCount
+                _prayerTotal.value = summary.totalFardCount
+            }
+            runCatching {
+                tasbeehRepository.getTotalCount()
+            }.onSuccess { total ->
+                _tasbeehCount.value = total
+            }
+        }
+    }
     private val prefs = application.getSharedPreferences("sakina_prefs", Context.MODE_PRIVATE)
 
 

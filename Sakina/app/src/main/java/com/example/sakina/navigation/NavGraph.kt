@@ -1,6 +1,7 @@
 package com.example.sakina.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -22,10 +23,14 @@ import com.example.sakina.ui.authentication.LoginScreen
 
 
 @Composable
-fun AppNavGraph(navController: NavHostController) {
+fun AppNavGraph(
+    navController: NavHostController,
+    modifier: Modifier = Modifier
+) {
     NavHost(
         navController = navController,
-        startDestination = Screen.Splash.route
+        startDestination = Screen.Splash.route,
+        modifier = modifier
     ) {
 
         composable(Screen.Splash.route) {
