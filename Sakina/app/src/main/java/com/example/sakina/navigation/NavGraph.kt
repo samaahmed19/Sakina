@@ -16,6 +16,7 @@ import com.example.sakina.ui.HolyQuran.surah_list.SurahListScreen
 import com.example.sakina.ui.Prayers.PrayerScreen
 import com.example.sakina.ui.Tasbeeh.TasbeehScreen
 import com.example.sakina.navigation.Screen
+import com.example.sakina.ui.authentication.LoginScreen
 
 
 
@@ -26,10 +27,30 @@ fun AppNavGraph(navController: NavHostController) {
         navController = navController,
         startDestination = Screen.Splash.route
     ) {
-        // Splash Screen
-        composable(Screen.Splash.route) {
-            SplashScreen(onTimeout = { navController.navigate(Screen.Home.route) { popUpTo(Screen.Splash.route) { inclusive = true } } }) }
 
+        composable(Screen.Splash.route) {
+            SplashScreen(
+                onNavigateToLogin = {
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(Screen.Splash.route) { inclusive = true }
+                    }
+                },
+                onNavigateToHome = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Splash.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+        composable(Screen.Login.route) {
+            LoginScreen(
+                onLoginSuccess = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Login.route) { inclusive = true }
+                    }
+                }
+            )
+        }
         //  Home Screen
         composable(Screen.Home.route) {
              HomeScreen(onAzkarCardClick = { navController.navigate(Screen.Categories.route) },

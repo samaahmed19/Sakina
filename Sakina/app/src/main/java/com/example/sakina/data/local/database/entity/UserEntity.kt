@@ -3,9 +3,10 @@ package com.example.sakina.data.local.database.entity
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "user")
+@Entity(tableName = "user_table")
 data class UserEntity(
-    @PrimaryKey val id: Int = 1,
+    @PrimaryKey
+    val id: Int = 1,
     val name: String,
     val email: String?,
     val location: String?

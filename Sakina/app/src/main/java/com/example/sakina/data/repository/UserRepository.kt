@@ -24,4 +24,8 @@ class UserRepository @Inject constructor(
     }
 
     fun getUser() = userDao.getUser()
+
+    suspend fun getUserOnce(): UserEntity? {
+        return userDao.getUserOnce()
+    }
 }

@@ -33,6 +33,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.content.ContextCompat
 import com.example.sakina.R
 import kotlin.random.Random
+import androidx.hilt.navigation.compose.hiltViewModel
 
 private val BackgroundDark = Color(0xFF1A1B2E)
 private val BackgroundPurple = Color(0xFF16213E)
@@ -63,7 +64,8 @@ private val TextSubtle = Color.White.copy(alpha = 0.5f)
 
 @Composable
 fun LoginScreen(
-    viewModel: LoginViewModel = viewModel()
+    onLoginSuccess: () -> Unit,
+    viewModel: LoginViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
     val context = LocalContext.current
@@ -82,6 +84,8 @@ fun LoginScreen(
     fun onSetLocationClick() {
         if (hasLocationPermission) {
             viewModel.fetchLocation()
+
+            println("LocationDebug: تم الضغط على زر تحديد الموقع")
         } else {
             permissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
         }
@@ -164,6 +168,7 @@ fun LoginScreen(
 
                 SetLocationButton(
                     onClick = { onSetLocationClick() },
+                    onValueChange = { viewModel.onLocationChange(it) }, // ضيفي السطر ده
                     isLoading = state.isLoadingLocation,
                     locationText = state.location
                 )
@@ -173,7 +178,12 @@ fun LoginScreen(
                 GlowButton(
                     text = "ابدأ رحلتك ",
                     loading = state.isLoading,
-                    onClick = viewModel::onStartClick
+                    onClick = {
+
+                        viewModel.onStartClick(onSuccess = {
+                            onLoginSuccess()
+                        })
+                    }
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -285,42 +295,73 @@ private fun LocationInfoBox() {
 @Composable
 private fun SetLocationButton(
     onClick: () -> Unit,
+    onValueChange: (String) -> Unit,
     isLoading: Boolean = false,
     locationText: String = ""
 ) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(InputFieldBg)
-            .clickable(enabled = !isLoading, onClick = onClick)
-            .padding(16.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            if (isLoading) {
-                CircularProgressIndicator(
-                    color = LocationTeal,
-                    strokeWidth = 2.dp,
-                    modifier = Modifier.size(22.dp)
-                )
-            } else {
+
+    if (locationText.isBlank() && !isLoading) {
+        OutlinedTextField(
+            value = locationText,
+            onValueChange = onValueChange,
+            placeholder = { Text("  اضغط تحديد    ", color = TextMuted) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(16.dp)),
+            leadingIcon = {
                 Icon(
                     imageVector = Icons.Default.LocationOn,
                     contentDescription = null,
                     tint = LocationTeal,
-                    modifier = Modifier.size(22.dp)
+                    modifier = Modifier.clickable { onClick() }
+                )
+            },
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = InputFieldBg,
+                unfocusedContainerColor = InputFieldBg,
+                focusedIndicatorColor = LocationTeal,
+                unfocusedIndicatorColor = Color.Transparent,
+                focusedTextColor = Color.White,
+                unfocusedTextColor = Color.White
+            ),
+            shape = RoundedCornerShape(16.dp)
+        )
+    } else {
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(16.dp))
+                .background(InputFieldBg)
+                .clickable(enabled = !isLoading, onClick = onClick)
+                .padding(16.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        color = LocationTeal,
+                        strokeWidth = 2.dp,
+                        modifier = Modifier.size(22.dp)
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.LocationOn,
+                        contentDescription = null,
+                        tint = LocationTeal,
+                        modifier = Modifier.size(22.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = if (locationText.isNotBlank()) "تم تحديد الموقع ✓ ($locationText)" else "تحديد الموقع",
+                    color = if (locationText.isNotBlank()) LocationTealLight else TextMuted,
+                    fontSize = 15.sp
                 )
             }
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = if (locationText.isNotBlank()) "تم تحديد الموقع ✓" else "تحديد الموقع",
-                color = if (locationText.isNotBlank()) LocationTealLight else TextMuted,
-                fontSize = 15.sp
-            )
         }
     }
 }
@@ -430,7 +471,13 @@ private fun LoginScreenPreview() {
                 Spacer(modifier = Modifier.height(16.dp))
                 LocationInfoBox()
                 Spacer(modifier = Modifier.height(16.dp))
-                SetLocationButton(onClick = {}, isLoading = false, locationText = "")
+
+                SetLocationButton(
+                    onClick = {},
+                    onValueChange = {},
+                    isLoading = false,
+                    locationText = ""
+                )
                 Spacer(modifier = Modifier.height(24.dp))
                 GlowButton(
                     text = "ابدأ رحلتك الرحانية",

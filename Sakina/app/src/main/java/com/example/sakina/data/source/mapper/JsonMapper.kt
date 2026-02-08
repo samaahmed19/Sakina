@@ -6,7 +6,7 @@ import com.example.sakina.data.local.database.entity.DuaCategoryEntity
 import com.example.sakina.data.local.database.entity.DuaEntity
 import com.example.sakina.data.local.database.entity.ZikrEntity
 import com.example.sakina.data.local.database.entity.TasbeehEntity
-import com.example.sakina.data.local.database.entity.DuaCategoryEntity
+
 import org.json.JSONArray
 import org.json.JSONObject
 

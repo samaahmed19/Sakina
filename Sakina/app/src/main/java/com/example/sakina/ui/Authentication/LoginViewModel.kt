@@ -24,7 +24,7 @@ class LoginViewModel @Inject constructor(
         _uiState.update {
             it.copy(
                 name = value,
-                nameError = null          // امسح رسالة الخطأ أول ما يبدأ يكتب
+                nameError = null
             )
         }
     }
@@ -37,39 +37,45 @@ class LoginViewModel @Inject constructor(
 
     fun fetchLocation() {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoadingLocation = true) }
+            _uiState.update { it.copy(isLoading = true) }
             val location = locationHelper.getCurrentLocation()
-            _uiState.update {
-                it.copy(
-                    location = location ?: it.location,
-                    isLoadingLocation = false
-                )
+
+            if (location != null) {
+
+                _uiState.update { it.copy(location = location, isLoading = false, nameError = null) }
+            } else {
+
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        nameError = "تعذر تحديد الموقع تلقائياً. تأكد من تشغيل الـ GPS أو حاول مرة أخرى."
+                    )
+                }
             }
         }
     }
 
-    fun onStartClick() {
+    fun onStartClick(onSuccess: () -> Unit) {
         val currentState = _uiState.value
-        val currentName = currentState.name
+        if (currentState.name.isBlank()) {
+            _uiState.update { it.copy(nameError = "ادخل اسمك أولًا") }
+            return
+        }
 
-        // فاليديشن الاسم
-        if (currentName.isBlank()) {
-            _uiState.update {
-                it.copy(nameError = "ادخل اسمك أولًا")
-            }
+        if (currentState.location.isBlank()) {
+            _uiState.update { it.copy(nameError = "يرجى تحديد موقعك أولاً") }
             return
         }
 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-
             userRepository.saveUser(
-                name = currentName.trim(),
+                name = currentState.name.trim(),
                 email = null,
-                location = currentState.location.ifBlank { null }
+                location = currentState.location
             )
-
             _uiState.update { it.copy(isLoading = false) }
+            onSuccess()
         }
     }
 }

@@ -17,7 +17,7 @@ class HomeViewModel @Inject constructor(
     application: Application
 ) : ViewModel() {
 
-
+    val userFlow = userRepository.getUser()
     private val prefs = application.getSharedPreferences("sakina_prefs", Context.MODE_PRIVATE)
 
 
