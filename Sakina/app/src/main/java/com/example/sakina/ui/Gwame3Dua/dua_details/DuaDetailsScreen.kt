@@ -101,9 +101,7 @@ fun DuaDetailsScreen(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalComposeApi::class,
-    ExperimentalComposeUiApi::class
-)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalComposeUiApi::class, ExperimentalComposeApi::class)
 @Composable
 fun DuaCardItem(
     duaText: String,
@@ -119,17 +117,11 @@ fun DuaCardItem(
     val parts = remember(duaText) {
         val lastOpenBracket = duaText.lastIndexOf('(')
         val lastCloseBracket = duaText.lastIndexOf(')')
-
         if (lastOpenBracket != -1 && lastCloseBracket != -1 && lastCloseBracket > lastOpenBracket) {
             val mainText = duaText.substring(0, lastOpenBracket).trim()
-            val source = duaText.substring(lastOpenBracket + 1, lastCloseBracket)
-                .replace("_", " ")
-                .trim()
-
+            val source = duaText.substring(lastOpenBracket + 1, lastCloseBracket).replace("_", " ").trim()
             Pair(mainText, source)
-        } else {
-            Pair(duaText, null)
-        }
+        } else { Pair(duaText, null) }
     }
 
     val patterns = remember { listOf(R.drawable.pattern_1, R.drawable.pattern_2, R.drawable.pattern_3, R.drawable.pattern_4, R.drawable.pattern_5, R.drawable.pattern_6, R.drawable.pattern_7, R.drawable.pattern_8) }
@@ -143,8 +135,7 @@ fun DuaCardItem(
     var currentImageUri by remember { mutableStateOf(prefs.getString("uri_$duaKey", null)?.let { Uri.parse(it) }) }
 
     LaunchedEffect(userAddedImages.size) {
-        val savedUri = prefs.getString("uri_$duaKey", null)?.let { Uri.parse(it) }
-        if (savedUri != null && !userAddedImages.contains(savedUri)) {
+        if (currentImageUri != null && !userAddedImages.contains(currentImageUri)) {
             currentImageUri = null
         }
     }
@@ -170,17 +161,21 @@ fun DuaCardItem(
         AlertDialog(
             onDismissRequest = { imageToDelete = null },
             title = { Text("حذف الصورة") },
-            text = { Text("سيتم حذف هذه الصورة من قائمة الخلفيات في جميع الأذكار. هل أنت متأكد؟") },
+            text = { Text("سيتم حذف هذه الصورة من قائمة الخلفيات في جميع الكروت.") },
             confirmButton = {
                 TextButton(onClick = {
-                    val uriStringToRemove = imageToDelete.toString()
-                    userAddedImages.remove(imageToDelete)
+                    val uriToRemove = imageToDelete!!
+                    userAddedImages.remove(uriToRemove)
                     scope.launch(Dispatchers.IO) {
                         val editor = prefs.edit()
+
                         editor.putStringSet("added_images", userAddedImages.map { it.toString() }.toSet())
-                        val allEntries = prefs.all
-                        allEntries.forEach { (key, value) ->
-                            if (key.startsWith("uri_") && value == uriStringToRemove) { editor.remove(key) }
+
+                        val allKeys = prefs.all
+                        allKeys.forEach { (key, value) ->
+                            if (key.startsWith("uri_") && value == uriToRemove.toString()) {
+                                editor.remove(key)
+                            }
                         }
                         editor.apply()
                     }
@@ -190,10 +185,6 @@ fun DuaCardItem(
             dismissButton = { TextButton(onClick = { imageToDelete = null }) { Text("إلغاء") } }
         )
     }
-
-    val painter = rememberAsyncImagePainter(
-        model = ImageRequest.Builder(context).data(currentImageUri ?: selectedPattern).crossfade(true).build()
-    )
 
     Column(modifier = Modifier.fillMaxWidth()) {
         Box(modifier = Modifier.fillMaxWidth().capturable(captureController)) {
@@ -205,44 +196,23 @@ fun DuaCardItem(
             ) {
                 Box(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
                     Image(
-                        painter = painter,
+                        painter = rememberAsyncImagePainter(currentImageUri ?: selectedPattern),
                         contentDescription = null,
                         modifier = Modifier.matchParentSize(),
                         contentScale = ContentScale.Crop,
                         alpha = patternAlpha
                     )
-
                     Column(
                         modifier = Modifier.fillMaxWidth().padding(horizontal = 30.dp, vertical = 50.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        // النص الأساسي للدعاء
-                        Text(
-                            text = parts.first,
-                            color = Color.White,
-                            fontSize = 22.sp,
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center,
-                            lineHeight = 40.sp
-                        )
-
-                        // اسم النبي أو المصدر (يظهر بتنسيق رقيق بالأسفل)
+                        Text(text = parts.first, color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, lineHeight = 40.sp)
                         parts.second?.let { source ->
                             Spacer(modifier = Modifier.height(22.dp))
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Center
-                            ) {
-                                Box(modifier = Modifier.size(width = 24.dp, height = 1.dp).background(Color(0xFFFFD700).copy(0.4f)))
-                                Text(
-                                    text = source,
-                                    color = Color(0xFFFFD700),
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.Medium,
-                                    modifier = Modifier.padding(horizontal = 12.dp),
-                                    textAlign = TextAlign.Center
-                                )
-                                Box(modifier = Modifier.size(width = 24.dp, height = 1.dp).background(Color(0xFFFFD700).copy(0.4f)))
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Box(modifier = Modifier.size(24.dp, 1.dp).background(Color(0xFFFFD700).copy(0.4f)))
+                                Text(text = source, color = Color(0xFFFFD700), fontSize = 14.sp, modifier = Modifier.padding(horizontal = 12.dp))
+                                Box(modifier = Modifier.size(24.dp, 1.dp).background(Color(0xFFFFD700).copy(0.4f)))
                             }
                         }
                     }
@@ -252,9 +222,10 @@ fun DuaCardItem(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // لوحة التحكم (نفس الأكواد السابقة)
         Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp)) {
-            Text("تنسيق الخلفية", color = Color(0xFFFFD700), fontSize = 14.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 12.dp))
+            Text("تنسيق الخلفية", color = Color(0xFFFFD700), fontSize = 14.sp, fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.height(12.dp))
+
             LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
                 item {
                     Box(modifier = Modifier.size(55.dp).clip(RoundedCornerShape(15.dp)).background(Color.White.copy(0.05f)).border(1.dp, Color.White.copy(0.1f), RoundedCornerShape(15.dp)).clickable { photoPickerLauncher.launch("image/*") }, contentAlignment = Alignment.Center) {
@@ -262,13 +233,18 @@ fun DuaCardItem(
                     }
                 }
                 items(userAddedImages, key = { it.toString() }) { uri ->
-                    Box(modifier = Modifier.size(55.dp).clip(RoundedCornerShape(15.dp)).border(2.dp, if (currentImageUri == uri) Color(0xFFFFD700) else Color.Transparent, RoundedCornerShape(15.dp)).combinedClickable(
-                        onClick = {
-                            currentImageUri = uri
-                            scope.launch(Dispatchers.IO) { prefs.edit().putString("uri_$duaKey", uri.toString()).apply() }
-                        },
-                        onLongClick = { imageToDelete = uri }
-                    )) {
+                    Box(modifier = Modifier
+                        .size(55.dp)
+                        .clip(RoundedCornerShape(15.dp))
+                        .border(2.dp, if (currentImageUri == uri) Color(0xFFFFD700) else Color.Transparent, RoundedCornerShape(15.dp))
+                        .combinedClickable(
+                            onClick = {
+                                currentImageUri = uri
+                                scope.launch(Dispatchers.IO) { prefs.edit().putString("uri_$duaKey", uri.toString()).apply() }
+                            },
+                            onLongClick = { imageToDelete = uri }
+                        )
+                    ) {
                         Image(painter = rememberAsyncImagePainter(uri), null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
                     }
                 }
@@ -294,27 +270,52 @@ fun DuaCardItem(
                 }
             }
 
-            Slider(
-                value = patternAlpha,
-                onValueChange = { patternAlpha = it },
-                onValueChangeFinished = { scope.launch(Dispatchers.IO) { prefs.edit().putFloat("alpha_$duaKey", patternAlpha).apply() } },
-                valueRange = 0.05f..0.8f,
-                colors = SliderDefaults.colors(thumbColor = Color(0xFFFFD700), activeTrackColor = Color(0xFFFFD700), inactiveTrackColor = Color.White.copy(0.1f)),
-                modifier = Modifier.padding(top = 10.dp)
-            )
+            Spacer(modifier = Modifier.height(15.dp))
+
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                Icon(painterResource(R.drawable.visibility), null, tint = Color.White.copy(0.5f), modifier = Modifier.size(20.dp))
+                Slider(
+                    value = patternAlpha,
+                    onValueChange = { patternAlpha = it },
+                    onValueChangeFinished = { scope.launch(Dispatchers.IO) { prefs.edit().putFloat("alpha_$duaKey", patternAlpha).apply() } },
+                    valueRange = 0.0f..1.0f,
+                    colors = SliderDefaults.colors(thumbColor = Color(0xFFFFD700), activeTrackColor = Color(0xFFFFD700), inactiveTrackColor = Color.White.copy(0.1f)),
+                    modifier = Modifier.weight(1f).padding(horizontal = 10.dp)
+                )
+                Text(
+                    text = "${(patternAlpha * 100).toInt()}%",
+                    color = Color.White.copy(0.5f),
+                    fontSize = 12.sp,
+                    modifier = Modifier.width(35.dp),
+                    textAlign = TextAlign.End
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(25.dp))
 
-        Row(modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp), horizontalArrangement = Arrangement.SpaceAround, verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             ActionLargeBtn(R.drawable.copy, "نسخ", Color(0xFF4FC3F7)) {
                 val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                 clipboard.setPrimaryClip(ClipData.newPlainText("Dua", parts.first))
                 Toast.makeText(context, "تم نسخ الدعاء", Toast.LENGTH_SHORT).show()
             }
-            IconButton(onClick = onFavoriteClick, modifier = Modifier.size(65.dp).background(Color.White.copy(0.05f), CircleShape)) {
-                Icon(painterResource(if (isFavorite) R.drawable.heart_filled else R.drawable.heart_outline), null, tint = if (isFavorite) Color.Red else Color.White, modifier = Modifier.size(32.dp))
+
+            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.clickable { onFavoriteClick() }) {
+                Box(
+                    modifier = Modifier.size(55.dp).background(Color.White.copy(0.05f), CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(painterResource(if (isFavorite) R.drawable.heart_filled else R.drawable.heart_outline), null, tint = if (isFavorite) Color.Red else Color.White, modifier = Modifier.size(28.dp))
+                }
+                Spacer(modifier = Modifier.height(6.dp))
+                Text("تفضيل", color = Color.White.copy(0.6f), fontSize = 12.sp)
             }
+
             ActionLargeBtn(R.drawable.download, "حفظ", Color(0xFF00FFD1)) {
                 scope.launch {
                     try {

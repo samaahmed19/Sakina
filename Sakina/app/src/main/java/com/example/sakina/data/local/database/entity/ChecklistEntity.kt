@@ -10,10 +10,3 @@ data class ChecklistEntity(
     val isCompleted: Boolean = false,
     val createdAt: Long = System.currentTimeMillis()
 )
-@Entity(tableName = "streak")
-data class StreakEntity(
-    @PrimaryKey val id: Int = 0,
-    val streakDays: Int,
-    val lastCompletedDay: Long
-)
-

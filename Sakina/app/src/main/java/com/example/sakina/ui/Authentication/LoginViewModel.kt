@@ -29,26 +29,24 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    fun onLocationChange(value: String) {
-        _uiState.update {
-            it.copy(location = value)
-        }
-    }
-
     fun fetchLocation() {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
+            _uiState.update { it.copy(isLoadingLocation = true) }
             val location = locationHelper.getCurrentLocation()
 
             if (location != null) {
-
-                _uiState.update { it.copy(location = location, isLoading = false, nameError = null) }
-            } else {
-
                 _uiState.update {
                     it.copy(
-                        isLoading = false,
-                        nameError = "تعذر تحديد الموقع تلقائياً. تأكد من تشغيل الـ GPS أو حاول مرة أخرى."
+                        location = location,
+                        isLoadingLocation = false,
+                        nameError = null
+                    )
+                }
+            } else {
+                _uiState.update {
+                    it.copy(
+                        isLoadingLocation = false,
+                        nameError = "تعذر تحديد الموقع تلقائياً. تأكد من تشغيل الـ GPS."
                     )
                 }
             }
