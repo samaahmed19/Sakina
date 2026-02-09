@@ -261,6 +261,10 @@ fun HomeScreen(
 
 @Composable
 fun DuaCard(text: String) {
+    val cleanText = remember(text) {
+        val baseText = if (text.contains("(")) text.substringBefore("(").trim() else text.trim()
+        baseText.trimEnd('.')
+    }
     val cyanColor = Color(0xFF2075B7)
     Box(
         modifier = Modifier
@@ -274,9 +278,9 @@ fun DuaCard(text: String) {
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
-                text = text,
+                text = cleanText,
                 color = Color.White,
-                fontSize = 14.sp,
+                fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center
             )
