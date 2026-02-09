@@ -26,7 +26,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.delay
 import kotlin.random.Random
 
-// الـ TasbeehOption هنسيبه عشان الألوان اللي انت اخترتها في الـ UI
 data class TasbeehOption(
     val id: String,
     val text: String,
@@ -70,9 +69,6 @@ fun StarryBackground() {
 
 @Composable
 fun TasbeehScreen(viewModel: TasbeehViewModel = hiltViewModel()) {
-    // استخدمنا الـ hiltViewModel عشان نمنع الـ Crash
-
-    // قائمة الخيارات اللي انت صممتها بألوانها
     val tasbeehOptions = remember {
         listOf(
             TasbeehOption("subhan", "سبحان الله", Color(0xFF7DDECC)),
@@ -83,14 +79,12 @@ fun TasbeehScreen(viewModel: TasbeehViewModel = hiltViewModel()) {
         )
     }
 
-    // ربط الاختيار الافتراضي من القائمة اللي فوق مع الـ ViewModel
     var uiSelectedOption by remember { mutableStateOf(tasbeehOptions[0]) }
 
     val INHALE_DURATION = 5500L
     val HOLD_DURATION = 2000L
     val EXHALE_DURATION = 6500L
 
-    // التحكم في مراحل التنفس من خلال الـ ViewModel
     LaunchedEffect(viewModel.hasStartedByClick) {
         if (viewModel.hasStartedByClick) {
             while (true) {
@@ -130,11 +124,11 @@ fun TasbeehScreen(viewModel: TasbeehViewModel = hiltViewModel()) {
                 .padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(30.dp))
+            Spacer(modifier = Modifier.height(40.dp))
 
-            Text("التسبيح", fontSize = 30.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
+            Text("التسبيح", fontSize = 28.sp, fontWeight = FontWeight.Bold, color = Color.White)
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             Text(
                 text = if (!viewModel.hasStartedByClick) "اضغط على الدائرة لتبدأ الشهيق والذكر..."
@@ -143,22 +137,23 @@ fun TasbeehScreen(viewModel: TasbeehViewModel = hiltViewModel()) {
                     BreathPhase.HOLD -> "تأمل في عظمة الخالق..."
                     else -> "أخرج كل ما يشغلك مع الزفير..."
                 },
-                fontSize = 15.sp, color = Color.White.copy(0.6f), textAlign = TextAlign.Center,
-                modifier = Modifier.height(50.dp)
+                fontSize = 14.sp, color = Color.White.copy(0.5f), textAlign = TextAlign.Center,
+                modifier = Modifier.height(45.dp)
             )
 
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 tasbeehOptions.forEach { option ->
                     TasbeehButton(option, uiSelectedOption.id == option.id) {
                         uiSelectedOption = option
-                        // لو عندك Entity في الـ ViewModel بنفس الاسم ممكن تربطهم هنا
                     }
                 }
             }
 
             Spacer(modifier = Modifier.weight(1f))
 
-            Box(contentAlignment = Alignment.Center, modifier = Modifier.size(280.dp)) {
+            Box(contentAlignment = Alignment.Center, modifier = Modifier.size(260.dp)) {
                 if (viewModel.hasStartedByClick) {
                     repeat(3) { index ->
                         OuterRing(viewModel.breathPhase, uiSelectedOption.color, index * 400L, animationDuration)
@@ -167,16 +162,16 @@ fun TasbeehScreen(viewModel: TasbeehViewModel = hiltViewModel()) {
 
                 Box(
                     modifier = Modifier
-                        .size(180.dp)
+                        .size(170.dp)
                         .scale(scale)
-                        .shadow(25.dp, CircleShape, ambientColor = uiSelectedOption.color)
+                        .shadow(30.dp, CircleShape, ambientColor = uiSelectedOption.color)
                         .background(
                             brush = Brush.radialGradient(
-                                colors = listOf(uiSelectedOption.color.copy(0.4f), Color(0xFF1A1F33).copy(0.95f))
+                                colors = listOf(uiSelectedOption.color.copy(0.35f), Color(0xFF1A1F33).copy(0.9f))
                             ),
                             shape = CircleShape
                         )
-                        .border(1.5.dp, uiSelectedOption.color.copy(0.5f), CircleShape)
+                        .border(1.dp, uiSelectedOption.color.copy(0.4f), CircleShape)
                         .clickable {
                             viewModel.incrementCount()
                             if (!viewModel.hasStartedByClick) viewModel.hasStartedByClick = true
@@ -191,41 +186,44 @@ fun TasbeehScreen(viewModel: TasbeehViewModel = hiltViewModel()) {
                                     BreathPhase.HOLD -> "ثبات"
                                     else -> "زفير"
                                 },
-                                fontSize = 14.sp, color = Color.White.copy(0.5f)
+                                fontSize = 12.sp, color = Color.White.copy(0.6f),
+                                fontWeight = FontWeight.Medium
                             )
                         }
-                        Text(text = viewModel.count.toString(), fontSize = 60.sp, fontWeight = FontWeight.Light, color = Color.White)
+                        Text(
+                            text = viewModel.count.toString(),
+                            fontSize = 54.sp,
+                            fontWeight = FontWeight.ExtraLight,
+                            color = Color.White
+                        )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(30.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
-            Text(
-                text = uiSelectedOption.text,
-                fontSize = 32.sp, fontWeight = FontWeight.Bold, color = uiSelectedOption.color,
-                textAlign = TextAlign.Center
-            )
 
-            Spacer(modifier = Modifier.height(100.dp))
+
+            Spacer(modifier = Modifier.weight(1.5f))
         }
 
         Column(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 30.dp),
+                .padding(bottom = 5.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             IconButton(
                 onClick = { viewModel.resetCount() },
                 modifier = Modifier
-                    .size(50.dp)
-                    .background(Color.White.copy(0.05f), CircleShape)
-                    .border(1.dp, Color.White.copy(0.15f), CircleShape)
+                    .size(46.dp)
+                    .background(Color.White.copy(0.04f), CircleShape)
+                    .border(0.5.dp, Color.White.copy(0.1f), CircleShape)
             ) {
-                Icon(Icons.Default.Refresh, "Reset", tint = Color.White.copy(0.7f))
+                Icon(Icons.Default.Refresh, "Reset", tint = Color.White.copy(0.5f), modifier = Modifier.size(20.dp))
             }
-            Text("إعادة التعيين", fontSize = 11.sp, color = Color.White.copy(0.3f))
+            Spacer(modifier = Modifier.height(2.dp))
+            Text("إعادة التعيين", fontSize = 10.sp, color = Color.White.copy(0.2f))
         }
     }
 }
@@ -234,23 +232,29 @@ fun TasbeehScreen(viewModel: TasbeehViewModel = hiltViewModel()) {
 fun TasbeehButton(option: TasbeehOption, isSelected: Boolean, onClick: () -> Unit) {
     Button(
         onClick = onClick,
-        modifier = Modifier.fillMaxWidth().height(54.dp),
+        modifier = Modifier.fillMaxWidth().height(50.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = if (isSelected) option.color.copy(alpha = 0.15f) else Color.White.copy(alpha = 0.03f)
+            containerColor = if (isSelected) option.color.copy(alpha = 0.12f) else Color.White.copy(alpha = 0.02f)
         ),
         shape = MaterialTheme.shapes.medium,
+        contentPadding = PaddingValues(horizontal = 16.dp),
         border = androidx.compose.foundation.BorderStroke(
-            1.dp,
-            if (isSelected) option.color.copy(alpha = 0.5f) else Color.White.copy(alpha = 0.1f)
+            0.5.dp,
+            if (isSelected) option.color.copy(alpha = 0.4f) else Color.White.copy(alpha = 0.08f)
         )
     ) {
-        Text(option.text, fontSize = 18.sp, color = if (isSelected) option.color else Color.White.copy(alpha = 0.8f))
+        Text(
+            option.text,
+            fontSize = 16.sp,
+            color = if (isSelected) option.color else Color.White.copy(alpha = 0.7f),
+            fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal
+        )
     }
 }
 
 @Composable
 fun OuterRing(breathPhase: BreathPhase, color: Color, delay: Long, animationDuration: Int) {
-    val targetScale = if (breathPhase == BreathPhase.EXHALE) 1.4f else 1.0f
+    val targetScale = if (breathPhase == BreathPhase.EXHALE) 1.35f else 1.0f
     val scale by animateFloatAsState(
         targetValue = targetScale,
         animationSpec = tween(durationMillis = animationDuration, delayMillis = delay.toInt(), easing = LinearEasing),
@@ -258,8 +262,8 @@ fun OuterRing(breathPhase: BreathPhase, color: Color, delay: Long, animationDura
     )
     Box(
         modifier = Modifier
-            .size(240.dp)
+            .size(230.dp)
             .scale(scale)
-            .border(1.dp, color.copy(alpha = 0.08f), CircleShape)
+            .border(1.dp, color.copy(alpha = 0.06f), CircleShape)
     )
 }

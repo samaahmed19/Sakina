@@ -16,13 +16,13 @@ import com.example.sakina.data.local.database.entity.AyahEntity
 import com.example.sakina.data.local.database.dao.ChecklistDao
 import com.example.sakina.data.local.database.dao.StreakDao
 import com.example.sakina.data.local.database.entity.ChecklistEntity
-import com.example.sakina.data.local.database.entity.StreakEntity
 import com.example.sakina.data.local.database.dao.TasbeehDao
 import com.example.sakina.data.local.database.dao.UserDao
 import com.example.sakina.data.local.database.dao.TafsirDao
 import com.example.sakina.data.local.database.entity.TafsirEntity
 import com.example.sakina.data.local.database.entity.TasbeehEntity
 import com.example.sakina.data.local.database.entity.UserEntity
+import com.example.sakina.data.local.database.entity.StreakEntity
 
 
 @Database(
@@ -40,7 +40,7 @@ import com.example.sakina.data.local.database.entity.UserEntity
         UserEntity::class,
         TafsirEntity::class
     ],
-    version = 4,
+    version = 3,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {

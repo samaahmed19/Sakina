@@ -9,7 +9,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.sakina.ui.Azkar.azkar_list.ZikrListScreen
 import com.example.sakina.ui.Azkar.azkar_details.ZikrDetailsScreen
-import com.example.sakina.ui.Checklist.ChecklistScreen
+import com.example.sakina.ui.checklist.ChecklistScreen
 import com.example.sakina.ui.Home.HomeScreen
 import com.example.sakina.ui.Splash.SplashScreen
 import com.example.sakina.ui.HolyQuran.surah_details.SurahDetailsScreen
