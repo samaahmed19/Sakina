@@ -13,6 +13,7 @@ import com.example.sakina.utils.LocationHelper
 import com.example.sakina.utils.PrayerTimesCalculator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -85,6 +86,28 @@ class PrayerViewModel @Inject constructor(
 
     init {
         load()
+        scheduleDailyRefresh()
+    }
+
+    private fun scheduleDailyRefresh() {
+        viewModelScope.launch {
+            while (true) {
+                delay(millisUntilNextMidnight() + 1_000L)
+                load()
+            }
+        }
+    }
+
+    private fun millisUntilNextMidnight(nowMillis: Long = System.currentTimeMillis()): Long {
+        val cal = Calendar.getInstance().apply {
+            timeInMillis = nowMillis
+            add(Calendar.DAY_OF_YEAR, 1)
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+        return (cal.timeInMillis - nowMillis).coerceAtLeast(0L)
     }
 
     /* ---------------------------------------------------------
