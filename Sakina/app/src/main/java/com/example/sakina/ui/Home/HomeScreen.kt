@@ -1,61 +1,56 @@
 package com.example.sakina.ui.Home
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import java.time.chrono.HijrahDate
-import java.time.format.DateTimeFormatter
-import java.util.Locale
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.runtime.*
-import androidx.compose.foundation.clickable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Icon
-import com.example.sakina.R
-import com.example.sakina.ui.Home.components.HomeCard
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.material3.Text
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LifecycleResumeEffect
+import com.example.sakina.R
+import com.example.sakina.ui.Home.components.HomeCard
+import com.example.sakina.ui.Home.components.HomeCard2
+import com.example.sakina.ui.Prayers.PrayerViewModel
+import com.example.sakina.utils.formatClockTime
+import com.example.sakina.utils.prayerTitleAr
+import java.time.chrono.HijrahDate
 import java.time.temporal.ChronoField
 import java.time.temporal.ChronoUnit
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.border
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import com.example.sakina.ui.Home.components.HomeCard2
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.text.style.TextAlign
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.unit.LayoutDirection
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.lifecycle.compose.LifecycleResumeEffect
+
 val NeonCyan = Color(0xFF00FFD1)
 val NeonPurple = Color(0xFFBD00FF)
 val NeonGold = Color(0xFFFFD700)
-val NeonRed =Color(0xFFFF7171)
-val NeonGreen =Color(0xFF4DFF88)
-val NeonPink =Color(0xFFFA2C71)
-
-
-
-
+val NeonRed = Color(0xFFFF7171)
+val NeonGreen = Color(0xFF4DFF88)
+val NeonPink = Color(0xFFFA2C71)
 
 fun getAdjustedHijrahDate(adjustment: Long = 0): String {
-
     val hijrahDate = HijrahDate.now().plus(adjustment, ChronoUnit.DAYS)
-
 
     val months = arrayOf(
         "المحرّم", "صفر", "ربيع الأول", "ربيع الآخر",
@@ -63,11 +58,9 @@ fun getAdjustedHijrahDate(adjustment: Long = 0): String {
         "رمضان", "شوال", "ذو القعدة", "ذو الحجة"
     )
 
-
     val day = hijrahDate.get(ChronoField.DAY_OF_MONTH)
-    val monthIndex = hijrahDate.get(ChronoField.MONTH_OF_YEAR) - 1 // نطرح 1 لأن المصفوفة تبدأ من 0
+    val monthIndex = hijrahDate.get(ChronoField.MONTH_OF_YEAR) - 1
     val year = hijrahDate.get(ChronoField.YEAR)
-
 
     return "$day ${months[monthIndex]} $year"
 }
@@ -104,7 +97,6 @@ fun GalaxyBackground(content: @Composable () -> Unit) {
     }
 }
 
-
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
@@ -118,19 +110,52 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val user by viewModel.userFlow.collectAsState(initial = null)
-    val prayerCompleted by viewModel.prayerCompleted.collectAsState(initial = 0)
-    val prayerTotal by viewModel.prayerTotal.collectAsState(initial = 5)
+    val context = LocalContext.current
+
+    // Prayer VM
+    val prayerViewModel: PrayerViewModel = hiltViewModel()
+    val prayerUiState by prayerViewModel.uiState.collectAsState()
+
+    val completedFardCount = prayerUiState.summary?.completedFardCount ?: 0
+    val totalFardCount = prayerUiState.summary?.totalFardCount ?: 5
+
+    val salahSubtitle = remember(prayerUiState.nextFardPrayerKey, prayerUiState.nextFardPrayerTimeMillis) {
+        val key = prayerUiState.nextFardPrayerKey
+        val timeMillis = prayerUiState.nextFardPrayerTimeMillis
+        if (key != null && timeMillis != null) {
+            "${prayerTitleAr(key)} ${formatClockTime(context, timeMillis)}"
+        } else {
+            "حدد موقعك لعرض المواقيت"
+        }
+    }
+
+    // Refresh prayer timings on resume
+    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                prayerViewModel.load()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
+    // Home VM data
     val tasbeehCount by viewModel.tasbeehCount.collectAsState(initial = 0)
     val dailyDua by viewModel.dailyDua
+
     LaunchedEffect(Unit) {
         viewModel.refreshLastRead()
         viewModel.loadPrayerAndTasbeeh()
         viewModel.loadDailyDua()
     }
+
     LifecycleResumeEffect(Unit) {
         viewModel.loadPrayerAndTasbeeh()
         onPauseOrDispose { }
     }
+
     GalaxyBackground {
         LazyColumn(
             modifier = modifier
@@ -139,6 +164,7 @@ fun HomeScreen(
             contentPadding = PaddingValues(top = 40.dp, bottom = 40.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
+            // Header
             item {
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
                     Column(
@@ -148,7 +174,7 @@ fun HomeScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = "أهلاً بك, ${user?.name ?: ""}",
+                            text = "أهلاً بك ${user?.name ?: ""}",
                             color = Color.White,
                             fontSize = 32.sp,
                             fontWeight = FontWeight.ExtraBold,
@@ -170,31 +196,45 @@ fun HomeScreen(
                     }
                 }
             }
+
+            // Dua of the day (separate item, not inside HomeCard)
             item {
                 DuaCard(text = dailyDua?.text ?: "يا حي يا قيوم برحمتك أستغيث...")
             }
-            item { HomeCard("صلاتي", "المغرب 6:32", NeonGold, R.drawable.pray,
-                    trailingContent = {
 
+            // Salaty card
+            item {
+                HomeCard(
+                    title = "صلاتي",
+                    subtitle = salahSubtitle,
+                    activeColor = NeonGold,
+                    imageRes = R.drawable.pray,
+                    trailingContent = {
                         Box(
                             modifier = Modifier
                                 .size(50.dp)
                                 .border(2.dp, NeonGold.copy(alpha = 0.5f), CircleShape)
                                 .background(NeonGold.copy(alpha = 0.2f), CircleShape),
-                            contentAlignment = Alignment.Center,
+                            contentAlignment = Alignment.Center
                         ) {
-                            Text("$prayerCompleted/$prayerTotal", color = NeonGold, fontWeight = FontWeight.Bold)
+                            Text(
+                                text = "$completedFardCount/$totalFardCount",
+                                color = NeonGold,
+                                fontWeight = FontWeight.Bold
+                            )
                         }
                     },
-                onClick = {onSalahCardClick()})
-
+                    onClick = { onSalahCardClick() }
+                )
             }
+
+            // Quran card
             item {
                 HomeCard(
-                    title = "القرءان الكريم",
+                    title = "القرآن الكريم",
                     subtitle = viewModel.subTitle(),
                     activeColor = NeonCyan,
-                    imageRes =  R.drawable.koran,
+                    imageRes = R.drawable.koran,
                     trailingContent = {
                         Icon(
                             imageVector = Icons.Default.PlayArrow,
@@ -206,32 +246,41 @@ fun HomeScreen(
                                 .padding(8.dp)
                         )
                     },
-                    onClick = { val id = viewModel.lastSurahId.value
+                    onClick = {
+                        val id = viewModel.lastSurahId.value
                         val name = viewModel.lastSurahName.value
                         val count = viewModel.lastAyahCount.value
 
-                        if (id != -1) {
-                            onNavigateToSurahDetails(id, name, count)
-                        } else {
-                            onQuranCardClick()
-                        }}
+                        if (id != -1) onNavigateToSurahDetails(id, name, count)
+                        else onQuranCardClick()
+                    }
                 )
             }
+
+            // Azkar card
             item {
-                    HomeCard("الأذكار", " ", NeonPurple, R.drawable.decoration,onClick = { onAzkarCardClick() })
-                }
+                HomeCard(
+                    title = "الأذكار",
+                    subtitle = " ",
+                    activeColor = NeonPurple,
+                    imageRes = R.drawable.decoration,
+                    onClick = { onAzkarCardClick() }
+                )
+            }
+
+            // Dua collection card
             item {
                 HomeCard(
                     title = "جوامع الدعاء",
                     subtitle = "مختصر الكلم وطيب الأثر",
                     activeColor = NeonRed,
                     imageRes = R.drawable.islamic_pattern,
-                    trailingContent = {
-                    },
+                    trailingContent = { /* optional */ },
                     onClick = { onDuaCardClick() }
                 )
             }
 
+            // Two small cards row
             item {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -243,7 +292,7 @@ fun HomeScreen(
                         activeColor = NeonGreen,
                         imageRes = R.drawable.tasbih,
                         modifier = Modifier.weight(1f),
-                                onClick = { onTasbeehCardClick() }
+                        onClick = { onTasbeehCardClick() }
                     )
                     HomeCard2(
                         title = "هعمل ايه النهاردة؟",
@@ -251,11 +300,11 @@ fun HomeScreen(
                         activeColor = NeonPink,
                         imageRes = R.drawable.arabic,
                         modifier = Modifier.weight(1f),
-                                onClick = { onCheckCardClick() }
+                        onClick = { onCheckCardClick() }
                     )
-                            }
                 }
             }
+        }
     }
 }
 
@@ -265,14 +314,26 @@ fun DuaCard(text: String) {
         val baseText = if (text.contains("(")) text.substringBefore("(").trim() else text.trim()
         baseText.trimEnd('.')
     }
+
     val cyanColor = Color(0xFF2075B7)
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 1.dp)
-            .shadow(elevation = 0.dp, shape = RoundedCornerShape(24.dp), spotColor = cyanColor)
+            .shadow(
+                elevation = 0.dp,
+                shape = RoundedCornerShape(24.dp),
+                spotColor = cyanColor
+            )
             .background(cyanColor.copy(alpha = 0.35f), RoundedCornerShape(34.dp))
-            .border(BorderStroke(4.dp, Brush.verticalGradient(listOf(cyanColor, Color.Transparent))), RoundedCornerShape(24.dp))
+            .border(
+                BorderStroke(
+                    4.dp,
+                    Brush.verticalGradient(listOf(cyanColor, Color.Transparent))
+                ),
+                RoundedCornerShape(24.dp)
+            )
             .padding(12.dp),
         contentAlignment = Alignment.Center
     ) {

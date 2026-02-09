@@ -23,8 +23,8 @@ import com.example.sakina.ui.theme.SakinaTheme
 import dagger.hilt.android.AndroidEntryPoint
 import com.example.sakina.navigation.AppNavGraph
 import com.example.sakina.navigation.SakinaBottomBar
-// التعديل هنا: خلي حرف الـ c في checklist سمول
-import com.example.sakina.ui.checklist.DailyResetWorker
+import com.example.sakina.ui.Checklist.DailyResetWorker
+
 import java.util.concurrent.TimeUnit
 
 @AndroidEntryPoint

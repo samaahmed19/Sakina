@@ -44,12 +44,12 @@ fun SettingsScreen(
             //Profile
             ProfileSection(state.name, state.email) {}
             Spacer(Modifier.height(8.dp))
-            Divider()
+            HorizontalDivider()
 
             //Location
             LocationSection(state.location) { showLocationDialog = true }
             Spacer(Modifier.height(8.dp))
-            Divider()
+            HorizontalDivider()
 
             //Notifications
             NotificationsSection(
@@ -59,12 +59,12 @@ fun SettingsScreen(
                 onAzkarChange = viewModel::updateAzkarNotifications
             )
             Spacer(Modifier.height(8.dp))
-            Divider()
+            HorizontalDivider()
 
             //Appearance
             AppearanceSection(state.darkMode, viewModel::updateDarkMode)
             Spacer(Modifier.height(8.dp))
-            Divider()
+            HorizontalDivider()
 
             //Language
             LanguageSection(state.language) { showLanguageDialog = true }

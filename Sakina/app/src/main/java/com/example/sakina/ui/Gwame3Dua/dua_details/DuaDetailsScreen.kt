@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -50,6 +51,7 @@ fun DuaDetailsScreen(
     onBack: () -> Unit
 ) {
     val duas by viewModel.duas.collectAsState()
+    val context = LocalContext.current
 
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
         Box(
@@ -72,6 +74,7 @@ fun DuaDetailsScreen(
                     ) {
                         Icon(painterResource(id = R.drawable.arrow_forward_24), "رجوع", tint = Color.White)
                     }
+
                     Text(
                         text = viewModel.categoryTitle,
                         modifier = Modifier.weight(1f),
