@@ -57,6 +57,7 @@ dependencies {
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.hilt.common)
+    implementation("androidx.hilt:hilt-work:1.3.0")
     kapt("androidx.room:room-compiler:2.8.4")
     implementation("androidx.room:room-ktx:2.8.4")
     testImplementation("androidx.room:room-testing:2.8.4")
