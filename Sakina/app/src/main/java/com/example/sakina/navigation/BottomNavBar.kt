@@ -24,7 +24,7 @@ data class NavItem(
 )
 
 val bottomNavItems = listOf(
-    NavItem(Screen.Home.route, "هوم", Icons.Default.Home),
+    NavItem(Screen.Home.route, "الرئيسية", Icons.Default.Home),
     NavItem(Screen.Quran.route, "قرآن", Icons.Default.MenuBook),
     NavItem(Screen.Categories.route, "أذكار", Icons.Default.Favorite),
     NavItem(Screen.Tasbeeh.route, "تسبيح", Icons.Default.Star)

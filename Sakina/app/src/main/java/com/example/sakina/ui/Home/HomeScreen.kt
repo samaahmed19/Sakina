@@ -283,7 +283,9 @@ fun HomeScreen(
             // Two small cards row
             item {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(IntrinsicSize.Min),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     HomeCard2(
@@ -291,7 +293,9 @@ fun HomeScreen(
                         subtitle = tasbeehCount.toString(),
                         activeColor = NeonGreen,
                         imageRes = R.drawable.tasbih,
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight(),
                         onClick = { onTasbeehCardClick() }
                     )
                     HomeCard2(
@@ -299,7 +303,9 @@ fun HomeScreen(
                         subtitle = "",
                         activeColor = NeonPink,
                         imageRes = R.drawable.arabic,
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight(),
                         onClick = { onCheckCardClick() }
                     )
                 }

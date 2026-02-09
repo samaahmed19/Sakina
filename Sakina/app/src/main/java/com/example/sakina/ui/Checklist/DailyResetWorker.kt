@@ -1,4 +1,4 @@
-package com.example.sakina.ui.Checklist
+package com.example.sakina.ui.checklist
 
 import com.example.sakina.data.local.database.dao.ChecklistDao
 import android.content.Context
@@ -30,6 +30,5 @@ class DailyResetWorker @AssistedInject constructor(
         }
     }
 }
-
 
 
