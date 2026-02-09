@@ -10,6 +10,8 @@ import com.example.sakina.data.repository.UserRepository
 import com.example.sakina.domain.usecase.GetDayPrayersUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.sakina.data.local.database.entity.DuaEntity
+import com.example.sakina.data.repository.DuaRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -23,11 +25,13 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
+    private val repository: DuaRepository,
     userRepository: UserRepository,
     application: Application,
     private val getDayPrayers: GetDayPrayersUseCase,
     private val tasbeehRepository: TasbeehRepository
 ) : ViewModel() {
+    private val prefs = application.getSharedPreferences("sakina_prefs", Context.MODE_PRIVATE)
 
     val userFlow = userRepository.getUser()
 
@@ -42,8 +46,37 @@ class HomeViewModel @Inject constructor(
     private val _tasbeehCount = MutableStateFlow(0)
     val tasbeehCount: StateFlow<Int> = _tasbeehCount.asStateFlow()
 
+    private val _dailyDua = mutableStateOf<DuaEntity?>(null)
+    val dailyDua: State<DuaEntity?> = _dailyDua
+
     init {
         loadPrayerAndTasbeeh()
+        loadDailyDua()
+    }
+
+    fun loadDailyDua() {
+        viewModelScope.launch {
+            val today = Calendar.getInstance().let {
+                "${it.get(Calendar.YEAR)}-${it.get(Calendar.DAY_OF_YEAR)}"
+            }
+
+            val savedDate = prefs.getString("last_dua_date", "")
+            val savedDuaText = prefs.getString("last_dua_text", null)
+
+            if (today == savedDate && savedDuaText != null) {
+                _dailyDua.value = DuaEntity(id = 0, text = savedDuaText, categoryId = 0)
+            } else {
+                val newDua = repository.getRandomDua()
+                newDua?.let {
+                    _dailyDua.value = it
+                    prefs.edit().apply {
+                        putString("last_dua_date", today)
+                        putString("last_dua_text", it.text)
+                        apply()
+                    }
+                }
+            }
+        }
     }
 
     fun loadPrayerAndTasbeeh() {
@@ -61,7 +94,6 @@ class HomeViewModel @Inject constructor(
             }
         }
     }
-    private val prefs = application.getSharedPreferences("sakina_prefs", Context.MODE_PRIVATE)
 
 
     private fun greetingWithTime(): String {

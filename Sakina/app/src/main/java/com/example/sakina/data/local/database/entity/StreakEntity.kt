@@ -5,7 +5,7 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "streak")
 data class StreakEntity(
-    @PrimaryKey val id: Int = 0,
-    val streakDays: Int,
-    val lastCompletedDay: Long
+    @PrimaryKey val id: Int = 1,
+    val count: Int = 0,
+    val lastCheckDate: Long = 0L
 )

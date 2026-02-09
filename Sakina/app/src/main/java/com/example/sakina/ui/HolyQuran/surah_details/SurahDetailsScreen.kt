@@ -32,9 +32,11 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.Placeholder
@@ -42,84 +44,124 @@ import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.sakina.R
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.util.Random
 // ================= BACKGROUND =================
 @Composable
-
 fun GalaxyBackground(content: @Composable () -> Unit) {
-
-    val infiniteTransition = rememberInfiniteTransition(label = "stars")
-
+    val infiniteTransition = rememberInfiniteTransition(label = "stars_and_meteors")
     val xOffset by infiniteTransition.animateFloat(
-
         initialValue = 0f,
-
         targetValue = 2000f,
-
         animationSpec = infiniteRepeatable(
-
-            animation = tween(60000, easing = LinearEasing),
-
+            animation = tween(100000, easing = LinearEasing),
             repeatMode = RepeatMode.Restart
-
         ), label = "xOffset"
-
     )
+    val meteorProgress by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 2f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(12000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ), label = "meteorProgress"
+    )
+
+
+    val meteorData = remember {
+        List(8) {
+            Triple(
+                kotlin.random.Random.nextFloat(), // X Start
+                kotlin.random.Random.nextFloat(), // Y Start
+                kotlin.random.Random.nextFloat() * 0.5f + 0.5f // Speed factor (عشوائية السرعة)
+            )
+        }
+    }
+
     Box(
         modifier = Modifier
-
             .fillMaxSize()
-
             .background(
-
                 Brush.verticalGradient(
                     listOf(Color(0xFF020617), Color(0xFF0F172A), Color(0xFF020617))
                 )
             )
-
     ) {
-
         Canvas(modifier = Modifier.fillMaxSize()) {
+            val random = java.util.Random(42)
 
-            val random = Random(42)
-
-            repeat(120) {
-
+            val nebulaColor = Color(0xFF1E293B).copy(alpha = 0.3f)
+            drawCircle(
+                brush = Brush.radialGradient(
+                    colors = listOf(nebulaColor, Color.Transparent),
+                    center = Offset(size.width * 0.2f, size.height * 0.3f),
+                    radius = size.width * 0.8f
+                ),
+                radius = size.width * 0.8f,
+                center = Offset(size.width * 0.2f, size.height * 0.3f)
+            )
+            repeat(150) {
                 val baseX = random.nextFloat() * size.width
-
                 val baseY = random.nextFloat() * size.height
-
                 val currentX = (baseX + xOffset) % size.width
-
                 val currentY = (baseY + (xOffset * 0.5f)) % size.height
 
-
                 drawCircle(
-
-                    color = Color.White.copy(alpha = random.nextFloat()),
-
-                    radius = random.nextFloat() * 1.8.dp.toPx(),
-
+                    color = Color.White.copy(alpha = random.nextFloat() * 0.4f),
+                    radius = random.nextFloat() * 1.5.dp.toPx(),
                     center = Offset(currentX, currentY)
-
                 )
-
             }
+            meteorData.forEachIndexed { i, data ->
+                val startDelay = i * 0.12f
+                val individualProgress = (meteorProgress - startDelay).coerceIn(0f, 1f)
 
+                if (individualProgress > 0f && individualProgress < 1f) {
+                    val startXPos = data.first * size.width
+                    val startYPos = data.second * size.height * 0.5f
+                    val speed = data.third
+                    val distance = size.width * 0.8f * individualProgress * speed
+
+                    val currentMeteorX = startXPos + distance
+                    val currentMeteorY = startYPos + (distance * 0.4f)
+
+                    val alpha = if (individualProgress < 0.2f) {
+                        individualProgress / 0.2f
+                    } else {
+                        (1f - individualProgress) / 0.8f
+                    }.coerceIn(0f, 1f) * 0.5f
+                    val tailBrush = Brush.linearGradient(
+                        colors = listOf(Color.White.copy(alpha = alpha), Color.Transparent),
+                        start = Offset(currentMeteorX, currentMeteorY),
+                        end = Offset(currentMeteorX - (100f * speed), currentMeteorY - (40f * speed))
+                    )
+
+                    drawLine(
+                        brush = tailBrush,
+                        start = Offset(currentMeteorX, currentMeteorY),
+                        end = Offset(currentMeteorX - (110f * speed), currentMeteorY - (45f * speed)),
+                        strokeWidth = 1.dp.toPx(),
+                        cap = StrokeCap.Round
+                    )
+
+                    drawCircle(
+                        color = Color.White.copy(alpha = alpha),
+                        radius = (1.2.dp.toPx() * speed),
+                        center = Offset(currentMeteorX, currentMeteorY)
+                    )
+                }
+            }
         }
-
         content()
-
     }
-
 }
-
 // ================= MAIN SCREEN =================
 @Composable
 fun SurahDetailsScreen(
@@ -135,9 +177,9 @@ fun SurahDetailsScreen(
     val expandedAyahIndex by viewModel.expandedAyahIndex
     val tafsirMap by viewModel.tafsirMap.collectAsState()
     var showSettings by remember { mutableStateOf(false) }
-
+    val scope = rememberCoroutineScope()
     val lastSavedIndex by viewModel.lastSavedAyahIndex
-
+    val isAnyAyahSaved = lastSavedIndex != null && lastSavedIndex != -1
 
     LaunchedEffect(surahId) {
         viewModel.loadSurahData(surahId)
@@ -160,8 +202,14 @@ fun SurahDetailsScreen(
                 SurahHeader(
                     surahName = surahName,
                     ayahCount = ayahCount,
-                    isBookmarked = isBookmarked,
-                    onBookmarkClick = { viewModel.toggleBookmark() },
+                    isBookmarked = isAnyAyahSaved,
+                    onBookmarkClick = {
+                        if (isAnyAyahSaved) {
+                            scope.launch {
+                                listState.animateScrollToItem(lastSavedIndex!!)
+                            }
+                        }
+                    },
                     onSettingsClick = { showSettings = !showSettings }
                 )
                 androidx.compose.animation.AnimatedVisibility(
@@ -200,7 +248,7 @@ fun SurahDetailsScreen(
                             fontSize = fontSize,
                             isExpanded = expandedAyahIndex == index,
                             onCardClick = { viewModel.toggleAyahExpansion(index) },
-                            tafsir = currentTafsir, // تمرير التفسير الفعلي
+                            tafsir = currentTafsir,
                             index=index,
                             isLastRead = (lastSavedIndex ?: -1) == index,
                             onBookmarkAyah = {
@@ -477,5 +525,27 @@ fun IslamicNumberCircle(number: Int) {
             fontSize = 10.sp,
             modifier = Modifier.padding(top = 1.dp)
         )
+    }
+}
+@Preview(showBackground = true, widthDp = 360, heightDp = 640)
+@Composable
+fun GalaxyBackgroundPreview() {
+    MaterialTheme { // استخدمي الـ Theme الخاص بكِ إذا كان لديكِ
+        Surface(modifier = Modifier.fillMaxSize()) {
+            GalaxyBackground {
+                // هنا يمكن وضع أي محتوى، مثلاً بعض النصوص لرؤية الخلفية من خلالها
+                Column(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    Text(
+                        text = "شاشة السكينة",
+                        modifier = Modifier.fillMaxSize(),
+                        color = Color.White,
+                        fontSize = 30.sp,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+        }
     }
 }

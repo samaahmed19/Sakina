@@ -17,10 +17,8 @@ class DuaDetailsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    // استلام المعاملات من Navigation
-    val categoryId: String = checkNotNull(savedStateHandle["categoryId"])
-    val categoryTitle: String = checkNotNull(savedStateHandle["categoryTitle"])
-
+    val categoryId: Int = checkNotNull(savedStateHandle["categoryId"])
+    val categoryTitle: String = savedStateHandle.get<String>("categoryTitle")?.replace("_", " ") ?: ""
     private val _duas = MutableStateFlow<List<DuaEntity>>(emptyList())
     val duas: StateFlow<List<DuaEntity>> = _duas
 
@@ -30,7 +28,7 @@ class DuaDetailsViewModel @Inject constructor(
 
     private fun loadDuas() {
         viewModelScope.launch {
-            repository.getDuasByCategory(categoryId).collect { data ->
+            repository.getDuasByCategory(categoryId.toString()).collect { data ->
                 _duas.value = data
             }
         }

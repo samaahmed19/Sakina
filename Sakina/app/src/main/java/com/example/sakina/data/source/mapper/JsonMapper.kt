@@ -50,6 +50,7 @@ object JsonMapper {
         }
 
     // ===== Duas =====
+    // ===== Duas =====
     fun mapDuas(json: String): Pair<List<DuaCategoryEntity>, List<DuaEntity>> {
         val categories = mutableListOf<DuaCategoryEntity>()
         val duas = mutableListOf<DuaEntity>()
@@ -58,7 +59,7 @@ object JsonMapper {
 
         for (i in 0 until categoryArray.length()) {
             val catObj = categoryArray.getJSONObject(i)
-            val catId = catObj.getString("id")
+            val catId = catObj.getInt("id")
 
             val duasArray = catObj.getJSONArray("duas")
             val currentCategoryDuaCount = duasArray.length()
@@ -66,8 +67,8 @@ object JsonMapper {
             categories.add(
                 DuaCategoryEntity(
                     id = catId,
-                    title = catObj.getString("name"),
-                    icon = "splash",
+                    title = catObj.getString("title"),
+                    icon = catObj.optString("icon", "splash"),
                     count = currentCategoryDuaCount
                 )
             )
@@ -85,6 +86,7 @@ object JsonMapper {
 
         return Pair(categories.toList(), duas.toList())
     }
+
 
     // ===== Tasbeeh  =====
     fun mapTasbeeh(json: String): List<TasbeehEntity> {

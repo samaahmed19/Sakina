@@ -28,8 +28,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.content.ContextCompat
 import com.example.sakina.R
 import kotlin.random.Random
@@ -39,11 +37,11 @@ private val BackgroundDark = Color(0xFF1A1B2E)
 private val BackgroundPurple = Color(0xFF16213E)
 private val BackgroundDeep = Color(0xFF0F0F23)
 private val LightPurple = Color(0xFFB8A4D4)
-private val LightPurpleMuted = Color(0xFF9B8FCC)
-private val GoldenCrescent = Color(0xFFF5D742)
+private val TextMuted = Color.White.copy(alpha = 0.6f)
+private val TextSubtle = Color.White.copy(alpha = 0.5f)
+private val InputFieldBg = Color.White.copy(alpha = 0.1f)
 private val LocationTeal = Color(0xFF5DD9C1)
 private val LocationTealLight = Color(0xFF7FE8D6)
-private val GlassCardColor = Color.White.copy(alpha = 0.08f)
 private val GlassCardGradient = Brush.verticalGradient(
     listOf(
         Color.White.copy(alpha = 0.15f),
@@ -58,9 +56,6 @@ private val ButtonGradient = Brush.horizontalGradient(
         Color(0xFF60A5FA)
     )
 )
-private val InputFieldBg = Color.White.copy(alpha = 0.1f)
-private val TextMuted = Color.White.copy(alpha = 0.6f)
-private val TextSubtle = Color.White.copy(alpha = 0.5f)
 
 @Composable
 fun LoginScreen(
@@ -84,8 +79,6 @@ fun LoginScreen(
     fun onSetLocationClick() {
         if (hasLocationPermission) {
             viewModel.fetchLocation()
-
-            println("LocationDebug: تم الضغط على زر تحديد الموقع")
         } else {
             permissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
         }
@@ -96,15 +89,10 @@ fun LoginScreen(
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    listOf(
-                        BackgroundDark,
-                        BackgroundPurple,
-                        BackgroundDeep
-                    )
+                    listOf(BackgroundDark, BackgroundPurple, BackgroundDeep)
                 )
             )
     ) {
-
         Canvas(modifier = Modifier.fillMaxSize()) {
             repeat(150) {
                 drawCircle(
@@ -130,29 +118,13 @@ fun LoginScreen(
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-
                 SakinaLogoIcon()
-
                 Spacer(modifier = Modifier.height(16.dp))
-
-                Text(
-                    text = "سكن",
-                    fontSize = 32.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = LightPurple
-                )
-
+                Text(text = "سكن", fontSize = 32.sp, fontWeight = FontWeight.Bold, color = LightPurple)
                 Spacer(modifier = Modifier.height(6.dp))
-
-                Text(
-                    text = "Your Spiritual Abode",
-                    fontSize = 14.sp,
-                    color = TextMuted
-                )
-
+                Text(text = "Your Spiritual Abode", fontSize = 14.sp, color = TextMuted)
                 Spacer(modifier = Modifier.height(28.dp))
 
-                // حقل الاسم مع الفاليديشن
                 GlassTextField(
                     hint = "الاسم",
                     value = state.name,
@@ -161,33 +133,25 @@ fun LoginScreen(
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
-
                 LocationInfoBox()
-
                 Spacer(modifier = Modifier.height(16.dp))
 
                 SetLocationButton(
                     onClick = { onSetLocationClick() },
-                    onValueChange = { viewModel.onLocationChange(it) }, // ضيفي السطر ده
                     isLoading = state.isLoadingLocation,
                     locationText = state.location
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
-
                 GlowButton(
-                    text = "ابدأ رحلتك ",
+                    text = "ابدأ رحلتك",
                     loading = state.isLoading,
                     onClick = {
-
-                        viewModel.onStartClick(onSuccess = {
-                            onLoginSuccess()
-                        })
+                        viewModel.onStartClick(onSuccess = { onLoginSuccess() })
                     }
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
-
                 Text(
                     text = "نحفظ خصوصيتك ولا نشارك بياناتك مع أي طرف ثالث",
                     fontSize = 12.sp,
@@ -204,9 +168,7 @@ private fun SakinaLogoIcon() {
     Image(
         painter = painterResource(id = R.drawable.appicon),
         contentDescription = "",
-        modifier = Modifier
-            .size(100.dp)
-            .clip(RoundedCornerShape(50)),
+        modifier = Modifier.size(100.dp).clip(RoundedCornerShape(50)),
         contentScale = ContentScale.Crop
     )
 }
@@ -222,13 +184,9 @@ private fun GlassTextField(
         TextField(
             value = value,
             onValueChange = onChange,
-            placeholder = {
-                Text(hint, color = TextMuted)
-            },
+            placeholder = { Text(hint, color = TextMuted) },
             isError = error != null,
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(16.dp)),
+            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)),
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = InputFieldBg,
                 unfocusedContainerColor = InputFieldBg,
@@ -242,7 +200,6 @@ private fun GlassTextField(
             ),
             shape = RoundedCornerShape(16.dp)
         )
-
         if (error != null) {
             Text(
                 text = error,
@@ -295,71 +252,43 @@ private fun LocationInfoBox() {
 @Composable
 private fun SetLocationButton(
     onClick: () -> Unit,
-    onValueChange: (String) -> Unit,
     isLoading: Boolean = false,
     locationText: String = ""
 ) {
-
-    if (locationText.isBlank() && !isLoading) {
-        OutlinedTextField(
-            value = locationText,
-            onValueChange = onValueChange,
-            placeholder = { Text("  اضغط تحديد    ", color = TextMuted) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(16.dp)),
-            leadingIcon = {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(56.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .background(InputFieldBg)
+            .clickable(enabled = !isLoading, onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        if (isLoading) {
+            CircularProgressIndicator(
+                color = LocationTeal,
+                strokeWidth = 2.dp,
+                modifier = Modifier.size(24.dp)
+            )
+        } else {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier.padding(horizontal = 12.dp)
+            ) {
                 Icon(
                     imageVector = Icons.Default.LocationOn,
                     contentDescription = null,
-                    tint = LocationTeal,
-                    modifier = Modifier.clickable { onClick() }
+                    tint = if (locationText.isNotBlank()) LocationTeal else TextMuted,
+                    modifier = Modifier.size(24.dp)
                 )
-            },
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = InputFieldBg,
-                unfocusedContainerColor = InputFieldBg,
-                focusedIndicatorColor = LocationTeal,
-                unfocusedIndicatorColor = Color.Transparent,
-                focusedTextColor = Color.White,
-                unfocusedTextColor = Color.White
-            ),
-            shape = RoundedCornerShape(16.dp)
-        )
-    } else {
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(16.dp))
-                .background(InputFieldBg)
-                .clickable(enabled = !isLoading, onClick = onClick)
-                .padding(16.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                if (isLoading) {
-                    CircularProgressIndicator(
-                        color = LocationTeal,
-                        strokeWidth = 2.dp,
-                        modifier = Modifier.size(22.dp)
-                    )
-                } else {
-                    Icon(
-                        imageVector = Icons.Default.LocationOn,
-                        contentDescription = null,
-                        tint = LocationTeal,
-                        modifier = Modifier.size(22.dp)
-                    )
-                }
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = if (locationText.isNotBlank()) "تم تحديد الموقع ✓ ($locationText)" else "تحديد الموقع",
+                    text = if (locationText.isNotBlank()) locationText else "اضغط لتحديد الموقع",
                     color = if (locationText.isNotBlank()) LocationTealLight else TextMuted,
-                    fontSize = 15.sp
+                    fontSize = 14.sp,
+                    maxLines = 1,
+                    textAlign = TextAlign.Center
                 )
             }
         }
@@ -388,110 +317,9 @@ private fun GlowButton(
         contentAlignment = Alignment.Center
     ) {
         if (loading) {
-            CircularProgressIndicator(
-                color = Color.White,
-                strokeWidth = 2.dp,
-                modifier = Modifier.size(24.dp)
-            )
+            CircularProgressIndicator(color = Color.White, strokeWidth = 2.dp, modifier = Modifier.size(24.dp))
         } else {
-            Text(
-                text = text,
-                color = Color.White,
-                fontSize = 17.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
-    }
-}
-
-/* Preview */
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-private fun LoginScreenPreview() {
-    val fakeState = remember {
-        object {
-            val name = " "
-            val isLoading = false
-        }
-    }
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    listOf(BackgroundDark, BackgroundPurple, BackgroundDeep)
-                )
-            )
-    ) {
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            repeat(100) {
-                drawCircle(
-                    color = Color.White.copy(alpha = 0.4f),
-                    radius = 2f,
-                    center = Offset(
-                        Random.nextFloat() * size.width,
-                        Random.nextFloat() * size.height
-                    )
-                )
-            }
-        }
-        Box(
-            modifier = Modifier
-                .align(Alignment.Center)
-                .padding(24.dp)
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(28.dp))
-                .background(GlassCardGradient)
-                .padding(28.dp)
-        ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                SakinaLogoIcon()
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = "سَكَن",
-                    fontSize = 32.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = LightPurple
-                )
-                Spacer(modifier = Modifier.height(6.dp))
-                Text(
-                    text = "رحلتك الروحانية تبدأ هنا",
-                    fontSize = 14.sp,
-                    color = TextMuted
-                )
-                Spacer(modifier = Modifier.height(28.dp))
-                GlassTextField(
-                    hint = "الاسم",
-                    value = fakeState.name,
-                    onChange = {}
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                LocationInfoBox()
-                Spacer(modifier = Modifier.height(16.dp))
-
-                SetLocationButton(
-                    onClick = {},
-                    onValueChange = {},
-                    isLoading = false,
-                    locationText = ""
-                )
-                Spacer(modifier = Modifier.height(24.dp))
-                GlowButton(
-                    text = "ابدأ رحلتك الرحانية",
-                    loading = fakeState.isLoading,
-                    onClick = {}
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = "نحفظ خصوصيتك ولا نشارك بياناتك مع أي طرف ثالث",
-                    fontSize = 12.sp,
-                    color = TextSubtle,
-                    textAlign = TextAlign.Center
-                )
-            }
+            Text(text = text, color = Color.White, fontSize = 17.sp, fontWeight = FontWeight.Bold)
         }
     }
 }

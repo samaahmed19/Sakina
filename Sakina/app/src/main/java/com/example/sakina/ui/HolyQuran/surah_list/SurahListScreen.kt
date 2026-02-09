@@ -1,5 +1,7 @@
 package com.example.sakina.ui.HolyQuran.surah_list
 
+import android.R.attr.contentDescription
+import android.R.attr.tint
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
@@ -12,6 +14,7 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
+import androidx.compose.foundation.BorderStroke
 import com.example.sakina.R
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
@@ -37,16 +40,20 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import kotlin.random.Random
 
 // ================== DATA MODEL ==================
 
@@ -62,15 +69,34 @@ data class Surah(
 
 @Composable
 fun GalaxyBackground(content: @Composable () -> Unit) {
-    val infiniteTransition = rememberInfiniteTransition(label = "stars")
+    val infiniteTransition = rememberInfiniteTransition(label = "stars_and_meteors")
     val xOffset by infiniteTransition.animateFloat(
         initialValue = 0f,
         targetValue = 2000f,
         animationSpec = infiniteRepeatable(
-            animation = tween(60000, easing = LinearEasing),
+            animation = tween(100000, easing = LinearEasing),
             repeatMode = RepeatMode.Restart
         ), label = "xOffset"
     )
+    val meteorProgress by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 2f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(12000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ), label = "meteorProgress"
+    )
+
+
+    val meteorData = remember {
+        List(8) {
+            Triple(
+                Random.nextFloat(), // X Start
+                Random.nextFloat(), // Y Start
+                Random.nextFloat() * 0.5f + 0.5f // Speed factor (عشوائية السرعة)
+            )
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -83,17 +109,67 @@ fun GalaxyBackground(content: @Composable () -> Unit) {
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
             val random = java.util.Random(42)
-            repeat(120) {
+
+            val nebulaColor = Color(0xFF1E293B).copy(alpha = 0.3f)
+            drawCircle(
+                brush = Brush.radialGradient(
+                    colors = listOf(nebulaColor, Color.Transparent),
+                    center = Offset(size.width * 0.2f, size.height * 0.3f),
+                    radius = size.width * 0.8f
+                ),
+                radius = size.width * 0.8f,
+                center = Offset(size.width * 0.2f, size.height * 0.3f)
+            )
+            repeat(150) {
                 val baseX = random.nextFloat() * size.width
                 val baseY = random.nextFloat() * size.height
                 val currentX = (baseX + xOffset) % size.width
                 val currentY = (baseY + (xOffset * 0.5f)) % size.height
 
                 drawCircle(
-                    color = Color.White.copy(alpha = random.nextFloat()),
-                    radius = random.nextFloat() * 1.8.dp.toPx(),
+                    color = Color.White.copy(alpha = random.nextFloat() * 0.4f),
+                    radius = random.nextFloat() * 1.5.dp.toPx(),
                     center = Offset(currentX, currentY)
                 )
+            }
+            meteorData.forEachIndexed { i, data ->
+                val startDelay = i * 0.12f
+                val individualProgress = (meteorProgress - startDelay).coerceIn(0f, 1f)
+
+                if (individualProgress > 0f && individualProgress < 1f) {
+                    val startXPos = data.first * size.width
+                    val startYPos = data.second * size.height * 0.5f
+                    val speed = data.third
+                    val distance = size.width * 0.8f * individualProgress * speed
+
+                    val currentMeteorX = startXPos + distance
+                    val currentMeteorY = startYPos + (distance * 0.4f)
+
+                    val alpha = if (individualProgress < 0.2f) {
+                        individualProgress / 0.2f
+                    } else {
+                        (1f - individualProgress) / 0.8f
+                    }.coerceIn(0f, 1f) * 0.5f
+                    val tailBrush = Brush.linearGradient(
+                        colors = listOf(Color.White.copy(alpha = alpha), Color.Transparent),
+                        start = Offset(currentMeteorX, currentMeteorY),
+                        end = Offset(currentMeteorX - (100f * speed), currentMeteorY - (40f * speed))
+                    )
+
+                    drawLine(
+                        brush = tailBrush,
+                        start = Offset(currentMeteorX, currentMeteorY),
+                        end = Offset(currentMeteorX - (110f * speed), currentMeteorY - (45f * speed)),
+                        strokeWidth = 1.dp.toPx(),
+                        cap = StrokeCap.Round
+                    )
+
+                    drawCircle(
+                        color = Color.White.copy(alpha = alpha),
+                        radius = (1.2.dp.toPx() * speed),
+                        center = Offset(currentMeteorX, currentMeteorY)
+                    )
+                }
             }
         }
         content()
@@ -109,10 +185,12 @@ fun SurahListScreen(
     val surahList by viewModel.filteredSurahs.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
     val selectedFilter by viewModel.selectedFilter.collectAsState()
-
+    val savedSurahId by viewModel.savedSurahId.collectAsState()
     var visible by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { visible = true }
-
+    LaunchedEffect(Unit) {
+        viewModel.refreshSavedProgress()
+    }
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
         GalaxyBackground {
             Column(modifier = Modifier.fillMaxSize().padding(16.dp)){
@@ -157,6 +235,7 @@ fun SurahListScreen(
                         items(surahList) { surah ->
                             SurahCard(
                                 surah = surah,
+                                isCurrentProgress = surah.number == savedSurahId,
                                 modifier = Modifier.clickable { onSurahClick(surah) }
                             )
                         }
@@ -266,17 +345,22 @@ fun FilterChipItem(
 @Composable
 fun SurahCard(
     surah: Surah,
+    isCurrentProgress: Boolean,
     modifier: Modifier = Modifier
 ) {
     var pressed by remember { mutableStateOf(false) }
-    val glowColor = Color(0xFFBFA14A).copy(alpha = if (pressed) 0.6f else 0.3f)
+    val glowColor = when {
+        pressed -> Color(0xFFBFA14A).copy(alpha = 0.6f)
+        isCurrentProgress -> Color(0xFFFFD700).copy(alpha = 0.4f)
+        else -> Color(0xFFBFA14A).copy(alpha = 0.2f)
+    }
 
     Box(
         modifier = modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
             .drawBehind {
-                val shadowRadius = if (pressed) 30.dp.toPx() else 15.dp.toPx()
+                val shadowRadius = if (pressed || isCurrentProgress) 30.dp.toPx() else 15.dp.toPx()
                 val spread = if (pressed) 2.dp.toPx() else 0.dp.toPx()
 
                 drawIntoCanvas { canvas ->
@@ -305,7 +389,12 @@ fun SurahCard(
                     listOf(Color(0xFF0B1220), Color(0xFF111827), Color(0xFF0B1220))
                 )
             )
-            .border(1.dp, Color(0xFF1F2937).copy(alpha = 0.5f), RoundedCornerShape(22.dp))
+            .border(
+                width = if (isCurrentProgress) 1.5.dp else 1.dp,
+                color = if (isCurrentProgress) Color(0xFFFFD700).copy(alpha = 0.6f)
+                else Color(0xFF1F2937).copy(alpha = 0.5f),
+                shape = RoundedCornerShape(22.dp)
+            )
             .padding(18.dp)
     ) {
         Row(
@@ -317,16 +406,36 @@ fun SurahCard(
                 icon = R.drawable.islamic_pattern
             )
             Column(verticalArrangement = Arrangement.Center) {
-                Text(
-                    text = surah.nameAr,
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = surah.nameAr,
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+
+                }
             }
         }
         Box(modifier = Modifier.align(Alignment.CenterEnd)) {
-            SurahTypeBadge(type = surah.type)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                if (isCurrentProgress) {
+                        Image(
+                            painter = painterResource(id = R.drawable.save3),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .padding(6.dp)
+                                .size(45.dp),
+                            contentScale = ContentScale.Fit
+                        )
+
+                }
+
+                SurahTypeBadge(type = surah.type)
+            }
         }
     }
 }
@@ -393,4 +502,32 @@ fun SurahTypeBadge(type: String) {
         )
     }
 }
+// 1. كائن بيانات وهمي للتجربة
 
+
+@Preview(showBackground = true, backgroundColor = 0xFF020617)
+@Composable
+fun SurahCardPreview() {
+    // نقوم بتمرير كل القيم الناقصة هنا
+    val mockSurah = Surah(
+        number = 1,
+        nameAr = "سُورَةُ الفَاتِحَةِ",
+        nameEn = "Al-Fatiha",    // القيمة الناقصة 1
+        ayahCount = 7,           // القيمة الناقصة 2
+        type = "Meccan"          // القيمة الناقصة 3 (مكية أو مدنية)
+    )
+
+    Column(modifier = Modifier.padding(16.dp)) {
+        // كارد عادي
+        SurahCard(
+            surah = mockSurah,
+            isCurrentProgress = false
+        )
+
+        // كارد "آخر قراءة"
+        SurahCard(
+            surah = mockSurah.copy(nameAr = "سُورَةُ الكَهفِ", number = 18),
+            isCurrentProgress = true
+        )
+    }
+}

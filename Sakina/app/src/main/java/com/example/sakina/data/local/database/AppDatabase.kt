@@ -23,8 +23,7 @@ import com.example.sakina.data.local.database.dao.TafsirDao
 import com.example.sakina.data.local.database.entity.TafsirEntity
 import com.example.sakina.data.local.database.entity.TasbeehEntity
 import com.example.sakina.data.local.database.entity.UserEntity
-import com.example.sakina.data.local.database.entity.StreakEntity
-import com.example.sakina.data.local.database.dao.StreakDao
+
 
 
 @Database(
@@ -40,8 +39,7 @@ import com.example.sakina.data.local.database.dao.StreakDao
         StreakEntity::class,
         TasbeehEntity::class,
         UserEntity::class,
-        TafsirEntity::class,
-        StreakEntity::class
+        TafsirEntity::class
     ],
     version = 4,
     exportSchema = false
@@ -57,11 +55,13 @@ abstract class AppDatabase : RoomDatabase() {
 
     abstract fun checklistDao(): ChecklistDao
 
-    abstract fun streakDao(): StreakDao
-
     abstract fun tasbeehDao(): TasbeehDao
 
     abstract fun userDao(): UserDao
     abstract fun tafsirDao(): TafsirDao
     abstract fun streakDao(): StreakDao
 }
+
+
+
+

@@ -9,7 +9,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.sakina.ui.Azkar.azkar_list.ZikrListScreen
 import com.example.sakina.ui.Azkar.azkar_details.ZikrDetailsScreen
-import com.example.sakina.ui.Checklist.ChecklistScreen
+import com.example.sakina.ui.checklist.ChecklistScreen
 import com.example.sakina.ui.Home.HomeScreen
 import com.example.sakina.ui.Splash.SplashScreen
 import com.example.sakina.ui.HolyQuran.surah_details.SurahDetailsScreen
@@ -17,6 +17,8 @@ import com.example.sakina.ui.HolyQuran.surah_list.SurahListScreen
 import com.example.sakina.ui.Prayers.PrayerScreen
 import com.example.sakina.ui.Tasbeeh.TasbeehScreen
 import com.example.sakina.navigation.Screen
+import com.example.sakina.ui.Gwame3Dua.DuaListScreen
+import com.example.sakina.ui.Gwame3Dua.dua_details.DuaDetailsScreen
 import com.example.sakina.ui.authentication.LoginScreen
 
 
@@ -139,8 +141,22 @@ fun AppNavGraph(
         }
 
         //  Dua Screen
-         composable(Screen.Dua.route) {
+        composable(Screen.Dua.route) {
+            DuaListScreen(onCategoryClick = { category ->
+                navController.navigate(Screen.DuaDetails.createRoute(category.id, category.title))
+            })
+        }
 
-         }
+        // DuaDetails Screen
+        composable(
+            route = Screen.DuaDetails.route,
+            arguments = listOf(
+                navArgument("categoryId") { type = NavType.IntType },
+                navArgument("categoryTitle") { type = NavType.StringType }
+            )
+        ) {
+            DuaDetailsScreen(onBack = { navController.popBackStack() })
+        }
     }
+
 }

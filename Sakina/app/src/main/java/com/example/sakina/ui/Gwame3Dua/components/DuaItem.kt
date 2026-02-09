@@ -26,55 +26,32 @@ fun DuaItem(
     onFavoriteClick: () -> Unit
 ) {
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
+        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
         shape = RoundedCornerShape(28.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.05f)),
-        border = BorderStroke(
-            width = 1.dp,
-            brush = Brush.horizontalGradient(
-                listOf(activeColor.copy(alpha = 0.4f), Color.Transparent)
-            )
-        )
+        border = BorderStroke(1.dp, Brush.horizontalGradient(listOf(activeColor.copy(alpha = 0.4f), Color.Transparent)))
     ) {
-        Column(
-            modifier = Modifier.padding(20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
+        Column(modifier = Modifier.padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             Icon(
                 painter = painterResource(id = R.drawable.star),
                 contentDescription = null,
                 modifier = Modifier.size(20.dp),
                 tint = activeColor.copy(alpha = 0.7f)
             )
-
             Spacer(modifier = Modifier.height(16.dp))
-
             Text(
-                text = duaText,
-                color = Color.White,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Medium,
-                textAlign = TextAlign.Center,
-                lineHeight = 36.sp,
-                modifier = Modifier.fillMaxWidth()
+                text = duaText, color = Color.White, fontSize = 20.sp,
+                fontWeight = FontWeight.Medium, textAlign = TextAlign.Center,
+                lineHeight = 36.sp, modifier = Modifier.fillMaxWidth()
             )
-
             Spacer(modifier = Modifier.height(16.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
-            ) {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                 IconButton(
                     onClick = onFavoriteClick,
                     modifier = Modifier.background(Color.White.copy(alpha = 0.05f), CircleShape)
                 ) {
                     Icon(
-                        painter = painterResource(
-                            id = if (isFavorite) R.drawable.favorite else R.drawable.favorite
-                        ),
+                        painter = painterResource(id = R.drawable.heart_outline),
                         contentDescription = "Favorite",
                         tint = if (isFavorite) Color.Red else Color.White.copy(alpha = 0.6f)
                     )

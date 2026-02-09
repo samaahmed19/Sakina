@@ -1,5 +1,6 @@
-package com.example.sakina.ui.Checklist
+package com.example.sakina.ui.checklist
 
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -18,10 +19,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -29,32 +30,25 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.sakina.data.local.database.entity.ChecklistEntity
 import kotlin.random.Random
 
-/* ---------------- BACKGROUND ---------------- */
-
 @Composable
 fun GalaxyBackground(content: @Composable () -> Unit) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    listOf(
-                        Color(0xFF020617),
-                        Color(0xFF0F172A),
-                        Color(0xFF020617)
-                    )
-                )
-            )
-    ) {
+    val infiniteTransition = rememberInfiniteTransition(label = "stars")
+    val xOffset by infiniteTransition.animateFloat(
+        initialValue = 0f, targetValue = 2000f,
+        animationSpec = infiniteRepeatable(tween(100000, easing = LinearEasing), RepeatMode.Restart),
+        label = "x"
+    )
+
+    Box(modifier = Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color(0xFF020617), Color(0xFF0F172A))))) {
         Canvas(modifier = Modifier.fillMaxSize()) {
-            repeat(120) {
+            val random = java.util.Random(42)
+            repeat(150) {
+                val baseX = random.nextFloat() * size.width
+                val baseY = random.nextFloat() * size.height
                 drawCircle(
-                    color = Color.White.copy(alpha = Random.nextFloat()),
-                    radius = Random.nextFloat() * 2f,
-                    center = Offset(
-                        Random.nextFloat() * size.width,
-                        Random.nextFloat() * size.height
-                    )
+                    color = Color.White.copy(alpha = random.nextFloat() * 0.4f),
+                    radius = 1.5.dp.toPx(),
+                    center = Offset((baseX + xOffset) % size.width, (baseY + (xOffset * 0.5f)) % size.height)
                 )
             }
         }
@@ -62,27 +56,23 @@ fun GalaxyBackground(content: @Composable () -> Unit) {
     }
 }
 
-/* ---------------- SCREEN ---------------- */
-
 @Composable
-fun ChecklistScreen(
-
-    viewModel: ChecklistViewModel = hiltViewModel()
-) {  var showAddDialog by remember { mutableStateOf(false) }
+fun ChecklistScreen(viewModel: ChecklistViewModel = hiltViewModel()) {
+    var showAddDialog by remember { mutableStateOf(false) }
     var newTaskText by remember { mutableStateOf("") }
-    val tasks by viewModel.allTasks.collectAsState(initial = emptyList())
-    val streakDays by viewModel.streakDays
+
+    val tasks by viewModel.tasks.collectAsState()
+    val streakState by viewModel.streak.collectAsState()
+    val streakDaysCount by viewModel.streakDaysCount
+
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
         GalaxyBackground {
             LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 16.dp),
+                modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 contentPadding = PaddingValues(top = 40.dp, bottom = 40.dp)
             ) {
-
-                item { HeaderCard(streakDays = streakDays) }
+                item { HeaderCard(streakDays = streakDaysCount) }
 
                 item {
                     ProgressCard(
@@ -90,22 +80,14 @@ fun ChecklistScreen(
                         total = tasks.size
                     )
                 }
-                item {
-                    AddTaskCard(
-                        onAddClick = { showAddDialog = true }
-                    )
-                }
+
+                item { AddTaskCard(onAddClick = { showAddDialog = true }) }
 
                 item {
-                    Text(
-                        text = "المهام اليومية",
-                        color = Color.White,
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Text("المهام اليومية", color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.Bold)
                 }
 
-                items(tasks) { task ->
+                items(tasks, key = { it.id }) { task ->
                     TaskCard(
                         task = task,
                         onToggle = { viewModel.toggleTask(task) },
@@ -113,12 +95,13 @@ fun ChecklistScreen(
                     )
                 }
             }
+
             if (showAddDialog) {
                 AddTaskDialog(
                     value = newTaskText,
                     onValueChange = { newTaskText = it },
                     onAdd = {
-                        viewModel.addNewTask(newTaskText)
+                        viewModel.addTask(newTaskText)
                         newTaskText = ""
                         showAddDialog = false
                     },
@@ -129,82 +112,36 @@ fun ChecklistScreen(
     }
 }
 
-/* ---------------- HEADER ---------------- */
-
 @Composable
 private fun HeaderCard(streakDays: Int) {
     Card(
         shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0xFFFFC107).copy(alpha = 0.15f)
-        ),
-        modifier = Modifier
-            .fillMaxWidth()
-            .border(
-                1.dp,
-                Color(0xFFFFC107),
-                RoundedCornerShape(24.dp)
-            )
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFC107).copy(alpha = 0.15f)),
+        modifier = Modifier.fillMaxWidth().border(1.dp, Color(0xFFFFC107).copy(alpha = 0.5f), RoundedCornerShape(24.dp))
     ) {
-        Column(
-            modifier = Modifier.padding(20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = "✨ هنعمل ايه انهارده؟",
-                color = Color.White,
-                fontSize = 22.sp,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-               text = "🔥 $streakDays يوم",
-                color = Color(0xFFFFC107),
-                fontSize = 28.sp,
-                fontWeight = FontWeight.ExtraBold
-            )
+        Column(modifier = Modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+            Text("✨ هنعمل ايه انهارده؟", color = Color.White, fontSize = 20.sp)
+            Spacer(modifier = Modifier.height(12.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("🔥", fontSize = 32.sp)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("$streakDays يوم", color = Color(0xFFFFC107), fontSize = 36.sp, fontWeight = FontWeight.ExtraBold)
+            }
         }
     }
 }
 
-/* ---------------- PROGRESS ---------------- */
-
 @Composable
-private fun ProgressCard(
-    completed: Int,
-    total: Int
-) {
-    val progress = if (total == 0) 0f else completed / total.toFloat()
-
-    Card(
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color.White.copy(alpha = 0.08f)
-        ),
-        modifier = Modifier.fillMaxWidth()
-    ) {
+private fun ProgressCard(completed: Int, total: Int) {
+    val progress = if (total == 0) 0f else completed.toFloat() / total.toFloat()
+    Card(shape = RoundedCornerShape(20.dp), colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.08f)), modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp)) {
-
-            Text(
-                text = "التقدم اليومي",
-                color = Color.White,
-                fontWeight = FontWeight.Bold
-            )
-
+            Text("التقدم اليومي", color = Color.White, fontWeight = FontWeight.Bold)
+            Text("$completed / $total", color = Color(0xFF64FFDA))
             Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = "$completed / $total",
-                color = Color(0xFF64FFDA)
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
             LinearProgressIndicator(
-                progress = progress,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(6.dp),
+                progress = { progress },
+                modifier = Modifier.fillMaxWidth().height(6.dp),
                 color = Color(0xFF64FFDA),
                 trackColor = Color.White.copy(alpha = 0.2f)
             )
@@ -212,238 +149,50 @@ private fun ProgressCard(
     }
 }
 
-
-/* ---------------- TASK CARD ---------------- */
-
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun TaskCard(
-    task: ChecklistEntity,
-    onToggle: () -> Unit,
-    onDelete: () -> Unit
-) {
+fun TaskCard(task: ChecklistEntity, onToggle: () -> Unit, onDelete: () -> Unit) {
     Card(
         shape = RoundedCornerShape(18.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color.White.copy(alpha = 0.06f)
-        ),
-        modifier = Modifier
-            .fillMaxWidth()
-            .border(
-                1.dp,
-                Color.White.copy(alpha = 0.15f),
-                RoundedCornerShape(18.dp)
-            )
-            .combinedClickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null,
-                onClick = { /* optional */ },
-                onLongClick = { onDelete() }
-            )
-
+        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.06f)),
+        modifier = Modifier.fillMaxWidth().border(1.dp, Color.White.copy(alpha = 0.15f), RoundedCornerShape(18.dp))
+            .combinedClickable(interactionSource = remember { MutableInteractionSource() }, indication = null, onClick = {}, onLongClick = onDelete)
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(14.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-
-            Checkbox(
-                checked = task.isCompleted,
-                onCheckedChange = { onToggle() },
-                colors = CheckboxDefaults.colors(
-                    checkedColor = Color(0xFF64FFDA),
-                    uncheckedColor = Color.White
-                )
-            )
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            Text(
-                text = task.taskName,
-                color = Color.White,
-                fontSize = 18.sp,
-                modifier = Modifier.weight(1f),
-                textAlign = TextAlign.Start
-            )
-
-            Box(
-                modifier = Modifier
-                    .size(34.dp)
-                    .background(
-                        Color.White.copy(alpha = 0.15f),
-                        CircleShape
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Text("⭐", fontSize = 14.sp)
-            }
+        Row(modifier = Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
+            Checkbox(checked = task.isCompleted, onCheckedChange = { onToggle() }, colors = CheckboxDefaults.colors(checkedColor = Color(0xFF64FFDA)))
+            Text(task.taskName, color = Color.White, fontSize = 18.sp, modifier = Modifier.weight(1f).padding(horizontal = 8.dp))
+            Text("⭐", fontSize = 14.sp)
         }
     }
 }
 
 @Composable
-private fun AddTaskCard(
-    onAddClick: () -> Unit
-) {
+private fun AddTaskCard(onAddClick: () -> Unit) {
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .border(
-                1.dp,
-                Color(0xFF64FFDA),
-                RoundedCornerShape(18.dp)
-            ),
+        modifier = Modifier.fillMaxWidth().border(1.dp, Color(0xFF64FFDA), RoundedCornerShape(18.dp)),
         shape = RoundedCornerShape(18.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color.White.copy(alpha = 0.06f)
-        ),
+        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.06f)),
         onClick = onAddClick
     ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Text(
-                text = "＋",
-                fontSize = 22.sp,
-                color = Color(0xFF64FFDA),
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = "إضافة مهمة جديدة",
-                color = Color.White,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium
-            )
+        Row(modifier = Modifier.padding(16.dp), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+            Text("＋ إضافة مهمة جديدة", color = Color(0xFF64FFDA), fontWeight = FontWeight.Bold)
         }
     }
 }
+
 @Composable
-fun AddTaskDialog(
-    value: String,
-    onValueChange: (String) -> Unit,
-    onAdd: () -> Unit,
-    onDismiss: () -> Unit
-) {
+fun AddTaskDialog(value: String, onValueChange: (String) -> Unit, onAdd: () -> Unit, onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = Color(0xFF020617).copy(alpha = 0.95f),
-        shape = RoundedCornerShape(24.dp),
-
-        title = {
-            Text(
-                text = "✨ مهمة جديدة",
-                color = Color.White,
-                fontWeight = FontWeight.Bold,
-                fontSize = 20.sp
-            )
-        },
-
+        containerColor = Color(0xFF0F172A),
+        title = { Text("✨ مهمة جديدة", color = Color.White) },
         text = {
             OutlinedTextField(
-                value = value,
-                onValueChange = onValueChange,
-                placeholder = {
-                    Text(
-                        "اكتب المهمة هنا…",
-                        color = Color.White.copy(alpha = 0.5f)
-                    )
-                },
-                singleLine = true,
-                shape = RoundedCornerShape(16.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = Color.White,
-                    unfocusedTextColor = Color.White,
-                    cursorColor = Color(0xFF64FFDA),
-                    focusedBorderColor = Color(0xFF64FFDA),
-                    unfocusedBorderColor = Color.White.copy(alpha = 0.3f),
-                    focusedContainerColor = Color.White.copy(alpha = 0.05f),
-                    unfocusedContainerColor = Color.White.copy(alpha = 0.05f)
-                )
+                value = value, onValueChange = onValueChange,
+                colors = OutlinedTextFieldDefaults.colors(focusedTextColor = Color.White, unfocusedTextColor = Color.White)
             )
         },
-
-        confirmButton = {
-            TextButton(onClick = onAdd) {
-                Text(
-                    "إضافة",
-                    color = Color(0xFF64FFDA),
-                    fontWeight = FontWeight.Bold
-                )
-            }
-        },
-
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(
-                    "إلغاء",
-                    color = Color.White.copy(alpha = 0.7f)
-                )
-            }
-        }
+        confirmButton = { TextButton(onClick = onAdd) { Text("إضافة", color = Color(0xFF64FFDA)) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("إلغاء", color = Color.White) } }
     )
 }
-/* ---------------- PREVIEW ---------------- */
-@Preview(showBackground = true, heightDp = 800)
-@Composable
-fun ChecklistPreview() {
-
-    val previewTasks = listOf(
-        ChecklistEntity(1, "صدقة", false),
-        ChecklistEntity(2, "ورد القرآن", true),
-        ChecklistEntity(3, "قيام الليل", false)
-    )
-
-    var showAddDialog by remember { mutableStateOf(true) }
-    var newTaskText by remember { mutableStateOf("ورد القرآن") }
-
-    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-        GalaxyBackground {
-            Box {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    item { HeaderCard(streakDays = 12) }
-                    item { ProgressCard(1, 3) }
-
-                    items(previewTasks) {
-                        TaskCard(
-                            task = it,
-                            onToggle = {},
-                            onDelete = {}
-                        )
-                    }
-
-                    item {
-                        AddTaskCard(
-                            onAddClick = { showAddDialog = true }
-                        )
-                    }
-                }
-
-            }
-        }
-    }
-}
-@Preview(showBackground = true)
-@Composable
-fun AddTaskDialogPreview() {
-    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-        GalaxyBackground {
-            AddTaskDialog(
-                value = "ورد القرآن",
-                onValueChange = {},
-                onAdd = {},
-                onDismiss = {}
-            )
-        }
-    }
-}
-
