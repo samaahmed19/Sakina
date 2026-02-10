@@ -174,7 +174,7 @@ fun HomeScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = "أهلاً بك ${user?.name ?: ""}",
+                            text = "أهلاً بك, ${user?.name ?: ""}",
                             color = Color.White,
                             fontSize = 32.sp,
                             fontWeight = FontWeight.ExtraBold,
