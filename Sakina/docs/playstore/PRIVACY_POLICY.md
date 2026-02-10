@@ -47,5 +47,5 @@ Sakina is not designed to knowingly collect personal information from children.
 We may update this policy from time to time. We will update the “Last updated” date above.
 
 ## Contact
-If you have questions about this policy, contact us at: (add your support email here)
+If you have questions about this policy, contact us at: sama23012612@gmail.com
 
