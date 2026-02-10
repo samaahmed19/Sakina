@@ -67,7 +67,7 @@ fun LoginScreen(
 
     val hasLocationPermission = ContextCompat.checkSelfPermission(
         context,
-        Manifest.permission.ACCESS_FINE_LOCATION
+        Manifest.permission.ACCESS_COARSE_LOCATION
     ) == PackageManager.PERMISSION_GRANTED
 
     val permissionLauncher = rememberLauncherForActivityResult(
@@ -80,7 +80,7 @@ fun LoginScreen(
         if (hasLocationPermission) {
             viewModel.fetchLocation()
         } else {
-            permissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+            permissionLauncher.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
         }
     }
 
@@ -153,7 +153,7 @@ fun LoginScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = "نحفظ خصوصيتك ولا نشارك بياناتك مع أي طرف ثالث",
+                    text = "نستخدم موقعك التقريبي فقط لحساب مواقيت الصلاة على جهازك، ولا نشارك بياناتك مع أي طرف ثالث",
                     fontSize = 12.sp,
                     color = TextSubtle,
                     textAlign = TextAlign.Center

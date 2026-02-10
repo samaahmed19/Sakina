@@ -19,7 +19,7 @@ class LocationHelper @Inject constructor(
     fun hasLocationPermission(): Boolean {
         return ContextCompat.checkSelfPermission(
             context,
-            Manifest.permission.ACCESS_FINE_LOCATION
+            Manifest.permission.ACCESS_COARSE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED
     }
 
@@ -33,7 +33,7 @@ class LocationHelper @Inject constructor(
 
             if (ContextCompat.checkSelfPermission(
                     context,
-                    Manifest.permission.ACCESS_FINE_LOCATION
+                    Manifest.permission.ACCESS_COARSE_LOCATION
                 ) != PackageManager.PERMISSION_GRANTED
             ) {
                 return null
@@ -46,7 +46,7 @@ class LocationHelper @Inject constructor(
 
 
             val location = fusedClient.getCurrentLocation(
-                Priority.PRIORITY_HIGH_ACCURACY,
+                Priority.PRIORITY_BALANCED_POWER_ACCURACY,
                 null
             ).await()
 

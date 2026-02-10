@@ -13,6 +13,8 @@ interface UserDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertUser(user: UserEntity)
 
+    @Query("UPDATE user_table SET location = :location WHERE id = 1")
+    suspend fun updateLocation(location: String?)
 
     @Query("SELECT * FROM user_table WHERE id = 1")
     fun getUser(): Flow<UserEntity?>

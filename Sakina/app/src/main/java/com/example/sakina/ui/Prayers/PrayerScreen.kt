@@ -13,11 +13,14 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -45,10 +48,14 @@ import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import android.content.Intent
 import com.example.sakina.domain.model.Prayer
+import com.example.sakina.domain.model.PrayerCalculationMethod
 import com.example.sakina.domain.model.PrayerDaySummary
 import com.example.sakina.domain.model.PrayerKey
+import com.example.sakina.domain.model.PrayerMadhab
+import com.example.sakina.domain.model.PrayerSettings
 import com.example.sakina.domain.model.PrayerType
 import com.example.sakina.domain.model.ZawalStatus
+import com.example.sakina.utils.formatClockTime
 import kotlin.random.Random
 
 @Composable
@@ -60,6 +67,8 @@ fun PrayerScreen(
     PrayerTreeContent(
         uiState = uiState,
         onToggle = { key, newChecked -> viewModel.setPrayerChecked(key, newChecked) },
+        onSetMethod = { viewModel.setCalculationMethod(it) },
+        onSetMadhab = { viewModel.setMadhab(it) },
         onRetry = { viewModel.load() }
     )
 }
@@ -68,12 +77,15 @@ fun PrayerScreen(
 fun PrayerTreeContent(
     uiState: PrayerUiState,
     onToggle: (PrayerKey, Boolean) -> Unit,
+    onSetMethod: (PrayerCalculationMethod) -> Unit,
+    onSetMadhab: (PrayerMadhab) -> Unit,
     onRetry: () -> Unit
 ) {
     val context = LocalContext.current
     val summary = uiState.summary
 
     var showCelebrate by remember { mutableStateOf(false) }
+    var showSettings by remember { mutableStateOf(false) }
 
     LaunchedEffect(summary?.shouldCelebrate) {
         if (summary?.shouldCelebrate == true) {
@@ -111,11 +123,26 @@ fun PrayerTreeContent(
                 )
             }
 
+            if (showSettings) {
+                PrayerSettingsDialog(
+                    settings = uiState.settings,
+                    onSetMethod = onSetMethod,
+                    onSetMadhab = onSetMadhab,
+                    onClose = { showSettings = false }
+                )
+            }
+
             when {
                 uiState.isLoading -> LoadingState()
                 uiState.error != null -> ErrorCard(message = uiState.error, onRetry = onRetry)
                 uiState.summary == null -> EmptyState()
-                else -> PrayerList(summary = uiState.summary, onToggle = onToggle)
+                else -> PrayerList(
+                    summary = uiState.summary,
+                    fardPrayerTimes = uiState.fardPrayerTimes,
+                    settings = uiState.settings,
+                    onOpenSettings = { showSettings = true },
+                    onToggle = onToggle
+                )
             }
         }
     }
@@ -142,6 +169,9 @@ private fun EmptyState() {
 @Composable
 private fun PrayerList(
     summary: PrayerDaySummary,
+    fardPrayerTimes: Map<PrayerKey, Long>,
+    settings: PrayerSettings,
+    onOpenSettings: () -> Unit,
     onToggle: (PrayerKey, Boolean) -> Unit
 ) {
     val fard = summary.items.filter { it.type == PrayerType.FARD }
@@ -154,13 +184,14 @@ private fun PrayerList(
         contentPadding = PaddingValues(top = 22.dp, bottom = 26.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
-        item { HeaderSection(summary = summary) }
+        item { HeaderSection(summary = summary, settings = settings, onOpenSettings = onOpenSettings) }
         item { AyahCard() }
 
         item { SectionTitle("الفرائض") }
         items(fard, key = { it.key.key }) { item ->
             PrayerCard(
                 prayer = item,
+                timeMillis = fardPrayerTimes[item.key],
                 accent = Color(0xFFFFD700),
                 onToggle = onToggle
             )
@@ -174,6 +205,7 @@ private fun PrayerList(
         items(nawafil, key = { it.key.key }) { item ->
             PrayerCard(
                 prayer = item,
+                timeMillis = null,
                 accent = Color(0xFFB388FF),
                 onToggle = onToggle
             )
@@ -184,9 +216,22 @@ private fun PrayerList(
 /* ----------------------------- Header ----------------------------- */
 
 @Composable
-private fun HeaderSection(summary: PrayerDaySummary) {
+private fun HeaderSection(
+    summary: PrayerDaySummary,
+    settings: PrayerSettings,
+    onOpenSettings: () -> Unit
+) {
     Column(verticalArrangement = Arrangement.spacedBy(15.dp)) {
-        Text(text = "صلاتي", color =Color(0xFFFFD700), fontSize = 35.sp)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(text = "صلاتي", color = Color(0xFFFFD700), fontSize = 35.sp)
+            TextButton(onClick = onOpenSettings) {
+                Text("الإعدادات", color = Color.White.copy(alpha = 0.85f))
+            }
+        }
 
         Text(
             text = "${summary.completedFardCount} من ${summary.totalFardCount} صلوات",
@@ -194,7 +239,79 @@ private fun HeaderSection(summary: PrayerDaySummary) {
             fontSize = 16.sp
         )
 
+        Text(
+            text = "${settings.method.labelAr} • ${settings.madhab.labelAr}",
+            color = Color.White.copy(alpha = 0.65f),
+            fontSize = 14.sp
+        )
+
         ProgressCard(completed = summary.completedFardCount, total = summary.totalFardCount)
+    }
+}
+
+@Composable
+private fun PrayerSettingsDialog(
+    settings: PrayerSettings,
+    onSetMethod: (PrayerCalculationMethod) -> Unit,
+    onSetMadhab: (PrayerMadhab) -> Unit,
+    onClose: () -> Unit
+) {
+    Dialog(onDismissRequest = onClose) {
+        Card(
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFF020617)),
+            border = BorderStroke(1.3.dp, Color(0xFFFFD700).copy(alpha = 0.45f)),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .padding(18.dp)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
+                Text("إعدادات المواقيت", color = Color(0xFFFFD700), fontSize = 20.sp)
+
+                Text("طريقة الحساب", color = Color.White.copy(alpha = 0.9f), fontSize = 15.sp)
+                PrayerCalculationMethod.values().forEach { method ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onSetMethod(method) }
+                            .padding(vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(selected = settings.method == method, onClick = { onSetMethod(method) })
+                        Spacer(Modifier.width(8.dp))
+                        Text(method.labelAr, color = Color.White.copy(alpha = 0.85f))
+                    }
+                }
+
+                Spacer(Modifier.height(6.dp))
+
+                Text("المذهب (العصر)", color = Color.White.copy(alpha = 0.9f), fontSize = 15.sp)
+                PrayerMadhab.values().forEach { madhab ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onSetMadhab(madhab) }
+                            .padding(vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(selected = settings.madhab == madhab, onClick = { onSetMadhab(madhab) })
+                        Spacer(Modifier.width(8.dp))
+                        Text(madhab.labelAr, color = Color.White.copy(alpha = 0.85f))
+                    }
+                }
+
+                Spacer(Modifier.height(6.dp))
+
+                TextButton(onClick = onClose, modifier = Modifier.align(Alignment.End)) {
+                    Text("إغلاق", color = Color.White)
+                }
+            }
+        }
     }
 }
 
@@ -327,6 +444,7 @@ private fun SectionTitle(title: String) {
 @Composable
 private fun PrayerCard(
     prayer: Prayer,
+    timeMillis: Long?,
     accent: Color,
     onToggle: (PrayerKey, Boolean) -> Unit
 ) {
@@ -371,6 +489,7 @@ private fun PrayerCard(
                 .padding(horizontal = 16.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            val context = LocalContext.current
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     prayer.titleAr,
@@ -378,7 +497,12 @@ private fun PrayerCard(
                     fontSize = 20.sp
                 )
                 Text(
-                    if (prayer.type == PrayerType.FARD) "فرض" else "نافلة",
+                    if (prayer.type == PrayerType.FARD) {
+                        val timeText = timeMillis?.let { formatClockTime(context, it) }
+                        if (timeText != null) "فرض • $timeText" else "فرض"
+                    } else {
+                        "نافلة"
+                    },
                     color = Color.White.copy(alpha = 0.6f),
                     fontSize = 15.sp
                 )
@@ -541,6 +665,8 @@ private fun PrayerScreenInteractivePreview() {
                 shouldCelebrate = isAllFardCompleted
             )
         },
+        onSetMethod = {},
+        onSetMadhab = {},
         onRetry = {}
     )
 }

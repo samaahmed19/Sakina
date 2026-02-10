@@ -28,4 +28,8 @@ class UserRepository @Inject constructor(
     suspend fun getUserOnce(): UserEntity? {
         return userDao.getUserOnce()
     }
+
+    suspend fun updateLocation(location: String?) {
+        userDao.updateLocation(location)
+    }
 }

@@ -6,7 +6,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
@@ -121,6 +123,7 @@ fun TasbeehScreen(viewModel: TasbeehViewModel = hiltViewModel()) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .verticalScroll(rememberScrollState())
                 .padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -151,7 +154,7 @@ fun TasbeehScreen(viewModel: TasbeehViewModel = hiltViewModel()) {
                 }
             }
 
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.height(24.dp))
 
             Box(contentAlignment = Alignment.Center, modifier = Modifier.size(260.dp)) {
                 if (viewModel.hasStartedByClick) {
@@ -200,30 +203,28 @@ fun TasbeehScreen(viewModel: TasbeehViewModel = hiltViewModel()) {
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(14.dp))
 
-
-
-            Spacer(modifier = Modifier.weight(1.5f))
-        }
-
-        Column(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 5.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            IconButton(
-                onClick = { viewModel.resetCount() },
-                modifier = Modifier
-                    .size(46.dp)
-                    .background(Color.White.copy(0.04f), CircleShape)
-                    .border(0.5.dp, Color.White.copy(0.1f), CircleShape)
-            ) {
-                Icon(Icons.Default.Refresh, "Reset", tint = Color.White.copy(0.5f), modifier = Modifier.size(20.dp))
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                IconButton(
+                    onClick = { viewModel.resetCount() },
+                    modifier = Modifier
+                        .size(46.dp)
+                        .background(Color.White.copy(0.04f), CircleShape)
+                        .border(0.5.dp, Color.White.copy(0.1f), CircleShape)
+                ) {
+                    Icon(
+                        Icons.Default.Refresh,
+                        contentDescription = "Reset",
+                        tint = Color.White.copy(0.5f),
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.height(2.dp))
+                Text("إعادة التعيين", fontSize = 10.sp, color = Color.White.copy(0.2f))
             }
-            Spacer(modifier = Modifier.height(2.dp))
-            Text("إعادة التعيين", fontSize = 10.sp, color = Color.White.copy(0.2f))
+
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }
