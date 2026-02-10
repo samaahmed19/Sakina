@@ -3,6 +3,8 @@ package com.example.sakina.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
+import androidx.navigation.navDeepLink
+import androidx.core.net.toUri
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -81,7 +83,11 @@ fun AppNavGraph(
         // ِAzkar Details Screen
         composable(
             route = "azkar_details/{catId}",
-            arguments = listOf(navArgument("catId") { type = NavType.StringType })
+            arguments = listOf(navArgument("catId") { type = NavType.StringType }),
+            // Deep Link
+            deepLinks = listOf(
+                navDeepLink { uriPattern = "sakan://azkar/{catId}" }
+            )
         ) { backStackEntry ->
             val catId = backStackEntry.arguments?.getString("catId") ?: ""
 

@@ -46,6 +46,7 @@ android {
 }
 
 dependencies {
+    implementation("com.google.accompanist:accompanist-permissions:0.34.0")
     implementation("io.coil-kt:coil-compose:2.5.0")
     implementation("dev.shreyaspatil:capturable:2.1.0")
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
