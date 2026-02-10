@@ -3,6 +3,7 @@ package com.example.sakina.navigation
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MenuBook
@@ -35,8 +36,9 @@ data class NavItem(
 
 val bottomNavItems = listOf(
     NavItem(Screen.Home.route, "الرئيسية", Icons.Default.Home),
-    NavItem(Screen.Quran.route, "قرآن", Icons.Default.MenuBook),
     NavItem(Screen.Categories.route, "أذكار", Icons.Default.Favorite),
+    NavItem(Screen.Quran.route, "قرآن", Icons.Default.MenuBook),
+    NavItem(Screen.Dua.route, "دعاء", Icons.Default.AutoAwesome),
     NavItem(Screen.Tasbeeh.route, "تسبيح", Icons.Default.Star)
 )
 
@@ -50,8 +52,9 @@ fun SakinaBottomBar(
 
     val showBar = currentRoute in listOf(
         Screen.Home.route,
-        Screen.Quran.route,
         Screen.Categories.route,
+        Screen.Quran.route,
+        Screen.Dua.route,
         Screen.Tasbeeh.route
     )
 
