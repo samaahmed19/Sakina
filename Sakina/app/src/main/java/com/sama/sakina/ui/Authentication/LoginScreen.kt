@@ -1,0 +1,324 @@
+package com.sama.sakina.ui.authentication
+
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
+import kotlin.random.Random
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.sama.sakina.R
+private val BackgroundDark = Color(0xFF1A1B2E)
+private val BackgroundPurple = Color(0xFF16213E)
+private val BackgroundDeep = Color(0xFF0F0F23)
+private val LightPurple = Color(0xFFB8A4D4)
+private val TextMuted = Color.White.copy(alpha = 0.6f)
+private val TextSubtle = Color.White.copy(alpha = 0.5f)
+private val InputFieldBg = Color.White.copy(alpha = 0.1f)
+private val LocationTeal = Color(0xFF5DD9C1)
+private val LocationTealLight = Color(0xFF7FE8D6)
+private val GlassCardGradient = Brush.verticalGradient(
+    listOf(
+        Color.White.copy(alpha = 0.15f),
+        Color.White.copy(alpha = 0.06f),
+        Color.White.copy(alpha = 0.12f)
+    )
+)
+private val ButtonGradient = Brush.horizontalGradient(
+    colors = listOf(
+        Color(0xFFA78BFA),
+        Color(0xFF818CF8),
+        Color(0xFF60A5FA)
+    )
+)
+
+@Composable
+fun LoginScreen(
+    onLoginSuccess: () -> Unit,
+    viewModel: LoginViewModel = hiltViewModel()
+) {
+    val state by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
+
+    val hasLocationPermission = ContextCompat.checkSelfPermission(
+        context,
+        Manifest.permission.ACCESS_COARSE_LOCATION
+    ) == PackageManager.PERMISSION_GRANTED
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) viewModel.fetchLocation()
+    }
+
+    fun onSetLocationClick() {
+        if (hasLocationPermission) {
+            viewModel.fetchLocation()
+        } else {
+            permissionLauncher.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
+        }
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                Brush.verticalGradient(
+                    listOf(BackgroundDark, BackgroundPurple, BackgroundDeep)
+                )
+            )
+    ) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            repeat(150) {
+                drawCircle(
+                    color = Color.White.copy(alpha = 0.2f + Random.nextFloat() * 0.5f),
+                    radius = 1f + Random.nextFloat() * 2f,
+                    center = Offset(
+                        Random.nextFloat() * size.width,
+                        Random.nextFloat() * size.height
+                    )
+                )
+            }
+        }
+
+        Box(
+            modifier = Modifier
+                .align(Alignment.Center)
+                .padding(24.dp)
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(28.dp))
+                .background(GlassCardGradient)
+                .padding(28.dp)
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                SakinaLogoIcon()
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(text = "سكن", fontSize = 32.sp, fontWeight = FontWeight.Bold, color = LightPurple)
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(text = "Your Spiritual Abode", fontSize = 14.sp, color = TextMuted)
+                Spacer(modifier = Modifier.height(28.dp))
+
+                GlassTextField(
+                    hint = "الاسم",
+                    value = state.name,
+                    onChange = viewModel::onNameChange,
+                    error = state.nameError
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+                LocationInfoBox()
+                Spacer(modifier = Modifier.height(16.dp))
+
+                SetLocationButton(
+                    onClick = { onSetLocationClick() },
+                    isLoading = state.isLoadingLocation,
+                    locationText = state.location
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+                GlowButton(
+                    text = "ابدأ رحلتك",
+                    loading = state.isLoading,
+                    onClick = {
+                        viewModel.onStartClick(onSuccess = { onLoginSuccess() })
+                    }
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = "نستخدم موقعك التقريبي فقط لحساب مواقيت الصلاة على جهازك، ولا نشارك بياناتك مع أي طرف ثالث",
+                    fontSize = 12.sp,
+                    color = TextSubtle,
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SakinaLogoIcon() {
+    Image(
+        painter = painterResource(id = R.drawable.appicon),
+        contentDescription = "",
+        modifier = Modifier.size(100.dp).clip(RoundedCornerShape(50)),
+        contentScale = ContentScale.Crop
+    )
+}
+
+@Composable
+private fun GlassTextField(
+    hint: String,
+    value: String,
+    onChange: (String) -> Unit,
+    error: String? = null
+) {
+    Column {
+        TextField(
+            value = value,
+            onValueChange = onChange,
+            placeholder = { Text(hint, color = TextMuted) },
+            isError = error != null,
+            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)),
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = InputFieldBg,
+                unfocusedContainerColor = InputFieldBg,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+                focusedTextColor = Color.White,
+                unfocusedTextColor = Color.White,
+                errorContainerColor = InputFieldBg,
+                errorIndicatorColor = Color.Transparent,
+                errorTextColor = Color.White
+            ),
+            shape = RoundedCornerShape(16.dp)
+        )
+        if (error != null) {
+            Text(
+                text = error,
+                color = Color(0xFFFF6B6B),
+                fontSize = 12.sp,
+                modifier = Modifier.padding(start = 4.dp, top = 4.dp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun LocationInfoBox() {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(InputFieldBg)
+            .padding(16.dp)
+    ) {
+        Column {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.LocationOn,
+                    contentDescription = null,
+                    tint = LocationTeal,
+                    modifier = Modifier.size(20.dp)
+                )
+                Text(
+                    text = "الموقع مطلوب",
+                    color = LocationTealLight,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 15.sp
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "نستخدم موقعك لتحديد مواقيت الصلاة والأذكار المرتبطة بالمكان بدقة",
+                color = TextMuted,
+                fontSize = 12.sp,
+                lineHeight = 18.sp
+            )
+        }
+    }
+}
+
+@Composable
+private fun SetLocationButton(
+    onClick: () -> Unit,
+    isLoading: Boolean = false,
+    locationText: String = ""
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(56.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .background(InputFieldBg)
+            .clickable(enabled = !isLoading, onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        if (isLoading) {
+            CircularProgressIndicator(
+                color = LocationTeal,
+                strokeWidth = 2.dp,
+                modifier = Modifier.size(24.dp)
+            )
+        } else {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier.padding(horizontal = 12.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.LocationOn,
+                    contentDescription = null,
+                    tint = if (locationText.isNotBlank()) LocationTeal else TextMuted,
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = if (locationText.isNotBlank()) locationText else "اضغط لتحديد الموقع",
+                    color = if (locationText.isNotBlank()) LocationTealLight else TextMuted,
+                    fontSize = 14.sp,
+                    maxLines = 1,
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun GlowButton(
+    text: String,
+    loading: Boolean,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(56.dp)
+            .shadow(
+                elevation = 20.dp,
+                shape = RoundedCornerShape(20.dp),
+                ambientColor = Color(0xFF818CF8),
+                spotColor = Color(0xFF60A5FA)
+            )
+            .clip(RoundedCornerShape(20.dp))
+            .background(brush = ButtonGradient)
+            .clickable(enabled = !loading, onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        if (loading) {
+            CircularProgressIndicator(color = Color.White, strokeWidth = 2.dp, modifier = Modifier.size(24.dp))
+        } else {
+            Text(text = text, color = Color.White, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+        }
+    }
+}

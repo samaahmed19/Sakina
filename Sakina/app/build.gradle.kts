@@ -10,11 +10,11 @@ plugins {
 
 
 android {
-    namespace = "com.example.sakina"
+    namespace = "com.sama.sakina"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.example.sakina"
+        applicationId = "com.sama.sakina"
         minSdk = 24
         targetSdk = 35
         versionCode = 1
