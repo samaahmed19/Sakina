@@ -1,0 +1,12 @@
+package com.sama.sakina.data.local.database.entity
+
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity(tableName = "ayahs")
+data class AyahEntity(
+    @PrimaryKey(autoGenerate = true) val uid: Int = 0,
+    val surahId: Int,
+    val text: String,
+    val number: Int
+)
