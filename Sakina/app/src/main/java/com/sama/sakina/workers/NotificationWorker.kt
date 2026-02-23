@@ -1,4 +1,5 @@
 package com.sama.sakina.workers
+import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -8,13 +9,18 @@ import android.content.Intent
 import android.os.Build
 import com.sama.sakina.MainActivity
 import androidx.core.app.NotificationCompat
+import android.content.BroadcastReceiver
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.net.toUri
 import androidx.work.Worker
 import androidx.work.WorkerParameters
-import java.util.Calendar
-import android.annotation.SuppressLint
 import com.sama.sakina.R
+import com.sama.sakina.services.PrayerForegroundService
+import com.sama.sakina.utils.PrayerNotificationHelper
+import dagger.hilt.android.AndroidEntryPoint
+import java.util.Calendar
+import javax.inject.Inject
+
 
 class AzkarWorker(context: Context, params: WorkerParameters) : Worker(context, params) {
 
@@ -51,7 +57,7 @@ class AzkarWorker(context: Context, params: WorkerParameters) : Worker(context, 
             manager.createNotificationChannel(channel)
         }
 
-        val deepLinkUri = "sakan://azkar/$catId".toUri()
+        val deepLinkUri = "sakina://azkar/$catId".toUri()
 
         val intent = Intent(
             Intent.ACTION_VIEW,
@@ -76,5 +82,30 @@ class AzkarWorker(context: Context, params: WorkerParameters) : Worker(context, 
 
 
         NotificationManagerCompat.from(applicationContext).notify(catId.hashCode(), notification)
+    }
+}
+
+class PrayerWorker(context: Context, params: WorkerParameters) : Worker(context, params) {
+
+    @SuppressLint("MissingPermission")
+    override fun doWork(): Result {
+        val prayerName = inputData.getString("PRAYER_NAME") ?: "الصلاة"
+        val isOngoing = inputData.getBoolean("IS_ONGOING", false)
+
+        val channelId = "PRAYER_NOTIFICATIONS"
+
+        val notification = NotificationCompat.Builder(applicationContext, channelId)
+            .setSmallIcon(R.drawable.appicon)
+            .setContentTitle("حان الآن موعد صلاة $prayerName")
+            .setContentText("﴿إِنَّ الصَّلَاةَ كَانَتْ عَلَى الْمُؤْمِنِينَ كِتَابًا مَّوْقُوتًا﴾")
+            .setOngoing(isOngoing)
+            .setPriority(NotificationCompat.PRIORITY_MAX)
+            .setAutoCancel(!isOngoing)
+            .build()
+
+        val manager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        manager.notify(1001, notification)
+
+        return Result.success()
     }
 }

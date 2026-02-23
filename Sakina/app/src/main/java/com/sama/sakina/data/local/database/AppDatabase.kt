@@ -41,7 +41,7 @@ import com.sama.sakina.data.local.database.entity.UserEntity
         UserEntity::class,
         TafsirEntity::class
     ],
-    version = 4,
+    version = 5,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {

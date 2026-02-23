@@ -18,11 +18,20 @@ class DuaDetailsViewModel @Inject constructor(
 ) : ViewModel() {
 
     val categoryId: Int = checkNotNull(savedStateHandle["categoryId"])
-    val categoryTitle: String = savedStateHandle.get<String>("categoryTitle")?.replace("_", " ") ?: ""
+
+    val scrollDuaId: Int = savedStateHandle["scrollDuaId"] ?: -1
+    private val _categoryName = MutableStateFlow("")
+
+    val categoryName: StateFlow<String> = _categoryName
     private val _duas = MutableStateFlow<List<DuaEntity>>(emptyList())
     val duas: StateFlow<List<DuaEntity>> = _duas
 
     init {
+        viewModelScope.launch {
+            repository.getCategoryById(categoryId).collect { category ->
+                _categoryName.value = category.title
+            }
+        }
         loadDuas()
     }
 
@@ -38,5 +47,15 @@ class DuaDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             repository.updateFavorite(duaId, !currentFav)
         }
+    }
+
+    private var hasScrolled = false
+
+    fun markAsScrolled() {
+        hasScrolled = true
+    }
+
+    fun shouldScroll(): Boolean {
+        return !hasScrolled && scrollDuaId != -1
     }
 }

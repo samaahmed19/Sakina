@@ -34,6 +34,9 @@ import com.sama.sakina.data.local.database.entity.DuaCategoryEntity
 import com.sama.sakina.ui.Gwame3Dua.dua_list.DuaViewModel
 import java.util.Random
 import com.sama.sakina.R
+import kotlin.rem
+import kotlin.toString
+
 @Composable
 fun DuaSmartNeonCard(
     title: String,
@@ -166,13 +169,15 @@ fun DuaSmartNeonCard(
 @Composable
 fun DuaListScreen(
     viewModel: DuaViewModel = hiltViewModel(),
-    onCategoryClick: (DuaCategoryEntity) -> Unit
+    onCategoryClick: (DuaCategoryEntity) -> Unit,
+    onFavoriteClick: () -> Unit
 ) {
     val categories by viewModel.categories.collectAsState()
     DuaListContent(
         categories = categories,
         onFilterSelected = { viewModel.onFilterChanged(it) },
-        onCategoryClick = onCategoryClick
+        onCategoryClick = onCategoryClick,
+        onFavoriteClick = onFavoriteClick
     )
 }
 
@@ -180,7 +185,8 @@ fun DuaListScreen(
 fun DuaListContent(
     categories: List<DuaCategoryEntity>,
     onFilterSelected: (String) -> Unit,
-    onCategoryClick: (DuaCategoryEntity) -> Unit
+    onCategoryClick: (DuaCategoryEntity) -> Unit,
+    onFavoriteClick: () -> Unit
 ) {
     val softNeonColors = listOf(
         Color(0xFFFFD700), Color(0xFFBD00FF), Color(0xFF00FFD1),
@@ -222,17 +228,67 @@ fun DuaListContent(
 
             LazyVerticalGrid(
                 columns = GridCells.Fixed(2),
-                modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp),
                 contentPadding = PaddingValues(top = 35.dp, bottom = 20.dp),
                 horizontalArrangement = Arrangement.spacedBy(14.dp),
                 verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
+
                 item(span = { GridItemSpan(2) }) {
                     Column(modifier = Modifier.padding(bottom = 8.dp)) {
-                        Text("جوامع الدعاء", color = Color(0xFFFFD700), fontSize = 40.sp, fontWeight = FontWeight.Black)
-                        Text("ادْعُ اللَّهَ بِمَا شِئْتَ مِنْ خَيْرَيِ الدُّنْيَا وَالْآخِرَةِ", color = Color.White.copy(alpha = 0.7f), fontSize = 16.sp)
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "جوامع الدعاء",
+                                color = Color(0xFFFFD700),
+                                fontSize = 40.sp,
+                                fontWeight = FontWeight.Black
+                            )
+
+                            Surface(
+                                onClick = onFavoriteClick,
+                                shape = CircleShape,
+                                color = Color.White.copy(alpha = 0.1f),
+                                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.2f)),
+                                modifier = Modifier.height(40.dp)
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 16.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Text(
+                                        text = "المفضلة",
+                                        color = Color.White,
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.Medium
+                                    )
+
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.heart_filled),
+                                        contentDescription = null,
+                                        tint = Color.Red,
+                                        modifier = Modifier.size(23.dp)
+                                    )
+                                }
+                            }
+
+                        }
+
+                        Text(
+                            text = "ادْعُ اللَّهَ بِمَا شِئْتَ مِنْ خَيْرَيِ الدُّنْيَا وَالْآخِرَةِ",
+                            color = Color.White.copy(alpha = 0.7f),
+                            fontSize = 16.sp,
+                            modifier = Modifier.padding(top = 8.dp)
+                        )
                     }
                 }
+
                 item(span = { GridItemSpan(2) }) { DuaAyahCard() }
                 item(span = { GridItemSpan(2) }) { DuaFiltersBar(onFilterSelected = onFilterSelected) }
 
@@ -249,7 +305,6 @@ fun DuaListContent(
         }
     }
 }
-
 @Composable
 fun getDuaIconResource(iconName: String?): Int {
     return when (iconName) {

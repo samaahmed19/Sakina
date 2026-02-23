@@ -36,13 +36,21 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.WorkManager
 import dagger.hilt.android.AndroidEntryPoint
 import com.sama.sakina.ui.checklist.DailyResetWorker
+import com.sama.sakina.utils.AlarmScheduler
+import com.sama.sakina.utils.PrayerNotificationHelper
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 
 @AndroidEntryPoint
 @OptIn(com.google.accompanist.permissions.ExperimentalPermissionsApi::class)
 class MainActivity : ComponentActivity() {
+
+    @Inject lateinit var prayerNotificationHelper: PrayerNotificationHelper
+    @Inject lateinit var alarmScheduler: AlarmScheduler
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setupPreciseAlarmsAndService()
         WindowCompat.setDecorFitsSystemWindows(window, true)
         window.statusBarColor = AndroidColor.parseColor("#020617")
         window.navigationBarColor = AndroidColor.parseColor("#020617")
@@ -52,8 +60,6 @@ class MainActivity : ComponentActivity() {
         }
         scheduleDailyReset()
         createNotificationChannel()
-        scheduleDailyReset()
-        scheduleAzkarReminders()
         setContent {
             val navController = rememberNavController()
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -91,51 +97,26 @@ class MainActivity : ComponentActivity() {
     }
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             val name = "تنبيهات الأذكار"
             val descriptionText = "قناة مخصصة لتذكيرك بأذكار الصباح والمساء"
             val importance = NotificationManager.IMPORTANCE_HIGH
             val channel = NotificationChannel("AZKAR_NOTIFICATIONS", name, importance).apply {
                 description = descriptionText
             }
+            val prayerChannel = NotificationChannel(
+                "PRAYER_NOTIFICATIONS",
+                "تنبيهات الصلاة",
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply { description = "قناة مخصصة لمواقيت الصلاة" }
+
             val notificationManager: NotificationManager =
                 getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(channel)
+            manager.createNotificationChannel(prayerChannel)
         }
     }
 
-    private fun scheduleAzkarReminders() {
-        val workManager = WorkManager.getInstance(this)
-
-
-        scheduleSingleJob(workManager, 7, 0, "MORNING_AZKAR_JOB")
-
-
-        scheduleSingleJob(workManager, 19, 0, "EVENING_AZKAR_JOB")
-    }
-
-    private fun scheduleSingleJob(workManager: WorkManager, hour: Int, minute: Int, tag: String) {
-        val calendar = Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, hour)
-            set(Calendar.MINUTE, minute)
-            set(Calendar.SECOND, 0)
-            if (before(Calendar.getInstance())) {
-                add(Calendar.DAY_OF_MONTH, 1)
-            }
-        }
-
-        val delay = calendar.timeInMillis - System.currentTimeMillis()
-
-        val workRequest = PeriodicWorkRequestBuilder<AzkarWorker>(24, TimeUnit.HOURS)
-            .setInitialDelay(delay, TimeUnit.MILLISECONDS)
-            .addTag(tag)
-            .build()
-
-        workManager.enqueueUniquePeriodicWork(
-            tag,
-            ExistingPeriodicWorkPolicy.UPDATE,
-            workRequest
-        )
-    }
     private fun scheduleDailyReset() {
         val now = System.currentTimeMillis()
         val millisInDay = 24 * 60 * 60 * 1000L
@@ -153,6 +134,15 @@ class MainActivity : ComponentActivity() {
             ExistingPeriodicWorkPolicy.UPDATE,
             workRequest
         )
+    }
+
+
+
+    private fun setupPreciseAlarmsAndService() {
+        alarmScheduler.scheduleExactAzkar(7, 0, "morning")
+        alarmScheduler.scheduleExactAzkar(19, 0, "evening")
+
+        prayerNotificationHelper.updateNextPrayerNotification()
     }
 }
 

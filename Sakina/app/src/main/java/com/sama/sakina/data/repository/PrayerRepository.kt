@@ -4,6 +4,7 @@ import com.sama.sakina.data.local.database.dao.PrayerDao
 import com.sama.sakina.data.local.database.entity.PrayerEntity
 import com.sama.sakina.domain.model.*
 import com.sama.sakina.domain.usecase.ShouldCelebrateUseCase
+import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class PrayerRepository @Inject constructor(
@@ -72,15 +73,25 @@ class PrayerRepository @Inject constructor(
         )
     }
 
+
+    fun getMonthlyCompletion(month: String): Flow<Map<String, Int>> {
+        return prayerDao.getMonthlySummary(month)
+    }
+
+
     suspend fun setCompleted(
         date: String,
         key: PrayerKey,
         isCompleted: Boolean
     ): PrayerDaySummary {
+
+        val type = if (key.key.startsWith("PRAYER_")) "FARD" else "NAFILA"
+
         prayerDao.upsert(
             PrayerEntity(
                 date = date,
                 key = key.key,
+                type = type,
                 isCompleted = isCompleted,
                 completedAt = if (isCompleted) System.currentTimeMillis() else null
             )

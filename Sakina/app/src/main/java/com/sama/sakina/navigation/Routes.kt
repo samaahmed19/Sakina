@@ -16,9 +16,9 @@ sealed class Screen(val route: String) {
     object Checklist : Screen("check")
     object Dua : Screen("dua")
     object DuaDetails : Screen("dua_details/{categoryId}/{categoryTitle}") {
-        fun createRoute(id: Int, title: String): String {
-            val safeTitle = title.replace(" ", "_")
-            return "dua_details/$id/$safeTitle"
+        fun createRoute(id: Int, title: String, scrollDuaId: Int = -1): String {
+            val safeTitle = if (title.isBlank()) "details" else title.replace(" ", "_")
+            return "dua_details/$id/$safeTitle?scrollDuaId=$scrollDuaId"
         }
     }
     object Quran : Screen("quran")

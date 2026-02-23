@@ -31,4 +31,12 @@ class AzkarRepository @Inject constructor(
     }fun loadJsonFromAssets(fileName: String): String {
         return context.assets.open(fileName).bufferedReader().use { it.readText() }
     }
+
+    suspend fun resetOldAzkar(todayStart: Long) {
+        azkarDao.resetOldAzkar(todayStart)
+    }
+
+    suspend fun updateZikrWithTimestamp(zikrId: Int, count: Int, timestamp: Long) {
+        azkarDao.updateZikrWithTimestamp(zikrId, count, timestamp)
+    }
 }

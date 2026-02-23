@@ -18,6 +18,7 @@ import com.sama.sakina.ui.HolyQuran.surah_list.SurahListScreen
 import com.sama.sakina.ui.Prayers.PrayerScreen
 import com.sama.sakina.ui.Tasbeeh.TasbeehScreen
 import com.sama.sakina.ui.Gwame3Dua.DuaListScreen
+import com.sama.sakina.ui.Gwame3Dua.Favorite.DuaFavoriteScreen
 import com.sama.sakina.ui.Gwame3Dua.dua_details.DuaDetailsScreen
 import com.sama.sakina.ui.authentication.LoginScreen
 
@@ -72,7 +73,9 @@ fun AppNavGraph(
         }
 
         //  Azkar List Screen
-        composable(Screen.Categories.route) {
+        composable(Screen.Categories.route,
+            deepLinks = listOf(navDeepLink { uriPattern = "sakina://azkar_list" })
+        ) {
             ZikrListScreen(onCategoryClick = { categoryId ->
                 navController.navigate("azkar_details/$categoryId")
             })
@@ -84,7 +87,7 @@ fun AppNavGraph(
             arguments = listOf(navArgument("catId") { type = NavType.StringType }),
             // Deep Link
             deepLinks = listOf(
-                navDeepLink { uriPattern = "sakan://azkar/{catId}" }
+                navDeepLink { uriPattern = "sakina://azkar/{catId}" }
             )
         ) { backStackEntry ->
             val catId = backStackEntry.arguments?.getString("catId") ?: ""
@@ -145,18 +148,39 @@ fun AppNavGraph(
         }
 
         //  Dua Screen
-        composable(Screen.Dua.route) {
-            DuaListScreen(onCategoryClick = { category ->
-                navController.navigate(Screen.DuaDetails.createRoute(category.id, category.title))
-            })
+        composable(Screen.Dua.route,
+            deepLinks = listOf(navDeepLink { uriPattern = "sakina://dua_list" })
+        ) {
+            DuaListScreen(
+                onCategoryClick = { category ->
+                    navController.navigate(Screen.DuaDetails.createRoute(category.id, category.title))
+                },
+                onFavoriteClick = {
+                    navController.navigate("favorite_duas")
+                }
+            )
         }
+
+        //Dua Favorite Screen
+        composable("favorite_duas") {
+            DuaFavoriteScreen(
+                onBack = { navController.popBackStack() },
+                onDuaClick = { catId, duaId ->
+                    navController.navigate(Screen.DuaDetails.createRoute(catId, "المفضلة", duaId))                }
+            )
+        }
+
 
         // DuaDetails Screen
         composable(
-            route = Screen.DuaDetails.route,
+            route = "dua_details/{categoryId}/{categoryTitle}?scrollDuaId={scrollDuaId}",
             arguments = listOf(
                 navArgument("categoryId") { type = NavType.IntType },
-                navArgument("categoryTitle") { type = NavType.StringType }
+                navArgument("categoryTitle") { type = NavType.StringType },
+                navArgument("scrollDuaId") {
+                    type = NavType.IntType
+                    defaultValue = -1
+                }
             )
         ) {
             DuaDetailsScreen(onBack = { navController.popBackStack() })

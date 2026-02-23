@@ -37,5 +37,9 @@ data class ZikrEntity(
 
     val repeat: Int,
 
-    val reward: String?
+    val reward: String?,
+
+    val currentCount: Int = 0,
+
+    val lastUpdated: Long = 0L
 )

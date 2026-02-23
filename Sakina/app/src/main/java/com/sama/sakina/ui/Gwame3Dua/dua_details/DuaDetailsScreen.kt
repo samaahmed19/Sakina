@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -43,6 +44,7 @@ import dev.shreyaspatil.capturable.controller.rememberCaptureController
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import com.sama.sakina.R
+import kotlin.collections.get
 
 @Composable
 fun DuaDetailsScreen(
@@ -50,59 +52,77 @@ fun DuaDetailsScreen(
     onBack: () -> Unit
 ) {
     val duas by viewModel.duas.collectAsState()
-    val context = LocalContext.current
+    val categoryName by viewModel.categoryName.collectAsState()
+    val listState = rememberLazyListState()
+
+    LaunchedEffect(duas) {
+        if (duas.isNotEmpty() && viewModel.shouldScroll()) {
+            val index = duas.indexOfFirst { it.id == viewModel.scrollDuaId }
+            if (index != -1) {
+                listState.scrollToItem(index)
+                viewModel.markAsScrolled()
+            }
+        }
+    }
 
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Brush.verticalGradient(listOf(Color(0xFF020617), Color(0xFF0F172A))))
-        ) {
-            Column(modifier = Modifier.fillMaxSize()) {
-                // Top Bar
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .statusBarsPadding()
-                        .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
+        Scaffold(
+            topBar = {
+
+                Surface(
+                    color = Color(0xFF020617),
+                    shadowElevation = 4.dp
                 ) {
-                    IconButton(
-                        onClick = onBack,
-                        modifier = Modifier.background(Color.White.copy(alpha = 0.1f), CircleShape)
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .statusBarsPadding()
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(painterResource(id = R.drawable.arrow_forward_24), "رجوع", tint = Color.White)
-                    }
-
-                    Text(
-                        text = viewModel.categoryTitle,
-                        modifier = Modifier.weight(1f),
-                        textAlign = TextAlign.Center,
-                        color = Color(0xFFFFD700),
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.size(48.dp))
-                }
-
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(bottom = 32.dp, start = 16.dp, end = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(30.dp)
-                ) {
-                    items(duas, key = { it.id }) { dua ->
-                        DuaCardItem(
-                            duaText = dua.text,
-                            isFavorite = dua.isFavorite,
-                            onFavoriteClick = { viewModel.toggleFavorite(dua.id, dua.isFavorite) }
+                        IconButton(
+                            onClick = onBack,
+                            modifier = Modifier.background(Color.White.copy(0.1f), CircleShape)
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.arrow_forward_24),
+                                contentDescription = "رجوع",
+                                tint = Color.White
+                            )
+                        }
+                        Text(
+                            text = categoryName.ifEmpty { "الأدعية" },
+                            modifier = Modifier.weight(1f),
+                            textAlign = TextAlign.Center,
+                            color = Color(0xFFFFD700),
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold
                         )
+                        Spacer(modifier = Modifier.size(48.dp))
                     }
+                }
+            },
+            containerColor = Color(0xFF020617)
+        ) { padding ->
+            LazyColumn(
+                state = listState,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                items(duas, key = { it.id }) { dua ->
+                    DuaCardItem(
+                        duaText = dua.text,
+                        isFavorite = dua.isFavorite,
+                        onFavoriteClick = { viewModel.toggleFavorite(dua.id, dua.isFavorite) }
+                    )
                 }
             }
         }
     }
 }
-
 @OptIn(ExperimentalFoundationApi::class, ExperimentalComposeUiApi::class, ExperimentalComposeApi::class)
 @Composable
 fun DuaCardItem(

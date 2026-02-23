@@ -10,6 +10,10 @@ class DuaRepository @Inject constructor(
     private val duaDao: DuaDao
 ) {
 
+    fun getCategoryById(catId: Int): Flow<DuaCategoryEntity> {
+        return duaDao.getCategoryById(catId)
+    }
+
     fun getAllDuas(): Flow<List<DuaEntity>> {
         return duaDao.getAllDuas()
     }

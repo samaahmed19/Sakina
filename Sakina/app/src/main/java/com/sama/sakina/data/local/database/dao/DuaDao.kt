@@ -12,6 +12,9 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface DuaDao {
 
+    @Query("SELECT * FROM dua_categories WHERE id = :catId")
+    fun getCategoryById(catId: Int): Flow<DuaCategoryEntity>
+
     @Query("SELECT * FROM dua_categories")
     suspend fun getAllCategories(): List<DuaCategoryEntity>
 

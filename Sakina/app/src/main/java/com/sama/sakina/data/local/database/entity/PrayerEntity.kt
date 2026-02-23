@@ -9,6 +9,7 @@ import androidx.room.Entity
 data class PrayerEntity(
     val date: String,
     val key: String,
+    val type: String,
     val isCompleted: Boolean,
     val completedAt: Long?
 )

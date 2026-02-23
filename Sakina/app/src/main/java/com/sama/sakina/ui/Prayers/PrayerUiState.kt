@@ -10,6 +10,7 @@ data class PrayerUiState(
     val error: String? = null,
     val settings: PrayerSettings = PrayerSettings(),
     val fardPrayerTimes: Map<PrayerKey, Long> = emptyMap(),
+    val monthlyCompletion: Map<String, Int> = emptyMap(),
     val nextFardPrayerKey: PrayerKey? = null,
     val nextFardPrayerTimeMillis: Long? = null
 )

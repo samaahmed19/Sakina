@@ -7,16 +7,21 @@ import com.sama.sakina.data.repository.UserRepository
 import com.sama.sakina.domain.model.PrayerKey
 import com.sama.sakina.domain.model.PrayerCalculationMethod
 import com.sama.sakina.domain.model.PrayerMadhab
+import com.sama.sakina.domain.model.PrayerType
 import com.sama.sakina.domain.usecase.GetDayPrayersUseCase
+import com.sama.sakina.domain.usecase.GetMonthlyCompletionUseCase
 import com.sama.sakina.domain.usecase.SetPrayerCompletionUseCase
 import com.sama.sakina.utils.LocationHelper
 import com.sama.sakina.utils.PrayerTimesCalculator
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -27,6 +32,7 @@ import javax.inject.Inject
 @HiltViewModel
 class PrayerViewModel @Inject constructor(
     private val getDayPrayers: GetDayPrayersUseCase,
+    private val getMonthlyCompletion: GetMonthlyCompletionUseCase,
     private val setPrayerCompletion: SetPrayerCompletionUseCase,
     private val userRepository: UserRepository,
     private val locationHelper: LocationHelper,
@@ -42,20 +48,58 @@ class PrayerViewModel @Inject constructor(
     val uiState: StateFlow<PrayerUiState> = _uiState.asStateFlow()
 
     /* ---------------------------------------------------------
-     * DATE HANDLING
+     * DATE HANDLING & FORMATTERS
      * --------------------------------------------------------- */
 
+    private val monthFormat = SimpleDateFormat("yyyy-MM", Locale.US)
     private val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
+
+    private val _selectedDate = MutableStateFlow(dateFormat.format(Date()))
+    val selectedDate: StateFlow<String> = _selectedDate.asStateFlow()
+
+    private val _selectedMonth = MutableStateFlow(monthFormat.format(Date()))
+
+    /* ---------------------------------------------------------
+     * INIT
+     * --------------------------------------------------------- */
+    init {
+        observeMonthlyData()
+        load(_selectedDate.value)
+        scheduleDailyRefresh()
+    }
+
+    private fun observeMonthlyData() {
+        _selectedMonth
+            .flatMapLatest { month ->
+                getMonthlyCompletion(month)
+            }
+            .onEach { data ->
+                _uiState.update { it.copy(monthlyCompletion = data) }
+            }
+            .launchIn(viewModelScope)
+    }
+
+    fun onDateSelected(date: String) {
+        if (_selectedDate.value == date) return
+        _selectedDate.value = date
+
+        val newMonth = date.substring(0, 7)
+        if (newMonth != _selectedMonth.value) {
+            _selectedMonth.value = newMonth
+        }
+
+        load(date)
+    }
 
     private fun today(): String = dateFormat.format(Date())
 
-    private fun parseLatLng(value: String?): Pair<Double, Double>? {
-        if (value.isNullOrBlank()) return null
-        val parts = value.split(",")
-        if (parts.size < 2) return null
-        val lat = parts[0].trim().toDoubleOrNull() ?: return null
-        val lon = parts[1].trim().toDoubleOrNull() ?: return null
-        return lat to lon
+    private fun parseLatLng(v: String?): Pair<Double, Double>? {
+        return try {
+            val s = v?.split(",") ?: return null
+            s[0].trim().toDouble() to s[1].trim().toDouble()
+        } catch (e: Exception) {
+            null
+        }
     }
 
     private fun prayerTimeOrder(): List<PrayerKey> = listOf(
@@ -65,29 +109,6 @@ class PrayerViewModel @Inject constructor(
         PrayerKey.PRAYER_MAGHRIB,
         PrayerKey.PRAYER_ISHA
     )
-
-    private fun findNextPrayer(nowMillis: Long, todayTimes: Map<PrayerKey, Long>, tomorrowTimes: Map<PrayerKey, Long>): Pair<PrayerKey, Long>? {
-        val ordered = prayerTimeOrder()
-        val nextToday = ordered
-            .mapNotNull { key -> todayTimes[key]?.let { key to it } }
-            .firstOrNull { (_, time) -> time > nowMillis }
-
-        if (nextToday != null) return nextToday
-
-        val nextTomorrow =
-            ordered.firstNotNullOfOrNull { key -> tomorrowTimes[key]?.let { key to it } }
-
-        return nextTomorrow
-    }
-
-    /* ---------------------------------------------------------
-     * INIT
-     * --------------------------------------------------------- */
-
-    init {
-        load()
-        scheduleDailyRefresh()
-    }
 
     private fun scheduleDailyRefresh() {
         viewModelScope.launch {
@@ -111,94 +132,81 @@ class PrayerViewModel @Inject constructor(
     }
 
     /* ---------------------------------------------------------
-     * LOAD DAY SUMMARY
+     * LOAD DAY SUMMARY & NEXT PRAYER
      * --------------------------------------------------------- */
 
-    fun load(date: String = today()) {
+    fun load(date: String = _selectedDate.value) {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(
-                isLoading = true,
-                error = null
-            )
-
-            val summaryDeferred = async {
-                getDayPrayers(date)
-            }
-
-            val userDeferred = async {
-                runCatching { userRepository.getUserOnce() }.getOrNull()
-            }
-
-            val currentLocationDeferred = async {
-                runCatching { locationHelper.getCurrentLocation() }.getOrNull()
-            }
-
-            val settingsDeferred = async {
-                runCatching { prayerSettingsRepository.getOnce() }.getOrDefault(_uiState.value.settings)
-            }
-
-            runCatching {
-                val summary = summaryDeferred.await()
-                val user = userDeferred.await()
-                val currentLocation = currentLocationDeferred.await()
-                val settings = settingsDeferred.await()
-
-                if (!currentLocation.isNullOrBlank() && currentLocation != user?.location) {
-                    runCatching { userRepository.updateLocation(currentLocation) }
+            if (_uiState.value.summary == null) {
+                _uiState.update {
+                    it.copy(isLoading = true, error = null)
                 }
+            }
+            try {
+                val summary = getDayPrayers(date)
+                val settings = prayerSettingsRepository.getOnce()
+                val user = userRepository.getUserOnce()
 
-                val locationToUse = currentLocation ?: user?.location
-                val latLng = parseLatLng(locationToUse)
+                val latLng = parseLatLng(user?.location)
+                var fardTimes = emptyMap<PrayerKey, Long>()
 
-                val fardTimesMap: Map<PrayerKey, Long>
-                val next: Pair<PrayerKey, Long>?
+                var nextKey: PrayerKey? = null
+                var nextTime: Long? = null
 
                 if (latLng != null) {
-                    val (lat, lon) = latLng
-                    val calendar = Calendar.getInstance().apply {
-                        time = dateFormat.parse(date) ?: Date()
+                    val cal = Calendar.getInstance().apply {
+                        val parsedDate = dateFormat.parse(date)
+                        time = parsedDate ?: Date()
                     }
-                    val todayFard = prayerTimesCalculator.calculateFardTimes(lat, lon, calendar, settings).asMap()
-                    val tomorrowCalendar = (calendar.clone() as Calendar).apply { add(Calendar.DAY_OF_YEAR, 1) }
-                    val tomorrowFard = prayerTimesCalculator.calculateFardTimes(lat, lon, tomorrowCalendar, settings).asMap()
+                    fardTimes = prayerTimesCalculator.calculateFardTimes(
+                        latLng.first,
+                        latLng.second,
+                        cal,
+                        settings
+                    ).asMap()
 
-                    fardTimesMap = todayFard
-                    next = findNextPrayer(System.currentTimeMillis(), todayFard, tomorrowFard)
-                } else {
-                    fardTimesMap = emptyMap()
-                    next = null
+                    // --- حساب الصلاة القادمة لإرسالها للـ Home Screen ---
+                    val now = System.currentTimeMillis()
+                    val orderedKeys = prayerTimeOrder()
+
+                    for (key in orderedKeys) {
+                        val timeMillis = fardTimes[key]
+                        if (timeMillis != null && timeMillis > now) {
+                            nextKey = key
+                            nextTime = timeMillis
+                            break
+                        }
+                    }
                 }
 
-                PrayerUiState(
+                _uiState.update { it.copy(
                     isLoading = false,
                     summary = summary,
                     settings = settings,
-                    fardPrayerTimes = fardTimesMap,
-                    nextFardPrayerKey = next?.first,
-                    nextFardPrayerTimeMillis = next?.second
-                )
-            }.onFailure { throwable ->
-                _uiState.value = PrayerUiState(
+                    fardPrayerTimes = fardTimes,
+                    nextFardPrayerKey = nextKey,
+                    nextFardPrayerTimeMillis = nextTime
+                ) }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(
                     isLoading = false,
-                    error = throwable.message ?: "Unknown error"
-                )
-            }.onSuccess { newState ->
-                _uiState.value = newState
+                    error = e.localizedMessage
+                ) }
             }
         }
     }
 
     fun setCalculationMethod(method: PrayerCalculationMethod) {
         viewModelScope.launch {
-            runCatching { prayerSettingsRepository.setMethod(method) }
-            load()
+            prayerSettingsRepository.setMethod(method)
+            load(_selectedDate.value)
         }
     }
 
     fun setMadhab(madhab: PrayerMadhab) {
         viewModelScope.launch {
-            runCatching { prayerSettingsRepository.setMadhab(madhab) }
-            load()
+            prayerSettingsRepository.setMadhab(madhab)
+            load(_selectedDate.value)
         }
     }
 
@@ -207,15 +215,28 @@ class PrayerViewModel @Inject constructor(
      * --------------------------------------------------------- */
 
     fun setPrayerChecked(key: PrayerKey, newValue: Boolean) {
-        val date = _uiState.value.summary?.date ?: today()
         viewModelScope.launch {
-            runCatching { setPrayerCompletion(date, key, newValue) }
-                .onSuccess { summary ->
-                    _uiState.value = _uiState.value.copy(summary = summary, error = null)
+            val date = _selectedDate.value
+
+            val result = runCatching { setPrayerCompletion(date, key, newValue) }
+
+            if (result.isSuccess) {
+                val updatedSummary = getDayPrayers(date)
+
+                _uiState.update { currentState ->
+                    val updatedMonthly = currentState.monthlyCompletion.toMutableMap()
+
+                    val fardCount = updatedSummary.items.count { it.type == PrayerType.FARD && it.isCompleted }
+                    val nafilaCount = updatedSummary.items.count { it.type == PrayerType.NAFILA && it.isCompleted }
+
+                    updatedMonthly[date] = (nafilaCount * 10) + fardCount
+
+                    currentState.copy(
+                        summary = updatedSummary,
+                        monthlyCompletion = updatedMonthly
+                    )
                 }
-                .onFailure { e ->
-                    _uiState.value = _uiState.value.copy(error = e.message ?: "Update failed")
-                }
+            }
         }
     }
 }

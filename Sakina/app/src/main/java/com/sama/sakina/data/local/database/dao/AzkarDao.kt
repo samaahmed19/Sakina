@@ -21,4 +21,13 @@ interface AzkarDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAzkar(azkar: List<ZikrEntity>)
+
+     @Query("UPDATE azkar SET currentCount = 0 WHERE lastUpdated < :todayStart")
+     suspend fun resetOldAzkar(todayStart: Long)
+
+     @Query("UPDATE azkar SET currentCount = :count, lastUpdated = :timestamp WHERE id = :zikrId")
+     suspend fun updateZikrWithTimestamp(zikrId: Int, count: Int, timestamp: Long)
+
+     @Query("UPDATE azkar SET currentCount = 0 WHERE categoryId = :categoryId")
+     suspend fun resetCategoryCount(categoryId: String)
 }

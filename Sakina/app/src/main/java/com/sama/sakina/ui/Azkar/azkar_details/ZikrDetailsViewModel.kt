@@ -11,7 +11,9 @@ import com.sama.sakina.data.repository.AzkarRepository
 import com.sama.sakina.data.source.mapper.JsonMapper
 import android.util.Log
 import com.sama.sakina.data.local.database.entity.CategoryEntity
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlin.text.repeat
 
 
 @HiltViewModel
@@ -56,6 +58,14 @@ class AzkarViewModel @Inject constructor(
     fun loadAzkar(categoryId: String) {
         viewModelScope.launch {
             // جلب العنوان
+            val calendar = java.util.Calendar.getInstance()
+            calendar.set(java.util.Calendar.HOUR_OF_DAY, 0)
+            calendar.set(java.util.Calendar.MINUTE, 0)
+            calendar.set(java.util.Calendar.SECOND, 0)
+            val todayStart = calendar.timeInMillis
+
+            repository.resetOldAzkar(todayStart)
+
             val category = repository.getCategoryById(categoryId)
             categoryTitle = category?.title ?: "الأذكار"
 
@@ -69,16 +79,27 @@ class AzkarViewModel @Inject constructor(
                     text = it.text,
                     reward = it.reward ?: "",
                     maxCount = it.repeat,
-                    currentCount = 0
+                    currentCount = it.currentCount
                 )
             }
         }
     }
 
     fun incrementCount(zikrId: Int) {
-        azkarList = azkarList.map {
-            if (it.id == zikrId && it.currentCount < it.maxCount) it.copy(currentCount = it.currentCount + 1)
-            else it
+        val item = azkarList.find { it.id == zikrId }
+        if (item != null && item.currentCount < item.maxCount) {
+            val newCount = item.currentCount + 1
+            val currentTime = System.currentTimeMillis()
+
+            // تحديث الـ UI
+            azkarList = azkarList.map {
+                if (it.id == zikrId) it.copy(currentCount = newCount) else it
+            }
+
+            // تحديث الـ DB مع التاريخ الجديد
+            viewModelScope.launch(Dispatchers.IO) {
+                repository.updateZikrWithTimestamp(zikrId, newCount, currentTime)
+            }
         }
     }
 }
