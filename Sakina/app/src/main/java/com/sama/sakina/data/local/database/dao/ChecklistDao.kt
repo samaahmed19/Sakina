@@ -6,7 +6,11 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ChecklistDao {
-    @Query("SELECT * FROM checklist_tasks ORDER BY id DESC")
+
+    @Query("""
+        SELECT * FROM checklist_tasks
+        ORDER BY sortOrder ASC, createdAt DESC
+    """)
     fun getAllTasks(): Flow<List<ChecklistEntity>>
 
     @Query("SELECT * FROM checklist_tasks")
@@ -21,7 +25,27 @@ interface ChecklistDao {
     @Delete
     suspend fun deleteTask(task: ChecklistEntity)
 
-    // الدالة الضرورية لتشغيل الـ Worker
-    @Query("UPDATE checklist_tasks SET isCompleted = 0")
-    suspend fun resetAllTasks()
+    // مهم للـ Worker (بـ نفس الاسم عشان مشروعك مايتكسرش)
+    @Query("UPDATE checklist_tasks SET isCompleted = 0, completedAt = NULL, updatedAt = :updatedAt")
+    suspend fun resetAllTasks(updatedAt: Long = System.currentTimeMillis())
+
+    // ===== إضافات احترافية =====
+
+    @Query("UPDATE checklist_tasks SET taskName = :newName, updatedAt = :updatedAt WHERE id = :taskId")
+    suspend fun updateTaskName(taskId: Int, newName: String, updatedAt: Long = System.currentTimeMillis())
+
+    @Query("UPDATE checklist_tasks SET category = :category, updatedAt = :updatedAt WHERE id = :taskId")
+    suspend fun updateTaskCategory(taskId: Int, category: String, updatedAt: Long = System.currentTimeMillis())
+
+    @Query("UPDATE checklist_tasks SET sortOrder = :sortOrder, updatedAt = :updatedAt WHERE id = :taskId")
+    suspend fun updateTaskOrder(taskId: Int, sortOrder: Int, updatedAt: Long = System.currentTimeMillis())
+
+    @Query("DELETE FROM checklist_tasks WHERE isCompleted = 1")
+    suspend fun deleteCompletedTasks()
+
+    @Query("SELECT COUNT(*) FROM checklist_tasks WHERE isCompleted = 1")
+    suspend fun getCompletedCount(): Int
+
+    @Query("SELECT COUNT(*) FROM checklist_tasks")
+    suspend fun getTotalCount(): Int
 }
