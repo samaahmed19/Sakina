@@ -167,15 +167,25 @@ class PrayerViewModel @Inject constructor(
 
                     // --- حساب الصلاة القادمة لإرسالها للـ Home Screen ---
                     val now = System.currentTimeMillis()
-                    val orderedKeys = prayerTimeOrder()
 
-                    for (key in orderedKeys) {
+                    for (key in prayerTimeOrder()) {
                         val timeMillis = fardTimes[key]
                         if (timeMillis != null && timeMillis > now) {
                             nextKey = key
                             nextTime = timeMillis
                             break
                         }
+                    }
+                    if (nextKey == null && date == today()) {
+                        val tomorrowCal = Calendar.getInstance().apply {
+                            add(Calendar.DAY_OF_YEAR, 1)
+                        }
+                        val tomorrowTimes = prayerTimesCalculator.calculateFardTimes(
+                            latLng.first, latLng.second, tomorrowCal, settings
+                        ).asMap()
+
+                        nextKey = PrayerKey.PRAYER_FAJR
+                        nextTime = tomorrowTimes[PrayerKey.PRAYER_FAJR]
                     }
                 }
 
