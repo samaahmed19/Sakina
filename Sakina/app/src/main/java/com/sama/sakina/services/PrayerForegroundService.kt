@@ -27,7 +27,8 @@ class PrayerForegroundService : Service() {
             val notification = createCustomNotification(nextPrayerName, nextPrayerTimeMillis)
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                startForeground(1, notification, android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE)
+
+                startForeground(1, notification, android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
             } else {
                 startForeground(1, notification)
             }
@@ -63,8 +64,8 @@ class PrayerForegroundService : Service() {
         val baseTime = SystemClock.elapsedRealtime() + (timeMillis - System.currentTimeMillis())
         remoteViews.setChronometer(R.id.chronometer, baseTime, null, true)
 
-        // الروابط
-        val azkarIntent = Intent(Intent.ACTION_VIEW, android.net.Uri.parse("sakina://azkar_list"), this, MainActivity::class.java)
+
+        val azkarIntent = Intent(Intent.ACTION_VIEW, android.net.Uri.parse("sakina://azkar_list"))
         val azkarPending = PendingIntent.getActivity(this, 10, azkarIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         remoteViews.setOnClickPendingIntent(R.id.btn_azkar, azkarPending)
 
@@ -90,6 +91,7 @@ class PrayerForegroundService : Service() {
             .setContentIntent(mainPending)
             .setOngoing(true)
             .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setCategory(NotificationCompat.CATEGORY_SERVICE)
             .build()
     }
 

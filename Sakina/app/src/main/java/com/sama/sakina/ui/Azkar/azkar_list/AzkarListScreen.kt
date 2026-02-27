@@ -2,6 +2,7 @@ package com.sama.sakina.ui.Azkar.azkar_list
 
 import androidx.compose.runtime.Composable
 import androidx.compose.material3.Text
+import com.sama.sakina.R
 import androidx.compose.foundation.clickable
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
@@ -47,7 +48,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.sama.sakina.R
 
 @Composable
 fun SmartNeonCard(

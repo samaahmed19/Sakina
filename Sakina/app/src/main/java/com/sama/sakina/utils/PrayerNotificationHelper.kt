@@ -10,10 +10,12 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import com.sama.sakina.utils.AlarmScheduler
 import java.util.Calendar
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.compareTo
+
 
 @Singleton
 class PrayerNotificationHelper @Inject constructor(
@@ -66,8 +68,17 @@ class PrayerNotificationHelper @Inject constructor(
                     e.printStackTrace()
                 }
 
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as android.app.AlarmManager
+                    if (alarmManager.canScheduleExactAlarms()) {
+                        alarmScheduler.scheduleExactPrayer(timeInMillis, prayerName)
+                    } else {
 
-                alarmScheduler.scheduleExactPrayer(timeInMillis, prayerName)
+                    }
+                } else {
+                    alarmScheduler.scheduleExactPrayer(timeInMillis, prayerName)
+                }
+
             }
         }
     }

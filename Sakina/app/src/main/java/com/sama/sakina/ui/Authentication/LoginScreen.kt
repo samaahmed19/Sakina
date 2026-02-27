@@ -32,6 +32,8 @@ import androidx.core.content.ContextCompat
 import kotlin.random.Random
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.sama.sakina.R
+
+
 private val BackgroundDark = Color(0xFF1A1B2E)
 private val BackgroundPurple = Color(0xFF16213E)
 private val BackgroundDeep = Color(0xFF0F0F23)

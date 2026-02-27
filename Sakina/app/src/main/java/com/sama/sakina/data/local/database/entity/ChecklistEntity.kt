@@ -7,6 +7,12 @@ import androidx.room.PrimaryKey
 data class ChecklistEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val taskName: String,
+    val category: String = "عام",
+    val sortOrder: Int = 0,
     val isCompleted: Boolean = false,
-    val createdAt: Long = System.currentTimeMillis()
+    val completedAt: Long? = null,
+
+    val createdAt: Long = System.currentTimeMillis(),
+    val updatedAt: Long = System.currentTimeMillis()
 )
+
