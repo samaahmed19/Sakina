@@ -1,5 +1,5 @@
 package com.sama.sakina.ui.HolyQuran.surah_list
-
+import com.sama.sakina.R
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
@@ -50,7 +50,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import kotlin.random.Random
-import com.sama.sakina.R
 
 // ================== DATA MODEL ==================
 

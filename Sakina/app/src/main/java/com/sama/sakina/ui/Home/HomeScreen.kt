@@ -1,5 +1,5 @@
 package com.sama.sakina.ui.Home
-
+import com.sama.sakina.R
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -40,7 +40,6 @@ import com.sama.sakina.utils.prayerTitleAr
 import java.time.chrono.HijrahDate
 import java.time.temporal.ChronoField
 import java.time.temporal.ChronoUnit
-import com.sama.sakina.R
 
 val NeonCyan = Color(0xFF00FFD1)
 val NeonPurple = Color(0xFFBD00FF)

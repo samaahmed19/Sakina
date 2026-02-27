@@ -1,5 +1,5 @@
 package com.sama.sakina.ui.HolyQuran.surah_details
-
+import com.sama.sakina.R
 import androidx.compose.runtime.getValue
 import androidx.compose.animation.core.*
 import androidx.compose.animation.expandVertically
@@ -50,7 +50,6 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import com.sama.sakina.R
 
 // ================= BACKGROUND =================
 @Composable
