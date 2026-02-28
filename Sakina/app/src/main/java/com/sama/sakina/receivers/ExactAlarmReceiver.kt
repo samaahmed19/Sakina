@@ -11,12 +11,12 @@ import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.sama.sakina.R
-import com.sama.sakina.di.AlarmReceiverEntryPoint
-import com.sama.sakina.utils.AlarmScheduler
-import com.sama.sakina.utils.PrayerNotificationHelper
+//import com.sama.sakina.di.AlarmReceiverEntryPoint
+//import com.sama.sakina.utils.AlarmScheduler
+//import com.sama.sakina.utils.PrayerNotificationHelper
 import dagger.hilt.android.EntryPointAccessors
 
-class ExactAlarmReceiver : BroadcastReceiver() {
+/*class ExactAlarmReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent?) {
         val pendingResult = goAsync()
@@ -133,3 +133,4 @@ private fun showNotification(context: Context, title: String, message: String, c
     manager.notify(finalNotificationId, notification)
 }
 
+*/
