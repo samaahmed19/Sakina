@@ -6,7 +6,7 @@ import android.os.Build
 import android.util.Log
 import com.sama.sakina.data.repository.PrayerSettingsRepository
 import com.sama.sakina.data.repository.UserRepository
-import com.sama.sakina.services.PrayerForegroundService
+//import com.sama.sakina.services.PrayerForegroundService
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -14,14 +14,15 @@ import java.util.Calendar
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton
+/*@Singleton
 class PrayerNotificationHelper @Inject constructor(
     @ApplicationContext private val context: Context,
     private val userRepository: UserRepository,
     private val settingsRepository: PrayerSettingsRepository,
     private val calculator: PrayerTimesCalculator,
     private val alarmScheduler: AlarmScheduler,
-    private val appScope: CoroutineScope
+    private val appScope: CoroutineScope,
+
 ) {
     fun updateNextPrayerNotification() {
         appScope.launch {
@@ -54,6 +55,7 @@ class PrayerNotificationHelper @Inject constructor(
                         putExtra("PRAYER_TIME", timeInMillis)
                     }
                     try {
+                        context.stopService(Intent(context, PrayerForegroundService::class.java))
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                             context.startForegroundService(serviceIntent)
                         } else {
@@ -67,6 +69,7 @@ class PrayerNotificationHelper @Inject constructor(
                         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as android.app.AlarmManager
                         if (alarmManager.canScheduleExactAlarms()) {
                             alarmScheduler.scheduleExactPrayer(timeInMillis, prayerName)
+
                         }
                     } else {
                         alarmScheduler.scheduleExactPrayer(timeInMillis, prayerName)
@@ -88,4 +91,4 @@ class PrayerNotificationHelper @Inject constructor(
             else -> "الصلاة"
         }
     }
-}
+}*/

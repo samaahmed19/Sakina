@@ -6,15 +6,17 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.provider.Settings
-import com.sama.sakina.receivers.ExactAlarmReceiver
+//import com.sama.sakina.receivers.ExactAlarmReceiver
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.util.Calendar
 import javax.inject.Inject
 import javax.inject.Singleton
+import android.util.Log
 
 
 
-@Singleton
+
+/*@Singleton
 class AlarmScheduler @Inject constructor(@ApplicationContext private val context: Context) {
     private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
@@ -44,6 +46,7 @@ class AlarmScheduler @Inject constructor(@ApplicationContext private val context
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
+        alarmManager.cancel(pendingIntent)
         executeScheduling(calendar.timeInMillis, pendingIntent)
     }
 
@@ -62,6 +65,7 @@ class AlarmScheduler @Inject constructor(@ApplicationContext private val context
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
+        alarmManager.cancel(pendingIntent)
         executeScheduling(timeInMillis, pendingIntent)
     }
     private fun executeScheduling(timeInMillis: Long, pendingIntent: PendingIntent) {
@@ -79,4 +83,4 @@ class AlarmScheduler @Inject constructor(@ApplicationContext private val context
             alarmManager.set(AlarmManager.RTC_WAKEUP, timeInMillis, pendingIntent)
         }
     }
-}
+}*/

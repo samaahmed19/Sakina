@@ -32,6 +32,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.material3.ripple
 
 @Composable
 fun HomeCard(
@@ -43,114 +46,112 @@ fun HomeCard(
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {}
 ) {
-
-    var isPressed by remember { mutableStateOf(false) }
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
 
 
     val neonAlpha by animateFloatAsState(
-        targetValue = if (isPressed) 0.9f else 0.0f,
-        animationSpec = tween(durationMillis = 400), label = ""
+        targetValue = if (isPressed) 1f else 0.0f,
+        animationSpec = tween(durationMillis = 300), label = "neonAlpha"
     )
 
     val borderThickness by animateDpAsState(
-        targetValue = if (isPressed) 2.dp else 1.dp,
-        animationSpec = tween(durationMillis = 200), label = ""
+        targetValue = if (isPressed) 2.5.dp else 3.dp,
+        animationSpec = tween(durationMillis = 150), label = "borderThickness"
     )
+
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(vertical = 3.dp)
-            .clickable(
-                indication = null,
-                interactionSource = remember { MutableInteractionSource() }
-            ) { isPressed = !isPressed
-                onClick()}
-
-            .shadow(
-                elevation = if (isPressed) 30.dp else 10.dp,
-                shape = RoundedCornerShape(24.dp),
-                spotColor = activeColor.copy(alpha = neonAlpha),
-                ambientColor = activeColor.copy(alpha = neonAlpha)
-            )
-    ) {
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(24.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = if (isPressed) activeColor.copy(alpha = 0.02f) else activeColor.copy(alpha = 0.03f),
-            ),
-            border = BorderStroke(
-                width = borderThickness,
-                brush = Brush.linearGradient(
-                    colors = if (isPressed) listOf(activeColor, activeColor.copy(alpha = 0.5f))
-                    else listOf(activeColor, activeColor.copy(alpha = 0.2f), )
+        Box(
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(vertical = 3.dp)
+                .shadow(
+                    elevation = if (isPressed) 25.dp else 15.dp,
+                    shape = RoundedCornerShape(30.dp),
+                    spotColor = activeColor.copy(alpha = neonAlpha),
+                    ambientColor = activeColor.copy(alpha = neonAlpha)
                 )
-            )
         ) {
-            Row(
+            Card(
                 modifier = Modifier
-                    .padding(20.dp)
-                    .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+                    .fillMaxWidth()
+                    .clickable(
+                        interactionSource = interactionSource,
 
-                Box(
+                        indication = ripple(bounded = true, color = activeColor),
+                        onClick = onClick
+                    ),
+                shape = RoundedCornerShape(24.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = if (isPressed) activeColor.copy(alpha = 0.08f) else Color(0xFF111827).copy(alpha = 0.8f),
+                ),
+                border = BorderStroke(
+                    width = borderThickness,
+                    brush = Brush.linearGradient(
+                        colors = if (isPressed) listOf(activeColor, activeColor.copy(alpha = 0.6f))
+                        else listOf(activeColor.copy(alpha = 0.5f), activeColor.copy(alpha = 0.2f))
+                    )
+                )
+            ) {
+                Row(
                     modifier = Modifier
-                        .size(70.dp)
-                        .drawBehind {
-                            if (isPressed) {
+                        .padding(20.dp)
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+
+                    Box(
+                        modifier = Modifier
+                            .size(70.dp)
+                            .drawBehind {
                                 drawCircle(
                                     color = activeColor,
-                                    style = Stroke(width = 3.dp.toPx()),
+                                    style = Stroke(width = if (isPressed) 3.dp.toPx() else 0.dp.toPx()),
                                     alpha = neonAlpha
                                 )
                             }
-                        }
-                        .padding(4.dp),
-                    contentAlignment = Alignment.Center
-                ) {
+                            .padding(1.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Image(
+                            painter = painterResource(id = imageRes),
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxSize()
 
-                    Image(
-                        painter = painterResource(id = imageRes),
-                        contentDescription = null,
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
-                }
+                        )
+                    }
 
-                Spacer(modifier = Modifier.width(16.dp))
+                    Spacer(modifier = Modifier.width(14.dp))
 
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = title,
-                        color = Color.White,
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.Bold,
-                        style = TextStyle(
-                            shadow = Shadow(
-                                color = activeColor.copy(alpha = neonAlpha),
-                                blurRadius = 15f
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = title,
+                            color = Color.White,
+                            fontSize = 22.sp,
+                            fontWeight = FontWeight.Bold,
+                            style = TextStyle(
+                                shadow = Shadow(
+                                    color = activeColor.copy(alpha = neonAlpha),
+                                    blurRadius = if (isPressed) 20f else 5f
+                                )
                             )
                         )
-                    )
-                    Text(
-                        text = subtitle,
-                        color = Color.White.copy(alpha = 0.6f),
-                        fontSize = 16.sp
-                    )
-                }
+                        Text(
+                            text = subtitle,
+                            color = Color.White.copy(alpha = 0.6f),
+                            fontSize = 16.sp
+                        )
+                    }
 
-
-                Box(
-                    modifier = Modifier.padding(start = 8.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    trailingContent()
+                    Box(
+                        modifier = Modifier.padding(start = 8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        trailingContent()
+                    }
                 }
             }
         }
-    }
     }
 }
 @Composable

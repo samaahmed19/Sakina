@@ -13,10 +13,10 @@ import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
 import com.sama.sakina.MainActivity
 import com.sama.sakina.R
-import com.sama.sakina.receivers.ExactAlarmReceiver
+//import com.sama.sakina.receivers.ExactAlarmReceiver
 import java.util.Locale
 
-class PrayerForegroundService : Service() {
+/*class PrayerForegroundService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent == null) {
@@ -44,7 +44,7 @@ class PrayerForegroundService : Service() {
     }
 
     private fun createCustomNotification(prayerName: String, timeMillis: Long): android.app.Notification {
-        val channelId = "PRAYER_ONGOING_CHANNEL"
+        val channelId = "PRAYER_ALERT_CHANNEL"
         val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -100,4 +100,4 @@ class PrayerForegroundService : Service() {
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
-}
+}*/
