@@ -17,7 +17,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    private val dataStore: DataStore<Preferences>,
+    @com.sama.sakina.data.local.datastore.SettingsDataStore private val dataStore: DataStore<Preferences>,
     private val userRepository: UserRepository
 ) : ViewModel() {
 

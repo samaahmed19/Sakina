@@ -25,8 +25,7 @@ object DatabaseModule {
             AppDatabase::class.java,
             "sakina_db"
         )
-            // ده أهم سطر: لو غيرت أي Entity، هيمسح القديم ويعمل الجديد بدل ما يعمل Crash
-            .fallbackToDestructiveMigration(false)
+            .fallbackToDestructiveMigration(true)
             .build()
     }
 

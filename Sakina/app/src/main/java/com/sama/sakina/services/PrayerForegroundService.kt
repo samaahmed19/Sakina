@@ -19,24 +19,28 @@ import java.util.Locale
 class PrayerForegroundService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val nextPrayerName = intent?.getStringExtra("PRAYER_NAME") ?: "..."
-        val nextPrayerTimeMillis = intent?.getLongExtra("PRAYER_TIME", System.currentTimeMillis())
-            ?: System.currentTimeMillis()
+        if (intent == null) {
+            stopSelf()
+            return START_NOT_STICKY
+        }
+
+        val nextPrayerName = intent.getStringExtra("PRAYER_NAME") ?: "..."
+        val nextPrayerTimeMillis = intent.getLongExtra("PRAYER_TIME", System.currentTimeMillis())
 
         try {
             val notification = createCustomNotification(nextPrayerName, nextPrayerTimeMillis)
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-
                 startForeground(1, notification, android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
             } else {
                 startForeground(1, notification)
             }
         } catch (e: Exception) {
             e.printStackTrace()
+            stopSelf()
         }
 
-        return START_STICKY
+        return START_NOT_STICKY
     }
 
     private fun createCustomNotification(prayerName: String, timeMillis: Long): android.app.Notification {

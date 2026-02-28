@@ -1,4 +1,5 @@
 package com.sama.sakina
+
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
@@ -20,26 +21,20 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Scaffold
 import androidx.navigation.compose.rememberNavController
-import androidx.work.PeriodicWorkRequestBuilder
 import androidx.compose.runtime.LaunchedEffect
 import com.sama.sakina.ui.theme.SakinaTheme
 import com.sama.sakina.navigation.AppNavGraph
 import com.sama.sakina.navigation.SakinaBottomBar
-import com.sama.sakina.workers.AzkarWorker
-import java.util.Calendar
 import androidx.compose.material.icons.Icons
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.core.view.WindowCompat
-import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.WorkManager
 import dagger.hilt.android.AndroidEntryPoint
 import com.sama.sakina.ui.checklist.DailyResetWorker
 import com.sama.sakina.utils.AlarmScheduler
 import com.sama.sakina.utils.PrayerNotificationHelper
-import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -51,7 +46,13 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setupPreciseAlarmsAndService()
+        try {
+            if (::prayerNotificationHelper.isInitialized && ::alarmScheduler.isInitialized) {
+                setupPreciseAlarmsAndService()
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("MainActivity", "Setup alarms/notifications failed", e)
+        }
         WindowCompat.setDecorFitsSystemWindows(window, true)
         window.statusBarColor = AndroidColor.parseColor("#020617")
         window.navigationBarColor = AndroidColor.parseColor("#020617")
@@ -59,9 +60,16 @@ class MainActivity : ComponentActivity() {
             isAppearanceLightStatusBars = false
             isAppearanceLightNavigationBars = false
         }
-        scheduleDailyReset()
-        DailyResetWorker.schedule(this)
-        createNotificationChannel()
+        try {
+            DailyResetWorker.schedule(this)
+        } catch (e: Exception) {
+            android.util.Log.e("MainActivity", "DailyResetWorker.schedule failed", e)
+        }
+        try {
+            createNotificationChannel()
+        } catch (e: Exception) {
+            android.util.Log.e("MainActivity", "createNotificationChannel failed", e)
+        }
         setContent {
             val navController = rememberNavController()
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -128,32 +136,14 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun scheduleDailyReset() {
-        val now = System.currentTimeMillis()
-        val millisInDay = 24 * 60 * 60 * 1000L
-
-        val nextMidnight = ((now / millisInDay) + 1) * millisInDay
-        val delay = nextMidnight - now
-
-        val workRequest =
-            PeriodicWorkRequestBuilder<DailyResetWorker>(1, TimeUnit.DAYS)
-                .setInitialDelay(delay, TimeUnit.MILLISECONDS)
-                .build()
-
-        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
-            "daily_task_reset",
-            ExistingPeriodicWorkPolicy.UPDATE,
-            workRequest
-        )
-    }
-
-
-
     private fun setupPreciseAlarmsAndService() {
-        alarmScheduler.scheduleExactAzkar(7, 0, "morning")
-        alarmScheduler.scheduleExactAzkar(19, 0, "evening")
-
-        prayerNotificationHelper.updateNextPrayerNotification()
+        try {
+            alarmScheduler.scheduleExactAzkar(7, 0, "morning")
+            alarmScheduler.scheduleExactAzkar(19, 0, "evening")
+            prayerNotificationHelper.updateNextPrayerNotification()
+        } catch (e: Exception) {
+            android.util.Log.e("MainActivity", "setupPreciseAlarmsAndService failed", e)
+        }
     }
 }
 

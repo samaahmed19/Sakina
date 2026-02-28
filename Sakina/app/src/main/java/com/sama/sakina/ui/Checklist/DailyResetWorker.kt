@@ -28,7 +28,7 @@ class DailyResetWorker @AssistedInject constructor(
             checklistDao.resetAllTasks()
             Result.success()
         } catch (e: Exception) {
-
+            android.util.Log.e("DailyResetWorker", "Failed to reset tasks", e)
             Result.failure()
         }
     }

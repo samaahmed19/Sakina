@@ -27,16 +27,19 @@ class DataInitializer @Inject constructor(
 
     suspend fun initAzkarIfNeeded() = withContext(Dispatchers.IO) {
         if (azkarDao.getAllCategories().isNotEmpty()) return@withContext
+        try {
+            val json = context.assets
+                .open("azkar.json")
+                .bufferedReader()
+                .use { it.readText() }
 
-        val json = context.assets
-            .open("azkar.json")
-            .bufferedReader()
-            .use { it.readText() }
-
-        val (categories, azkar) = JsonMapper.mapCategories(json)
-
-        azkarDao.insertCategories(categories)
-        azkarDao.insertAzkar(azkar)
+            val (categories, azkar) = JsonMapper.mapCategories(json)
+            azkarDao.insertCategories(categories)
+            azkarDao.insertAzkar(azkar)
+        } catch (e: Exception) {
+            android.util.Log.e("DataInitializer", "initAzkarIfNeeded failed", e)
+            throw e
+        }
     }
     private val surahNamesAr = arrayOf(
         "الفاتحة", "البقرة", "آل عمران", "النساء", "المائدة", "الأنعام", "الأعراف", "الأنفال", "التوبة", "يونس", "هود", "يوسف", "الرعد", "إبراهيم", "الحجر", "النحل", "الإسراء", "الكهف", "مريم", "طه", "الأنبياء", "الحج", "المؤمنون", "النور", "الفرقان", "الشعراء", "النمل", "القصص", "العنكبوت", "الروم", "لقمان", "السجدة", "الأحزاب", "سبأ", "فاطر", "يس", "الصافات", "ص", "الزمر", "غافر", "فصلت", "الشورى", "الزخرف", "الدخان", "الجاثية", "الأحقاف", "محمد", "الفتح", "الحجرات", "ق", "الذاريات", "الطور", "النجم", "القمر", "الرحمن", "الواقعة", "الحديد", "المجادلة", "الحشر", "الممتحنة", "الصف", "الجمعة", "المنافقون", "التغابن", "الطلاق", "التحريم", "الملك", "القلم", "الحاقة", "المعارج", "نوح", "الجن", "المزمل", "المدثر", "القيامة", "الإنسان", "المرسلات", "النبأ", "النازعات", "عبس", "التكوير", "الانفطار", "المطففين", "الانشقاق", "البروج", "الطارق", "الأعلى", "الغاشية", "الفجر", "البلد", "الشمس", "الليل", "الضحى", "الشرح", "التين", "العلق", "القدر", "البينة", "الزلزلة", "العاديات", "القارعة", "التكاثر", "العصر", "الهمزة", "الفيل", "قريش", "الماعون", "الكوثر", "الكافرون", "النصر", "المسد", "الإخلاص", "الفلق", "الناس"
@@ -57,12 +60,11 @@ class DataInitializer @Inject constructor(
 
             while (surahKeys.hasNext()) {
                 val surahKey = surahKeys.next()
-                val ayahsArray = rootObject.getJSONArray(surahKey)
+                val ayahsArray = rootObject.optJSONArray(surahKey) ?: continue
+                val surahId = surahKey.toIntOrNull() ?: continue
+                if (surahId !in 1..114) continue
 
-                val surahId = surahKey.toInt()
-
-
-                val name = if (surahId <= 114) surahNamesAr[surahId - 1] else "سورة $surahId"
+                val name = surahNamesAr.getOrNull(surahId - 1) ?: "سورة $surahId"
 
                 surahs.add(
                     SurahEntity(
@@ -73,12 +75,12 @@ class DataInitializer @Inject constructor(
                     )
                 )
                 for (i in 0 until ayahsArray.length()) {
-                    val ayahJson = ayahsArray.getJSONObject(i)
+                    val ayahJson = ayahsArray.optJSONObject(i) ?: continue
                     ayahs.add(
                         AyahEntity(
                             surahId = surahId,
-                            text = ayahJson.getString("text"),
-                            number = ayahJson.getInt("verse")
+                            text = ayahJson.optString("text", ""),
+                            number = ayahJson.optInt("verse", i + 1)
                         )
                     )
                 }
@@ -92,27 +94,34 @@ class DataInitializer @Inject constructor(
     }
     suspend fun initDuasIfNeeded() = withContext(Dispatchers.IO) {
         if (duaDao.getAllCategories().isNotEmpty()) return@withContext
+        try {
+            val json = context.assets
+                .open("dua.json")
+                .bufferedReader()
+                .use { it.readText() }
 
-        val json = context.assets
-            .open("dua.json")
-            .bufferedReader()
-            .use { it.readText() }
-
-        val (categories, duas) = JsonMapper.mapDuas(json)
-        duaDao.insertCategories(categories)
-        duaDao.insertAll(duas)
+            val (categories, duas) = JsonMapper.mapDuas(json)
+            duaDao.insertCategories(categories)
+            duaDao.insertAll(duas)
+        } catch (e: Exception) {
+            android.util.Log.e("DataInitializer", "initDuasIfNeeded failed", e)
+            throw e
+        }
     }
 
     suspend fun initTasbeehIfNeeded() = withContext(Dispatchers.IO) {
         if (tasbeehDao.getAll().isNotEmpty()) return@withContext
+        try {
+            val json = context.assets
+                .open("tasbeeh.json")
+                .bufferedReader()
+                .use { it.readText() }
 
-        val json = context.assets
-            .open("tasbeeh.json")
-            .bufferedReader()
-            .use { it.readText() }
-
-        val tasbeehList = JsonMapper.mapTasbeeh(json)
-
-        tasbeehDao.insertAll(tasbeehList)
+            val tasbeehList = JsonMapper.mapTasbeeh(json)
+            tasbeehDao.insertAll(tasbeehList)
+        } catch (e: Exception) {
+            android.util.Log.e("DataInitializer", "initTasbeehIfNeeded failed", e)
+            throw e
+        }
     }
 }

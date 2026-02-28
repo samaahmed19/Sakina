@@ -25,24 +25,28 @@ import javax.inject.Inject
 class AzkarWorker(context: Context, params: WorkerParameters) : Worker(context, params) {
 
     override fun doWork(): Result {
-        val calendar = Calendar.getInstance()
-        val hour = calendar.get(Calendar.HOUR_OF_DAY)
+        return try {
+            val calendar = Calendar.getInstance()
+            val hour = calendar.get(Calendar.HOUR_OF_DAY)
 
+            val categoryId: String
+            val title = "هل قرأت أذكارك اليوم؟"
+            val message: String
 
-        val categoryId: String
-        val title = "هل قرأت أذكارك اليوم؟"
-        val message: String
+            if (hour < 12) {
+                categoryId = "morning"
+                message = "ابدأ أذكار الصباح الآن."
+            } else {
+                categoryId = "evening"
+                message = "ابدأ أذكار المساء الآن."
+            }
 
-        if (hour < 12) {
-            categoryId = "morning"
-            message = "ابدأ أذكار الصباح الآن."
-        } else {
-            categoryId = "evening"
-            message = "ابدأ أذكار المساء الآن."
+            showNotification(title, message, categoryId)
+            Result.success()
+        } catch (e: Exception) {
+            android.util.Log.e("AzkarWorker", "doWork failed", e)
+            Result.failure()
         }
-
-        showNotification(title, message, categoryId)
-        return Result.success()
     }
 
 
@@ -89,23 +93,28 @@ class PrayerWorker(context: Context, params: WorkerParameters) : Worker(context,
 
     @SuppressLint("MissingPermission")
     override fun doWork(): Result {
-        val prayerName = inputData.getString("PRAYER_NAME") ?: "الصلاة"
-        val isOngoing = inputData.getBoolean("IS_ONGOING", false)
+        return try {
+            val prayerName = inputData.getString("PRAYER_NAME") ?: "الصلاة"
+            val isOngoing = inputData.getBoolean("IS_ONGOING", false)
 
-        val channelId = "PRAYER_NOTIFICATIONS"
+            val channelId = "PRAYER_NOTIFICATIONS"
 
-        val notification = NotificationCompat.Builder(applicationContext, channelId)
-            .setSmallIcon(R.drawable.appicon)
-            .setContentTitle("حان الآن موعد صلاة $prayerName")
-            .setContentText("﴿إِنَّ الصَّلَاةَ كَانَتْ عَلَى الْمُؤْمِنِينَ كِتَابًا مَّوْقُوتًا﴾")
-            .setOngoing(isOngoing)
-            .setPriority(NotificationCompat.PRIORITY_MAX)
-            .setAutoCancel(!isOngoing)
-            .build()
+            val notification = NotificationCompat.Builder(applicationContext, channelId)
+                .setSmallIcon(R.drawable.appicon)
+                .setContentTitle("حان الآن موعد صلاة $prayerName")
+                .setContentText("﴿إِنَّ الصَّلَاةَ كَانَتْ عَلَى الْمُؤْمِنِينَ كِتَابًا مَّوْقُوتًا﴾")
+                .setOngoing(isOngoing)
+                .setPriority(NotificationCompat.PRIORITY_MAX)
+                .setAutoCancel(!isOngoing)
+                .build()
 
-        val manager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        manager.notify(1001, notification)
+            val manager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            manager.notify(1001, notification)
 
-        return Result.success()
+            Result.success()
+        } catch (e: Exception) {
+            android.util.Log.e("PrayerWorker", "doWork failed", e)
+            Result.failure()
+        }
     }
 }

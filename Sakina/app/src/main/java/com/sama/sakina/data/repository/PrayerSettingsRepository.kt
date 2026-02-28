@@ -15,7 +15,7 @@ import javax.inject.Singleton
 
 @Singleton
 class PrayerSettingsRepository @Inject constructor(
-    private val dataStore: DataStore<Preferences>
+    @com.sama.sakina.data.local.datastore.SettingsDataStore private val dataStore: DataStore<Preferences>
 ) {
     private val methodKey = stringPreferencesKey("prayer_calc_method")
     private val madhabKey = stringPreferencesKey("prayer_madhab")

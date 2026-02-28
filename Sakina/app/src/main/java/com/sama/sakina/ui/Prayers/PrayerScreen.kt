@@ -695,23 +695,33 @@ private fun CelebrationDialog(
     }
 }
 
+private data class StarData(val xFraction: Float, val yFraction: Float, val alpha: Float, val radius: Float)
+
+private val cachedStars: List<StarData> = run {
+    val rnd = Random(42)
+    List(160) {
+        StarData(
+            xFraction = rnd.nextFloat(),
+            yFraction = rnd.nextFloat(),
+            alpha = (rnd.nextFloat() * 0.9f).coerceIn(0.05f, 0.9f),
+            radius = (rnd.nextFloat() * 2.2f).coerceIn(0.4f, 2.2f)
+        )
+    }
+}
+
 @Composable
 private fun StarsBackground() {
     Canvas(modifier = Modifier.fillMaxSize()) {
-        val rnd = Random(42)
-        repeat(160) {
-            val x = rnd.nextFloat() * size.width
-            val y = rnd.nextFloat() * size.height
-            val alpha = (rnd.nextFloat() * 0.9f).coerceIn(0.05f, 0.9f)
-            val radius = (rnd.nextFloat() * 2.2f).coerceIn(0.4f, 2.2f)
-
+        cachedStars.forEach { star ->
+            val x = star.xFraction * size.width
+            val y = star.yFraction * size.height
             drawCircle(
                 brush = Brush.radialGradient(
-                    colors = listOf(Color.White.copy(alpha = alpha), Color.Transparent),
+                    colors = listOf(Color.White.copy(alpha = star.alpha), Color.Transparent),
                     center = Offset(x, y),
-                    radius = radius * 3f
+                    radius = star.radius * 3f
                 ),
-                radius = radius * 3f,
+                radius = star.radius * 3f,
                 center = Offset(x, y)
             )
         }
